@@ -9,8 +9,8 @@ class Dbt_fn_documentation {
     /**
      * Genera la pagina della ricerca a partire da tutti gli header
      */
-    static function echo_search() {
-        $dir_scan = dirname(__FILE__)."/documentation/".get_locale();
+    static function echo_search() { 
+        $dir_scan = dirname(__FILE__)."/documentation/".get_user_locale();
         if (!is_dir($dir_scan)) {
             $dir_scan = dirname(__FILE__)."/documentation/en_GB";
         }
@@ -46,7 +46,7 @@ class Dbt_fn_documentation {
     }
 
     static function echo_menu($group_title) {
-        $dir_scan = dirname(__FILE__)."/documentation/".get_locale();
+        $dir_scan = dirname(__FILE__)."/documentation/".get_user_locale();
         if (!is_dir($dir_scan)) {
             $dir_scan = dirname(__FILE__)."/documentation/en_GB";
         }

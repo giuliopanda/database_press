@@ -995,18 +995,28 @@ class Dbt_fn {
 
     /**
      * Trova le opzioni di una tabella specifica
-     * @return array [status, description]
+     * @return array [status:'DRAFT|PUBLISH|CLOSE', description, $external_filter:boolean]
      */
     static function get_dbt_option_table($table_name) {
         if ($table_name == "") {
-            return  ['status'=>'DRAFT', 'description'=>'']; 
+            $return =  ['status'=>'DRAFT', 'description'=>'']; 
+        } else {
+            $table_name = trim(str_replace('`','',$table_name));
+            $table_options = get_option('dbt_table_info');
+            if ($table_options === false || !array_key_exists($table_name, $table_options)) {
+                $return =  ['status'=>'PUBLISH', 'description'=>''];
+            }   else {
+                $return = $table_options[$table_name];
+            }
         }
-        $table_name = trim(str_replace('`','',$table_name));
-        $table_options = get_option('dbt_table_info');
-        if ($table_options === false || !array_key_exists($table_name, $table_options)) {
-            return  ['status'=>'PUBLISH', 'description'=>''];
-        }      
-        return $table_options[$table_name]; 
+        $current_status = $return['status'];
+        $return['status'] = apply_filters( 'dbt_table_status', $return['status'], $table_name);
+        if ($return['status'] != $current_status) {
+            $return['external_filter'] = true;
+        }   else {
+            $return['external_filter'] = false;
+        }
+        return $return; 
     }
 
     /**
@@ -1330,7 +1340,7 @@ class Dbt_fn {
         $return_sql = [];
         foreach ($queries['sql'] as $sql) {
             if (!$wpdb->query($sql)) {
-                $errors[] = $wpdb->last_error();
+                $errors[] = $wpdb->last_error;
             } else {
                 $return_sql[] = $sql;
             }

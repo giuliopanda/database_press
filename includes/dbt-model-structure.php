@@ -633,14 +633,18 @@ class Dbt_model_structure
         }
         $items = $wpdb->get_results('SHOW INDEXES IN `'. esc_sql($this->table_name).'`');
         $result = [];
+        $table_options = Dbt_fn::get_dbt_option_table($this->table_name);
       
+        
         foreach ($items as $item) {
             if (!isset( $result[$item->Key_name])) {
                // $non_unique = ($item->Non_unique) ? 'NO' : 'YES';
                // $packed = ($item->Packed) ? 'YES' : 'NO';
                 $actions = '<div class="row-actions">';
-                $actions .= '<span class="edit"><a href="'.  admin_url("admin.php?page=database_tables&section=table-structure&table=".$this->table_name."&action=edit-index&dbt_id=".$item->Key_name) . '">EDIT</a> | </span>';
-                $actions .= '<span class="edit"><a href="'. admin_url("admin.php?page=database_tables&section=table-structure&table=".$this->table_name."&action=delete-index&dbt_id=".$item->Key_name) . '">DROP</a></span>';
+                if ($table_options['status'] == "DRAFT") {
+                    $actions .= '<span class="edit"><a href="'.  admin_url("admin.php?page=database_tables&section=table-structure&table=".$this->table_name."&action=edit-index&dbt_id=".$item->Key_name) . '">EDIT</a> | </span>';
+                    $actions .= '<span class="edit"><a href="'. admin_url("admin.php?page=database_tables&section=table-structure&table=".$this->table_name."&action=delete-index&dbt_id=".$item->Key_name) . '">DROP</a></span>';
+                }
                 $actions .= '</div>';
                 $type = ($item->Non_unique) ? 'Optimize MySQL Search (Index)' : 'Unique values';
                 $result[$item->Key_name] = (object)['name'=>"<b>".$item->Key_name."</b>".$actions,'type'=>$type,  'columns' => ''];

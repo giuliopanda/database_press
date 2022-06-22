@@ -19,7 +19,7 @@ class Dbt_loader_documentation {
 	 */
 	public function fn_get_documentation() {
 		require_once(__DIR__.'/dbt-function-documentation.php');
-		$dir_scan =__DIR__."/documentation/".get_locale();
+		$dir_scan = __DIR__. "/documentation/" .get_user_locale();
 		if (!is_dir($dir_scan)) {
 			$dir_scan = __DIR__."/documentation/en_GB";
 		}
