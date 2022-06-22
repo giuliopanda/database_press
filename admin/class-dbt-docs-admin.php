@@ -18,7 +18,7 @@ class DBT_docs_admin
 		Dbt_fn::require_init();
         $section =  $dtf::get_request('section', 'home');
 
-        $base_dir ="/../../includes/documentation/pages_".get_locale();
+        $base_dir ="/../../includes/documentation/pages_".get_user_locale();
 		if (!is_dir($base_dir)) {
 			$base_dir = "/../../includes/documentation/pages_en_GB";
 		}

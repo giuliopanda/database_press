@@ -254,9 +254,6 @@ class database_tables_admin
 				}
 			}
 			$table_options = Dbt_fn::get_dbt_option_table($table);
-			if ($table_options === false) {
-				$table_options = ['status'=>'PUBLISH', 'description'=>'', 'comment_fields'=>[], 'change_log'=>[]];
-			}
 
 			if ($table_model->error_primary) {
 				$msg_error = __('This system works better with tables that have only one field set as the autoincrement primary key.','database_tables');
