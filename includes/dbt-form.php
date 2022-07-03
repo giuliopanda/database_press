@@ -201,14 +201,20 @@ class Dbt_class_form {
 	 * I valori di values sono gestiti nello stesso formato di get_data
 	 *
 	 * @param array $values
-	 * @return void
+	 * @return array
+	 * ```json
+	 * {"execute":"boolean", "details":"array}
+	 * ```
 	 */
 	public function save_data($values) {
 		global $wpdb;
 		list($settings, $table_options) = $this->get_form();
         $items_groups = $this->convert_items_to_groups($values, $settings, $table_options);
-		$queries_executed = [];
+		$query_to_execute = [];
 		foreach ($items_groups as $items) {
+			//print "<h3>ITEMS</h3><pre>";
+			//var_dump ($items);
+			//print "</pre>";
 			foreach ($settings as $key=>$setting) {
 				// trovo la tabella e la chiave primaria
 				$table = "";
@@ -221,7 +227,6 @@ class Dbt_class_form {
 						$table = $ss->orgtable;
 						$table_alias = $ss->table;
 						$primary_name = $ss->name;
-						break;
 					}
 				}
 				$pri_name = Dbt_fn::clean_string($table_alias).'.'.Dbt_fn::clean_string($primary_name);
@@ -230,7 +235,7 @@ class Dbt_class_form {
 				if (array_key_exists($key, $items) && $table != "" && $primary_name != "") {
 					// salvo la tabella
 					foreach ($items[$key] as $val_key => $val_value) {
-						if (!array_key_exists($val_key, $setting)) {
+						if (!array_key_exists($val_key, $setting) || $setting[$val_key]->name == "_dbt_alias_table_") {
 							continue;	
 						}
 						if ($setting[$val_key]->name == $primary_name) {
@@ -241,15 +246,10 @@ class Dbt_class_form {
 							}
 							$sql_to_save[$setting[$val_key]->name] = $val_value;
 							PinaCode::set_var(Dbt_fn::clean_string($table_alias).".".Dbt_fn::clean_string($setting[$val_key]->name), $val_value);
+							
 						}
 					}
-					// campi calcolati:
-					foreach ($items[$key] as $val_key => $val_value) {
-						if ( $setting[$val_key]->form_type == "CALCULATED_FIELD") {
-							$sql_to_save[$setting[$val_key]->name] = PinaCode::execute_shortcode( $setting[$val_key]->custom_value );
-						}
-					}
-
+				
 					$exists  = 0;
 					if ($primary_value != "") {
 						$exists = $wpdb->get_var('SELECT count(*) as tot FROM `'.$table.'` WHERE `'.esc_sql($primary_name).'` = \''.esc_sql($primary_value).'\'');
@@ -259,25 +259,24 @@ class Dbt_class_form {
 					} 
 					if (count($sql_to_save) > 0) {
 						if ($exists == 1) {
-							$ris_update = $wpdb->update($table, $sql_to_save, [$primary_name=>$primary_value]);
-							if ($ris_update == false) {
-								$queries_executed[] = ['action'=>'update', 'result'=>false, 'table'=>$table_alias, 'id'=>$primary_value, 'error'=>$wpdb->last_error, 'sql' => $wpdb->last_query];
-							} else {
-								$queries_executed[] = ['action'=>'update', 'result'=>true, 'table'=>$table_alias, 'id'=>$primary_value, 'error'=>$wpdb->last_error, 'sql' => $wpdb->last_query];
-							}
+							$query_to_execute[] = ['action'=>'update', 'table'=>$table, 'sql_to_save'=>$sql_to_save, 'id'=> [$primary_name=>$primary_value], 'table_alias'=>$table_alias, 'pri_val'=>$primary_value, 'pri_name'=>$primary_name, 'setting' => $setting];
+							
 						} else {
-							$ris_insert = $wpdb->insert($table, $sql_to_save);
-							if ($ris_insert === false) {
-								$queries_executed[] = ['action'=>'insert', 'result'=>false, 'table'=>$table_alias, 'id'=>-1, 'error'=>$wpdb->last_error, 'sql' => $wpdb->last_query];
-							} else {
-								$queries_executed[] = ['action'=>'insert', 'result'=>true, 'table'=>$table_alias, 'id'=>$wpdb->insert_id, 'error'=>$wpdb->last_error, 'sql' => $wpdb->last_query];
-							}
+							$query_to_execute[] = ['action'=>'insert', 'table'=>$table, 'sql_to_save'=>$sql_to_save, 'table_alias'=>$table_alias, 'pri_val'=>$primary_value, 'pri_name'=>$primary_name, 'setting' => $setting];
 						}
 					}
 				}
 			}
 		}
-		return $queries_executed;
+		$ris =  Dbt_functions_list::execute_query_savedata($query_to_execute, $this->dbt_id, 'php-form');
+		$execute = true;
+		foreach ($ris as $r) {
+			if (!($r['result'] == true || ($r['result'] == false && $r['error'] == "" && $r['action']=="update"))) {
+				$execute = false;
+				break;
+			}
+		}
+		return ['execute' => $execute, 'details' => $ris];
 	}
 
 
@@ -293,6 +292,23 @@ class Dbt_class_form {
 			foreach ($setting as $row) {
 				if ($row->name == $field && $row->table == $table_alias) {
 					return $row;
+				}
+			}
+		}
+		return false;
+	}
+	/**
+	 * Trova il setting di un salvataggio a partire dal table_alias
+	 * @param \DbtDs_field_param[][] $settings
+	 * @param string $table_alias 
+	 * @return \DbtDs_field_param
+	 */
+	public function find_setting_from_table_field($table_alias) {
+		list($settings, $_) = $this->get_form();
+		foreach ($settings as $setting) {
+			foreach ($setting as $row) {
+				if ($row->table == $table_alias) {
+					return $setting;
 				}
 			}
 		}
@@ -317,21 +333,21 @@ class Dbt_class_form {
 				$temp_groups[$schema->table][$schema->name] = $schema;
 				
 			} else {
-				if (!isset($temp_groups['__orphan__'])) {
-					$temp_groups['__orphan__'] = [];
-				}
-				$temp_groups['__orphan__'][$schema->name] =  '';
+				//if (!isset($temp_groups['__orphan__'])) {
+				//	$temp_groups['__orphan__'] = [];
+				//}
+				//$temp_groups['__orphan__'][$schema->name] =  '';
 			}
 		}
 		$count_group = 0;
 		$items = [];
 		foreach ($temp_groups as $key=>$group) {
 			$count_group++;
-			if ($key != '__orphan__') {
+			//if ($key != '__orphan__') {
 				$items["gr".$count_group] = $group;
-			} else  {
-				$items[$key] = $group;
-			}
+		//	} else  {
+				//$items[$key] = $group;
+		//	}
 		}
 		return $items;
 	}
@@ -608,10 +624,13 @@ class Dbt_class_form {
 
 		if (!$form_field) return false;
 	
+		
 		//print ("<h4>trovato!!</h4>");
 		$field->order = $form_field['order'];
-		if (isset($form_field['label'])) {
+		if (isset($form_field['label']) && $form_field['label'] != "") {
 			$field->label = $form_field['label'];
+		} else {
+			$field->label = $form_field['name'];
 		}
 		if (isset($form_field['note'])) {
 			$field->note = $form_field['note'];
@@ -751,7 +770,15 @@ class Dbt_class_form {
 								$temp_item[$key][$field] = '';
 							} else {
 								if ($setting_field->form_type == "DATETIME" || $setting_field->form_type == "DATE" ) {
-									$temp = new \DateTime($item->$field, wp_timezone());
+									try {
+										$temp = new \DateTime($item->$field, wp_timezone());
+									} catch (\Exception $ex) {
+										if ($setting_field->form_type == "DATETIME") {
+											$item->$field = '0000-00-00 00:00:00';
+										} else {
+											$item->$field = '0000-00-00';
+										}
+									}
 									if (is_a($temp, 'DateTime')) {
 										if ($setting_field->form_type == "DATETIME") {
 											$item->$field = $temp->format('Y-m-d\TH:i:s');

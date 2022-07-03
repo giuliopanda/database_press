@@ -33,6 +33,9 @@ class Dbt_loader_documentation {
 			// APRO UNA PAGINA SPECIFICA
 			$get_page = str_replace(array("/", "\\", "..", "&", "?", "="), "", $get_page);
 			$get_page = str_replace(".php",'', $get_page).".php";
+			if (substr($get_page, 0, 8) == "dbt_docs") {
+				$get_page = "dbt_docs-menu.php";
+			}
 			if ( is_file($dir_scan . "/" . $get_page) ) {
 				$temp_data = get_file_data($dir_scan . "/" . $get_page, ['header-type'=>'header-type', 'header-title'=>'header-title','header-tags'=>'header-tags', 'header-description'=>'header-description', 'header-package-link'=>'header-package-link', 'header-package-title'=>'header-package-title']) ;
 				ob_start();

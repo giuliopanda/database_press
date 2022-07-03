@@ -91,6 +91,7 @@ class Dbt_items_list_setting {
 			$first_row[$key] = (object)['name'=>$print_column_name, 'original_table' => $orgtable,  'table' => $table, 'name_column'=>$name_column, 'original_name' => $orgname,'field_key'=>$field_key, 'original_field_name'=>$original_field_name,'toggle'=>(isset($value['toggle']) ? $value['toggle'] : 'SHOW'), 'type'=> $simple_type, 'sorting'=>$row_sorting, 'dropdown' => $drop_down, 'width'=>$width, 'mysql_name' => @$value['mysql_name'], 'name_request' => @$value['name_request'], 'searchable' => @$value['searchable'], 'custom_param' => @$value['custom_param'], 'format_values' => @$value['format_values'], 'format_styles' => @$value['format_styles'],  'adding_setting'=>($settings_fields === false) ? false : true];
         } 
         $count = 0;
+	
         foreach ($items as $count=>&$item) {
             $item = (object)$item;
             foreach ($array_thead as $key=>$setting) { 
@@ -182,6 +183,7 @@ class Dbt_items_list_setting {
 		/**
          * @var String $value
          */
+
 		if (is_object($item)) {
 			if (isset($item->$key)) {
 				$value = $item->$key;
@@ -196,6 +198,7 @@ class Dbt_items_list_setting {
 			}
 		}
 		$max_char_show = $this->max_text_length();
+		
 		if (isset($setting['setting']) && is_object($setting['setting'])) {
 			if (@$setting['setting']->view == "DATE") {
 				if (isset($setting['custom_param']) && $setting['custom_param'] > 0) {
@@ -266,7 +269,7 @@ class Dbt_items_list_setting {
 				} 
 				
 			}  else if (@$setting['setting']->view == "TEXT" || @$setting['setting']->view == "VARCHAR"  || @$setting['setting']->view == "") {
-				
+				$value = htmlentities($value);
 				if (isset($setting['custom_param']) && $setting['custom_param'] > 0) {
 					$max_char_show = $setting['custom_param'] ;
 				}
@@ -277,6 +280,7 @@ class Dbt_items_list_setting {
 				} 
 			}  else if (@$setting['setting']->view == "IMAGE" ) {
 				$max_char_show = 2000;
+				$value = htmlentities($value);
 				if (filter_var($value, FILTER_VALIDATE_URL) ) {
 					$value = '<img src="'.esc_attr($value).'" class="dbt-table-image" />';
 				} else {
@@ -298,11 +302,13 @@ class Dbt_items_list_setting {
 				$ris = Dbt::get_data($setting['setting']->lookup_id, 'items', [['op'=>"=",'column'=> esc_sql($setting['setting']->lookup_sel_val), 'value'=>$value]]);
 				if (is_countable($ris) && count($ris) == 1) {
 					$ris =array_shift($ris);
-					$value = $ris->$txt;
+					$value = htmlentities($ris->$txt);
 				} 
 				
 			}
-		} 
+		} else  {
+			$value = htmlentities($value);
+		}
 
 		if (strlen($value) > $max_char_show && $max_char_show > -1) {
 			$value = substr($value,0 , floor($max_char_show))." ..."; 

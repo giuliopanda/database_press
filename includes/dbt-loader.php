@@ -103,6 +103,8 @@ class Dbt_loader {
 			
 		}
 
+		add_filter('dbt_table_status', [$this, 'publish_wp_tables'], 2, 2);
+
 	}
 
 	/**
@@ -339,9 +341,7 @@ class Dbt_loader {
 	 * I casi del template redirect
 	 */
 	public function template_redirect() {
-
-		if (is_admin()) return;
-
+		if (!is_admin()) return;	
 		if (isset($_REQUEST['page'])  && $_REQUEST['page'] == 'database_tables') {
 			if (isset($_REQUEST['section']) && ($_REQUEST['section'] == 'table-structure') ) {
 				if (!isset($_REQUEST['action']) && !isset($_REQUEST['table'])) {
@@ -357,6 +357,7 @@ class Dbt_loader {
 					}
 				}
 			}
+
 		}
 	}
 
@@ -438,7 +439,7 @@ class Dbt_loader {
 	public function get_detail() {	
         Dbt_fn::require_init();
 		$dbt_id = absint($_REQUEST['dbt_id']);
-		$result = Dbt::get_data_from_id($dbt_id, $_REQUEST['dbt_ids']);
+		$result = Dbt::get_data_by_id($dbt_id, $_REQUEST['dbt_ids']);
 		if ($result !== false ) {
 			$dbt_post = Dbt_functions_list::get_post_dbt($dbt_id);
 			if (isset($dbt_post->post_content['frontend_view']['detail_type']) && $dbt_post->post_content['frontend_view']['detail_type'] != "no") {
@@ -542,17 +543,24 @@ class Dbt_loader {
 			$json_result['div_id'] = $_REQUEST['div_id'];
 		}
 		$queries_executed = [];
+		$query_to_execute = [];
+		$dbt_id = 0;
+		$form_dbt_id = false;
 		$request_edit_table = $_REQUEST['edit_table'];
+
 		// se è una lista ok, altrimenti solo gli amministratori possono salvare dati
-		if (isset($_REQUEST['dbt_global_list_id'])) {
-			//	list($request_edit_table, $error) =Dbt_functions_list::process_saving_data_using_form_params($request_edit_table, $_REQUEST['dbt_global_list_id']);
-			list($request_edit_table, $error) =Dbt_functions_list::process_saving_data_using_form_list($request_edit_table, $_REQUEST['dbt_global_list_id']);
+		if (isset($_REQUEST['dbt_global_list_id']) && absint($_REQUEST['dbt_global_list_id']) > 0) {
+			$dbt_id = absint($_REQUEST['dbt_global_list_id']);
+			$form_dbt_id = new Dbt_class_form($dbt_id);
+			list($request_edit_table, $error) 
+			=Dbt_functions_list::process_saving_data_using_form_list($request_edit_table, $_REQUEST['dbt_global_list_id']);
 			if ($error != "") {
 				$json_result['result'] = 'nook';
 				$json_result['error'] = __($error, 'database_tables');
 				wp_send_json($json_result);
 				die();
 			}
+			
 		} else {
 			if( !current_user_can('administrator') ) {
 				$json_result['result'] = 'nook';
@@ -561,6 +569,7 @@ class Dbt_loader {
 				die();
 			}
 		}
+		
 		foreach ($request_edit_table as $form_value) {
 			$alias_table = "";
 			foreach ($form_value as $table=>$rows) {
@@ -606,17 +615,13 @@ class Dbt_loader {
 							PinaCode::set_var(Dbt_fn::clean_string($alias_table).".".Dbt_fn::clean_string($kn), $fn[$key]);
 						}
 					}
+				
 					foreach ($fields_names as $kn=>$fn) {
 						if ($kn != "_dbt_alias_table_") {
-							// ?
-							if (is_countable($fn[$key])) {
-								$fn[$key] = maybe_serialize($fn[$key]);
-							}
-							$fn[$key] = stripslashes( $fn[$key] );
-							$sql[$kn] = PinaCode::execute_shortcode( $fn[$key] );
-
+							$sql[$kn] = stripslashes( $fn[$key] );
 						}
 					}
+					
 					// se primary key è un valore 
 					if ($primary_value != "") {
 						$exists = $wpdb->get_var('SELECT count(*) as tot FROM `'.$table.'` WHERE `'.esc_sql($primary_key).'` = \''.esc_sql($primary_value).'\'');
@@ -626,9 +631,14 @@ class Dbt_loader {
 					}else {
 						$sql[$primary_key] = $primary_value;
 					}
-					
+					$setting = false;
+					if (is_a($form_dbt_id, 'DatabaseTables\Dbt_class_form')) {
+						$setting = $form_dbt_id->find_setting_from_table_field($alias_table);
+					}
 					if ($exists == 1) {
 						if (count($sql) > 0) {
+							$query_to_execute[] = ['action'=>'update', 'table'=>$table, 'sql_to_save'=>$sql, 'id'=> [$primary_key=>$primary_value], 'table_alias'=>$alias_table, 'pri_val'=>$primary_value, 'pri_name'=>$primary_key, 'setting' => $setting];
+							/*
 							$ris_update = $wpdb->update($table, $sql, [$primary_key=>$primary_value]);
 
 							if ($ris_update !== false) {
@@ -644,6 +654,7 @@ class Dbt_loader {
 								wp_send_json($json_result);
 								die();
 							}
+							*/
 						}
 					} else if ($exists == 0) {
 						$json_result['reload'] = 1;
@@ -652,6 +663,8 @@ class Dbt_loader {
 						}
 						
 						if (count($sql) > 0 &&  !(isset($sql['_dbt_leave_empty_']) && $sql['_dbt_leave_empty_'] == 1 )) {
+							$query_to_execute[] = ['action'=>'insert', 'table'=>$table, 'sql_to_save'=>$sql, 'table_alias'=>$alias_table, 'pri_val'=>$primary_value, 'pri_name'=>$primary_key, 'setting' => $setting];
+							/*
 							$ris_insert = $wpdb->insert($table, $sql);
 							
 							if ($ris_insert !== false) {
@@ -668,6 +681,7 @@ class Dbt_loader {
 								wp_send_json($json_result);
 								die();
 							} 
+							*/
 						}
 					} else {
 						// ha trovaro risultati doppi?
@@ -676,6 +690,25 @@ class Dbt_loader {
 				//die($pri);
 			}
 		}
+		//var_dump ($query_to_execute);
+		$ris =  Dbt_functions_list::execute_query_savedata($query_to_execute, $dbt_id, 'admin-form');
+		
+
+		foreach ($ris as $r) {
+			if (!($r['result'] == true || ($r['result'] == false && $r['error'] == "" && $r['action']=="update"))) {	
+				$json_result['error'] = ($r['error'] != "") ? $r['error'] : 'the data could not be saved';
+				Dbt_fn::set_cookie('error', $json_result['error']);
+				if (is_countable($queries_executed) && count($queries_executed) > 0) {
+					$json_result['msg'] = __(sprintf('%s queries were executed successfully:', count($queries_executed)),'database_tables')."<br>".implode("<br>", $queries_executed);
+					Dbt_fn::set_cookie('msg', $json_result['msg']);
+				}
+				wp_send_json($json_result);
+				die();
+			} else {
+				$queries_executed[] =  $r->query;
+			} 
+		}
+
 		if (is_countable($queries_executed) && count($queries_executed) > 0) {
 			$json_result['msg'] = __(sprintf('%s queries were executed successfully:', count($queries_executed)),'database_tables')."<br>".implode("<br>", $queries_executed);
 			Dbt_fn::set_cookie('msg', $json_result['msg']);
@@ -684,7 +717,7 @@ class Dbt_loader {
 		
 		$table_model = $this->get_table_model_for_sidebar($_REQUEST['dbt_global_list_id']);
 		if ($table_model != false) {
-			$table_items = $table_model->get_list();
+			$table_model->get_list();
 			if (isset($_REQUEST['dbt_global_list_id'])) {
 				$post = Dbt_functions_list::get_post_dbt(absint($_REQUEST['dbt_global_list_id']));
 				if (isset($post->post_content)) {
@@ -692,7 +725,7 @@ class Dbt_loader {
 				}
 			}
 			Dbt_fn::remove_hide_columns($table_model);
-		
+			$table_items = $table_model->items;
 			if (count($table_model->items) == 2) {
 				$json_result['table_item_row'] = array_pop($table_items);
 			} else {
@@ -1372,6 +1405,17 @@ class Dbt_loader {
 		}
 		$table_model->list_add_where($filter);
 		return $table_model;
+	}
+
+	/**
+	 * Mette tutte le tabelle di wordpress in stato pubblicato
+	 */
+	function publish_wp_tables($status, $table) {
+		global $wpdb; 
+		if (in_array($table, [$wpdb->posts, $wpdb->users, $wpdb->prefix.'usermeta', $wpdb->prefix.'terms' , $wpdb->prefix.'termmeta', $wpdb->prefix.'term_taxonomy', $wpdb->prefix.'term_relationships', $wpdb->prefix.'postmeta', $wpdb->prefix.'options', $wpdb->prefix.'links', $wpdb->prefix.'comments', $wpdb->prefix.'commentmeta'])) {
+			$status = 'PUBLISH';
+		}
+		return $status;
 	}
 }
 

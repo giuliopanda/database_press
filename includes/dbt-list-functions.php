@@ -191,7 +191,7 @@ class Dbt_functions_list {
     /**
      * Inserisce nella query di table_model il limit, l'order ed eventuali filtri 
      * @param Array $post_content
-     * @return Model|false; 
+     * @return Dbt_model; 
      */
     public static function get_model_from_list_params($post_content) {
         $sql =  @$post_content['sql'];
@@ -399,7 +399,7 @@ class Dbt_functions_list {
     }
 
     /**
-     * TODO: Lo riscrivo usando dbt_form!!!!
+     * 
      *
      * @param [type] $request_edit_table
      * @param [type] $dbt_id
@@ -408,9 +408,11 @@ class Dbt_functions_list {
     public static function process_saving_data_using_form_list($request_edit_table, $dbt_id) {
         $form_dbt_id = new Dbt_class_form($dbt_id);
         list($form_settings, $__) = $form_dbt_id->get_form();
+        $error = "";
         foreach ($request_edit_table as $request_key => $form_value) {
 
             // SETTO le variabili su pinacode!
+            /*
 			foreach ($form_value as $table=>$rows) {
                 if (isset($form_value[$table]["_dbt_alias_table_"]))  {
                     foreach ($form_value[$table]["_dbt_alias_table_"] as $key=>$alias_table) {
@@ -428,13 +430,16 @@ class Dbt_functions_list {
                     }
                 }
             }
+            */
 
             foreach ($form_value as $table=>$rows) {
                 if (isset($form_value[$table]["_dbt_alias_table_"]))  {
                     foreach ($form_value[$table]["_dbt_alias_table_"] as $key=>$alias_table) {
                         foreach ($rows as $field=>$value) {
                             $field_setting = $form_dbt_id->find_setting_row_from_table_field($form_settings, $rows["_dbt_alias_table_"][$key], $field);
+                            // TODO APPLY FILTER! 
 
+                            /*
                             if ($field_setting != false && $field_setting->form_type == "CALCULATED_FIELD") {
                                 $request_edit_table[$request_key][$table][$field][$key] = PinaCode::execute_shortcode($field_setting->custom_value);
                                 PinaCode::set_var(Dbt_fn::clean_string($alias_table).".".Dbt_fn::clean_string($field), $request_edit_table[$request_key][$table][$field]);
@@ -464,6 +469,7 @@ class Dbt_functions_list {
                                     //TODO add pinacode variables
                                 }
                             }
+                            */
                         }
                     }
                 }
@@ -590,6 +596,113 @@ class Dbt_functions_list {
         }
         return $var1;
     }
+
+    /**
+     * Salva i dati di una query o di una lista nel database 
+     * 
+     * @param Array $query_to_execute
+     * ```json
+     * {"action":"string", "table":"string", "sql_to_save":"array", "id": "array", "table_alias":"string", "pri_val":"string", "pri_name":"string", "setting" : "array"}
+     * ```
+     * @param $dbt_id la lista da salvare
+     * @param string $origin Un testo che viene passato ai filtri
+     * 
+     * @return array
+     * ```json
+     *  {"action":"string", "result":"boolean", "table":"string", "table_alias":"string, "id":"int", "error"=>"string", "sql":"array"};
+     * ```
+     */
+    static public function execute_query_savedata($query_to_execute, $dbt_id = 0, $origin = "") {
+        global $wpdb;
+        $queries_executed = [];
+
+		if (count($query_to_execute) > 0) {
+			if ($dbt_id > 0) {
+				$query_to_execute = apply_filters('dbt_save_data', $query_to_execute, $dbt_id, $origin);
+			}
+			foreach ($query_to_execute as $qtx) {
+                if ($dbt_id > 0 && isset($qtx['setting'])) {
+                    foreach ($qtx['setting'] as $setting) {
+                        if ( $setting->form_type == "CALCULATED_FIELD") {
+                            // aggiungo i campi calcolati Le variabili pinacode devono essere state già impostate!
+                            $qtx['sql_to_save'][$setting->name] =  PinaCode::execute_shortcode($setting->custom_value);
+                        }
+                        // setto i default dei campi che non vengono passati
+                        if ( $setting->default_value != "" &&  !isset($qtx['sql_to_save'][$setting->name])) {
+                            $qtx['sql_to_save'][$setting->name] = $setting->default_value;
+                        }
+                      
+                    }
+                }
+
+                foreach ($qtx['sql_to_save'] as &$val) {
+                    if (is_countable($val)) {
+                        $val = maybe_serialize($val);
+                    }
+                    $val = PinaCode::execute_shortcode( $val );
+                }
+
+				$error = '';
+				if ($qtx['action'] == 'update') {
+					if ($qtx['table'] == $wpdb->posts) {
+						$qtx['sql_to_save']['ID'] = $qtx['pri_val']; 
+						$ris_update = wp_update_post($qtx['sql_to_save']);
+						if( is_wp_error( $ris_update ) ) {
+							$error = $ris_update->get_error_message();
+							$ris_update = false;
+						}
+					} else if ($qtx['table'] == $wpdb->users) {
+						$qtx['sql_to_save']['ID'] = $qtx['pri_val']; 
+						$ris_update = wp_update_user($qtx['sql_to_save']);
+						if( is_wp_error( $ris_update ) ) {
+							$error = $ris_update->get_error_message();
+							$ris_update = false;
+						}
+					} else {
+						$ris_update = $wpdb->update($qtx['table'], $qtx['sql_to_save'], $qtx['id']);
+						$error = $wpdb->last_error;
+					}
+					if ($ris_update == false) {
+						$queries_executed[] = ['action'=>'update', 'result'=>false, 'table'=>$qtx['table'], 'table_alias'=>$qtx['table_alias'], 'id'=>$qtx['pri_val'], 'error'=>$error, 'sql' => $qtx['sql_to_save'], 'query'=>''];
+					} else {
+						$queries_executed[] = ['action'=>'update', 'result'=>true, 'table'=>$qtx['table'], 'table_alias'=>$qtx['table_alias'], 'id'=>$qtx['pri_val'], 'error'=>'', 'sql' => $qtx['sql_to_save'], 'query'=>$wpdb->last_query];
+					}
+				}
+				if ($qtx['action'] == 'insert') {
+					if ($qtx['table'] == $wpdb->posts) {
+						if (isset($qtx['sql_to_save']['ID'])) {
+							unset($qtx['sql_to_save']['ID']);
+						}
+						$ris_insert = wp_insert_post($qtx['sql_to_save']);
+						if( is_wp_error( $ris_insert ) ) {
+							$error = $ris_insert->get_error_message();
+							$ris_insert = false;
+						}
+					} else if ($qtx['table'] == $wpdb->users) {
+						if (isset($qtx['sql_to_save']['ID'])) {
+							unset($qtx['sql_to_save']['ID']);
+						}
+						$ris_insert = wp_insert_user($qtx['sql_to_save']);
+						if( is_wp_error( $ris_insert ) ) {
+							$error = $ris_insert->get_error_message();
+							$ris_insert = false;
+						}
+					} else {
+						$ris_insert = $wpdb->insert($qtx['table'], $qtx['sql_to_save']);
+						$error = $wpdb->last_error;
+					}
+					if ($ris_insert == false) {
+						$queries_executed[] = ['action'=>'insert', 'result'=>false, 'table'=>$qtx['table'], 'table_alias'=>$qtx['table_alias'], 'id'=>-1, 'error'=>$wpdb->last_error, 'sql' => $qtx['sql_to_save'], 'query'=>''];
+					} else {
+						PinaCode::set_var(Dbt_fn::clean_string($qtx['table_alias']).".".Dbt_fn::clean_string($qtx['pri_name']), $ris_insert);
+
+						$queries_executed[] = ['action'=>'insert', 'result'=>true, 'table'=>$qtx['table'], 'table_alias'=>$qtx['table_alias'], 'id'=>$ris_insert, 'error'=>'', 'sql' => $qtx['sql_to_save'], 'query'=>$wpdb->last_query];
+					}
+				}
+			}
+		}
+		return $queries_executed;
+	}
 
 
 }

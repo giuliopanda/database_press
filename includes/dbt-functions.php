@@ -429,11 +429,11 @@ class Dbt_fn {
     {
         static $h_type2txt_types;
         if ($type_id == "WP_HTML" || $type_id == "CHECKBOX") return $type_id; // speciale
-        $array_convert = [ 'DECIMAL' => 'NUMERIC' , 'TINY' => 'NUMERIC',  'SHORT' => 'NUMERIC', 'LONG' => 'NUMERIC', 'FLOAT' => 'NUMERIC',
-  'DOUBLE' => 'NUMERIC', 'LONGLONG' => 'NUMERIC', 'INT24' => 'NUMERIC', 'NEWDECIMAL' => 'NUMERIC', 'TIMESTAMP'=>'DATE', 'DATE'=>'DATE', 'TIME'=>'DATE', 'YEAR'=>'DATE', 'DATETIME'=>'DATE','NEWDATE'=>'DATE', 'ENUM'=>'VARCHAR', 'SET'=>'VARCHAR', 'BLOB' => 'TEXT', 'TINY_BLOB'=>'TEXT', 'MEDIUM_BLOB'=>'TEXT', 'LONG_BLOB'=>'TEXT', 'VAR_STRING'=>'VARCHAR', 'STRING' => 'VARCHAR', 'INTERVAL' => 'DATE', 'BIT'=>'NUMERIC' ];
+        $array_convert = [ 'DECIMAL' => 'NUMBER' , 'TINY' => 'NUMBER',  'SHORT' => 'NUMBER', 'LONG' => 'NUMBER', 'FLOAT' => 'NUMBER',
+  'DOUBLE' => 'NUMBER', 'LONGLONG' => 'NUMBER', 'INT24' => 'NUMBER', 'NEWDECIMAL' => 'NUMBER', 'TIMESTAMP'=>'DATE', 'DATE'=>'DATE', 'TIME'=>'DATE', 'YEAR'=>'DATE', 'DATETIME'=>'DATE','NEWDATE'=>'DATE', 'ENUM'=>'VARCHAR', 'SET'=>'VARCHAR', 'BLOB' => 'TEXT', 'TINY_BLOB'=>'TEXT', 'MEDIUM_BLOB'=>'TEXT', 'LONG_BLOB'=>'TEXT', 'VAR_STRING'=>'VARCHAR', 'STRING' => 'VARCHAR', 'INTERVAL' => 'DATE', 'BIT'=>'NUMBER' ];
 
-        $array_convert_2 = [ 'DECIMAL' => 'DECIMAL' , 'TINY' => 'TINY',  'SHORT' => 'SHORT NUMERIC', 'LONG' => 'NUMBER', 'FLOAT' => 'FLOAT',
-        'DOUBLE' => 'DOUBLE', 'LONGLONG' => 'BIG INT', 'INT24' => 'BIG INT', 'NEWDECIMAL' => 'DECIMAL', 'TIMESTAMP'=>'TIMESTAMP', 'DATE'=>'DATE', 'TIME'=>'TIME', 'YEAR'=>'YEAR', 'DATETIME'=>'DATETIME','NEWDATE'=>'NEW DATE', 'ENUM'=>'ENUM', 'SET'=>'SET', 'BLOB' => 'BLOB', 'TINY_BLOB'=>'TINY BLOB', 'MEDIUM_BLOB'=>'MEDIUM BLOB', 'LONG_BLOB'=>'TEXT', 'VAR_STRING'=>'STRING', 'STRING' => 'STRING', 'INTERVAL' => 'INTERVAL DATE', 'BIT'=>'BIT '];
+        $array_convert_2 = [ 'DECIMAL' => 'DECIMAL' , 'TINY' => 'TINY',  'SHORT' => 'NUMBER', 'LONG' => 'NUMBER', 'FLOAT' => 'FLOAT',
+        'DOUBLE' => 'DECIMAL', 'LONGLONG' => 'NUMBER', 'INT24' => 'NUMBER', 'NEWDECIMAL' => 'DECIMAL', 'TIMESTAMP'=>'TIMESTAMP', 'DATE'=>'DATE', 'TIME'=>'TIME', 'YEAR'=>'YEAR', 'DATETIME'=>'DATETIME','NEWDATE'=>'NEW DATE', 'ENUM'=>'ENUM', 'SET'=>'SET', 'BLOB' => 'TEXT', 'TINY_BLOB'=>'TEXT', 'MEDIUM_BLOB'=>'TEXT', 'LONG_BLOB'=>'TEXT', 'VAR_STRING'=>'STRING', 'STRING' => 'STRING', 'INTERVAL' => 'INTERVAL DATE', 'BIT'=>'TINY '];
         if (!isset($h_type2txt_types))
         {
             $h_type2txt_types = array();

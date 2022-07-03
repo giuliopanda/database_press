@@ -266,6 +266,7 @@ class Dbt
      * @todo aggiungere i risultati lavorati dalle impostazioni oppure no.
      */
     static function get_data($dbt_id, $return = "items", $add_where = null, $limit = null, $order_field = null, $order="ASC") {
+        $return = strtolower($return);
         $post       = Dbt_functions_list::get_post_dbt($dbt_id);
         $sql =  @$post->post_content['sql'];
         if ( $sql != "") {
@@ -305,16 +306,15 @@ class Dbt
         }
 
     }
-
-        
+     
     /**
-     * Passato il post_id ritorna eventuali dati estratti dal template engine
+     * Data la lista estrae uno o più record a partire dagli ID
      *
      * @param int $dbt_id
      * @param array|int $dbt_ids [pri_key=>val, ...] per un singolo ID perché una query può avere più primary Id a causa di left join per cui li accetto tutti. Se un integer invece lo associo al primo pri_id che mi ritorna.
      * @return \stdClass|false se torna false non bisogna esegure il template engine
      */
-    static function get_data_from_id($dbt_id, $dbt_ids) {
+    static function get_data_by_id($dbt_id, $dbt_ids) {
         if (!class_exists('Dbt_functions_list')) {
             Dbt_fn::require_init();
         }
@@ -348,14 +348,61 @@ class Dbt
         return false;
     }
 
+    /**
+     * Estrae i dati grezzi di una lista per la modifica dei record
+     *
+     * @param int $dbt_id
+     * @param array|int $dbt_ids [pri_key=>val, ...] per un singolo ID perché una query può avere più primary Id a causa di left join per cui li accetto tutti. Se un integer invece lo associo al primo pri_id che mi ritorna.
+     * @return array se torna false non bisogna esegure il template engine
+     */
+    static function get_form_data_by_id($dbt_id, $dbt_ids) {
+        if (!class_exists('Dbt_class_form')) {
+            Dbt_fn::require_init();
+        }
+        $form = new Dbt_class_form($dbt_id);
+        if (is_array($dbt_ids)) {
+            return  $form->get_data($dbt_ids);
+        } else {
+            $name_requests = self::get_primaries_id($dbt_id);
+            $name_request = reset($name_requests);
+            $dbt_post = Dbt_functions_list::get_post_dbt($dbt_id);
+            $columns = Dbt::get_ur_list_columns($dbt_id);
+            $field_setting = $dbt_post->post_content["list_setting"][$columns[$name_request]];
+            $ids = [$field_setting->mysql_name => esc_sql($dbt_ids) ];
+            return  $form->get_data($ids);
+        }
+    }
+
+      /**
+     * ritorna la struttura del salvataggio dei dati
+     * @return array
+     */
+    static function get_save_data_structure($dbt_id) {
+        if (!class_exists('Dbt_class_form')) {
+            Dbt_fn::require_init();
+        }
+    
+        $form = new Dbt_class_form($dbt_id);
+    
+        list($settings, $_) = $form->get_form();
+        // TODO è un misto tra setting e schema della query perché poi il salvataggio è fatto dallo schema!
+        return $settings;
+    }
 
     /**
      * Salva i dati 
      * @return array
      */
     static function save_data($dbt_id, $data) {
+        if (!class_exists('Dbt_class_form')) {
+            Dbt_fn::require_init();
+        }
+    
         $form = new Dbt_class_form($dbt_id);
-        $result = $form->save_Data($data);
+        if (is_a($data, 'stdClass')) {
+            $data = [$data];
+        }
+        $result = $form->save_data($data);
         return $result;
     }
     
