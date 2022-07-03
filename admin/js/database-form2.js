@@ -243,7 +243,7 @@ function gp_form_field(label, field_name, val, type, param, count_block) {
                     $checkboxes_box.append($cb_label);
                 }
             }
-            $field = jQuery('<input type="text" name="'+field_name+'" class="js-dbt-radio-value" style="display:block">'); 
+            $field = jQuery('<input type="text" name="'+field_name+'" class="js-dbt-radio-value" style="display:none">'); 
             $field_label.append($checkboxes_box);
         } else if (type=="CHECKBOX") {
             $field_label = jQuery('<label class="dbt-checkbox-label"><span>'+label+'</span></label>');
@@ -460,7 +460,7 @@ function gp_form_field(label, field_name, val, type, param, count_block) {
                         data = {};
                         data.params = jQuery(this).data('autocomplete_params');
                         data.filter_distinct =jQuery(this).val(); 
-                        data.rif =jQuery(this).prop('id'); 
+                        data.rif = jQuery(this).prop('id'); 
                         data.sql ='';
                         data.action = 'dbt_autocomplete_values';
                         memory_name = jQuery(this).data('dbt_memory_name');
@@ -1295,7 +1295,7 @@ function gp_form_add_editor($form) {
     $form.find('.js-add-codemirror-editor').each(function() {
       //  console.log ('CodeMirror '+ typeof(jQuery(this).data('cm_editor')));
         if (typeof(jQuery(this).data('cm_editor')) == 'undefined') {
-            console.log ('CREATE '+ this);
+            //console.log ('CREATE '+ this);
             var codeMirror_ext = wp.codeEditor.initialize(this, {
                 'codemirror':{
                     mode: "htmlmixed",

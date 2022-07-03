@@ -9,17 +9,21 @@
  */
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+$append = '<span class="dbt-submit" onclick="dbt_submit_list_form()">' . __('Save', 'database_tables') . '</span>';
+
 ?>
 <div class="dbt-content-header">
     <?php require(dirname(__FILE__).'/dbt-partial-tabs.php'); ?>
 </div>
 <div class="dbt-content-table js-id-dbt-content">
-    <?php if ($dtf::echo_html_title_box('list', $list_title, '', $msg, $msg_error)) : ?>
+    <?php if (Dbt_fn::echo_html_title_box('list', $list_title, '', $msg, $msg_error, $append)) : ?>
+        <div class="dbt-lf-container-table-pre">&nbsp;</div>
         <form id="list_form" method="POST" action="<?php echo admin_url("admin.php?page=dbt_list&section=list-form&dbt_id=".$id); ?>">
             <input type="hidden" name="action" value="list-form-save" />
             <input type="hidden" name="table" value="<?php echo @$import_table; ?>" />
             <input type="hidden" name="dbt_id" value="<?php echo @$id; ?>" id="dbt_id_list" />
             <div class="dbt-content-margin">
+                
                 <div class="js-dragable-table">
                     <?php 
                     $count_fields = 0;
@@ -34,6 +38,7 @@ if (!defined('WPINC')) die;
                                     <span class="dbt-structure-toggle js-structure-toggle">
                                         <span class="js-lf-dbt-hide" onClick="dbt_lf_toggle_attr(this,0)" style="display: none;">Hide attributes</span>
                                         <span class="js-lf-dbt-show" onClick="dbt_lf_toggle_attr(this,1)" style="display: inline-block;">Show attributes</span>
+                                        <?php Dbt_fn::echo_html_icon_help('dbt_list-list-form','class'); ?>
                                     </span>
                                     <?php if ($table_options->table_status == "CLOSE") : ?>
                                         <div class="dtf-alert-warning">
@@ -59,18 +64,19 @@ if (!defined('WPINC')) die;
                                         <div class="dbt-form-row-column">
                                             <label class="dbt-label-grid dbt-css-mb-0"><span class="dbt-form-label"><?php _e('Module Type','database_tables'); ?></span>
                                                 <?php
+                                                $add_style = "";
                                                 // TODO DIVENTA: form, view hide
-
-                                                if (empty($table_options->module_type)) {
+                                                if ($table_options->table_status == "CLOSE") {
+                                                    $module_type = "READONLY";
+                                                    $add_style=' disabled="disabled';
+                                                } else if (empty($table_options->module_type)) {
                                                     //TODO se c'è un collegamento con la chiave primaria allora è hide di default.
                                                    $module_type =  (isset($table_options->precompiled_primary_id)) ? 'HIDE' : 'EDIT';
                                                 } else {
                                                     $module_type = $table_options->module_type;
                                                 }
-                                                ?>
-                                             
-                                                <?php 
-                                                echo Dbt_fn::html_select(['EDIT'=>'Editable' ,'READONLY'=>'Read nly',  'HIDE'=>'Hide'], true, 'name="table_module_type['. esc_attr($key) .']"', $module_type); ?>
+                                                
+                                                echo Dbt_fn::html_select(['EDIT'=>'Editable' ,'READONLY'=>'Read nly',  'HIDE'=>'Hide'], true, 'name="table_module_type['. esc_attr($key) .']" class="js-module-type"'.$add_style, $module_type); ?>
                                             </label>
                                         </div>
 
@@ -100,12 +106,12 @@ if (!defined('WPINC')) die;
                                     </div>
                                 </div>
                             </div>
-
                             <div class="js-dragable-table">  
                                 <?php require(__DIR__.'/dbt-content-list-form-single-table.php'); ?>
                             </div>
                             <?php if ($table_options->table_status == "DRAFT") : ?>
                                 <div class="button" onClick="dbt_duplicate_field(this)"><?php _e('New Field', 'database_tables'); ?></div>
+                                <?php Dbt_fn::echo_html_icon_help('dbt_list-list-form','new_field'); ?>
                             <?php else: ?>
                                 <div class="dbt-form-small-info">
                                 <?php _e ('The table is in a published state and cannot be changed', 'database_tables'); ?>
@@ -117,11 +123,7 @@ if (!defined('WPINC')) die;
                 </div>
 
                 <?php if (is_countable($tables) && count($tables) > 0) : ?>
-                <hr>
-                <h3 class="dbt-h3">Al salvataggio del form (redirect, invio email, salvataggio altri campi),</h3>
-                    <p>TODO</p>
-
-                <div class="dbt-submit" onclick="dbt_submit_list_form();"><?php _e('Save','database_tables'); ?></div>
+                    <div class="dbt-submit" onclick="dbt_submit_list_form();"><?php _e('Save','database_tables'); ?></div>
                 <?php else : ?>
                     <div class="dtf-alert-sql-error"><?php _e('Something is wrong, check the query if it is correct', 'database_tables'); ?></div>
                 <?php endif; ?>

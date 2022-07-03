@@ -33,11 +33,11 @@ class DBT_list_admin
 	    /**
 		 * @var $section Definisce il tab che sta visualizzando
 		 */
-        $section =  $dtf::get_request('section', 'home');
+        $section =  Dbt_fn::get_request('section', 'home');
          /**
 		 * @var $action Definisce l'azione
 		 */
-       	$action = $dtf::get_request('action', '', 'string');
+       	$action = Dbt_fn::get_request('action', '', 'string');
 		//print $section." ".$action;	
 		$msg =  $msg_error = '';
 		if (isset($_COOKIE['dbt_msg'])) {
@@ -77,19 +77,19 @@ class DBT_list_admin
 		wp_enqueue_script( 'dbt-new-list' );
 		
         $dtf = new Dbt_fn();
-        $section =  $dtf::get_request('section', 'list-all');
-		$action = $dtf::get_request('action', '', 'string');
+        $section =  Dbt_fn::get_request('section', 'list-all');
+		$action = Dbt_fn::get_request('action', '', 'string');
 		$msg = $msg_error = "";
 		
 		if ($action == "publish-list" ) {
-			$id = $dtf::get_request('dbt_id', 0, 'absint');
+			$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
 			if ($id > 0) {
 				wp_publish_post($id);
 				$msg = __('List published','database_tables');
 			}
 		}
 		if ($action == "remove-list" ) {
-			$id = $dtf::get_request('dbt_id', 0, 'absint');
+			$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
 			if ($id > 0) {
 				wp_delete_post($id, true);
 				$msg = __('List removed','database_tables');
@@ -97,7 +97,7 @@ class DBT_list_admin
 			$action = "show-trashed";
 		}
 		if ($action == "trash-list" ) {
-			$id = $dtf::get_request('dbt_id', 0, 'absint');
+			$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
 			if ($id > 0) {
 				wp_trash_post($id);
 				$msg = __('List trashed','database_tables');
@@ -155,8 +155,8 @@ class DBT_list_admin
 		wp_enqueue_script( 'database-list-sql-js', plugin_dir_url( __FILE__ ) . 'js/database-list-sql.js',[],rand());
 		wp_enqueue_script( 'jquery-ui-sortable');
         $dtf = new Dbt_fn();
-        $section =  $dtf::get_request('section', 'list-all');
-       	$action = $dtf::get_request('action', '', 'string');
+        $section =  Dbt_fn::get_request('section', 'list-all');
+       	$action = Dbt_fn::get_request('action', '', 'string');
 		$msg_error = "";
 		$msg = "";
 		$ris_list_saved = NULL;
@@ -171,7 +171,7 @@ class DBT_list_admin
 				$msg_error = $ris;
 			}
 		}
-		$id = $dtf::get_request('dbt_id', 0, 'absint');
+		$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
 		$render_content = "/dbt-content-list-sql-edit.php";
 		$sql = "";
 		$info_rows = [];
@@ -267,7 +267,7 @@ class DBT_list_admin
 	private function list_sql_save() {
 		global $wp_roles;
 		$dtf = new Dbt_fn();
-		$id = $dtf::get_request('dbt_id', 0, 'absint');
+		$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
 		$return = true;
 		$show_query = false;
 		if ($id > 0) {
@@ -353,13 +353,13 @@ class DBT_list_admin
 						foreach ($setting_custom_list as $key_list=>$list) {
 							$post->post_content['list_setting'][$key_list] = $list->get_for_saving_in_the_db();
 						}
-						$post_title = $dtf::get_request('post_title', '');
+						$post_title = Dbt_fn::get_request('post_title', '');
 						
 						if ($post_title != "") {
 							wp_update_post(array(
 								'ID'           => $id,
 								'post_title' 	=> sanitize_text_field($post_title),
-								'post_excerpt' 	=> sanitize_textarea_field($dtf::get_request('post_excerpt')),
+								'post_excerpt' 	=> sanitize_textarea_field(Dbt_fn::get_request('post_excerpt')),
 								'post_content' => addslashes(maybe_serialize($post->post_content)),
 							));
 						} else {
@@ -371,7 +371,7 @@ class DBT_list_admin
 					}
 
 					// permessi e menu admin
-					$post_title = $dtf::get_request('post_title', '');
+					$post_title = Dbt_fn::get_request('post_title', '');
 					$old = get_post_meta($id,'_dbt_admin_show', true);
 					$title =  (@$post_title != "") ? $post_title : $_REQUEST['menu_title'];
 	
@@ -428,10 +428,10 @@ class DBT_list_admin
 		wp_enqueue_script( 'dbt_frontend_js' );
 
 		$dtf = new Dbt_fn();
-		$action = $dtf::get_request('action_query', '', 'string');
+		$action = Dbt_fn::get_request('action_query', '', 'string');
 		$msg_error = "";
 		
-		$id = $dtf::get_request('dbt_id', 0, 'absint');
+		$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
 		$render_content = "/dbt-content-list-browse.php";
 		$html_content = "";
 		if ($id > 0) {
@@ -450,7 +450,7 @@ class DBT_list_admin
 			// TODO se c'è un limit nella query dovrebbe settare la paginazione?!
 			$table_model 				= new Dbt_model();
 
-			$list_of_columns 				= $dtf::get_all_columns();
+			$list_of_columns 				= Dbt_fn::get_all_columns();
 
 			$table_model->prepare($sql);
 			if ($table_model->sql_type() == "multiqueries") {
@@ -460,7 +460,7 @@ class DBT_list_admin
 
 				// cancello le righe selezionate!
 				if ($action == "delete_rows" && isset($_REQUEST["remove_ids"]) && is_array($_REQUEST["remove_ids"])) {
-					$result_delete = $dtf::delete_rows($_REQUEST["remove_ids"], '', $id);
+					$result_delete = Dbt_fn::delete_rows($_REQUEST["remove_ids"], '', $id);
 					if ($result_delete['error'] != "") {
 						$msg_error = $result_delete;
 					} else {
@@ -469,7 +469,7 @@ class DBT_list_admin
 				}
 
 				if ($action == "delete_from_sql") {
-					$result_delete = $dtf::dbt_delete_from_sql($dtf::get_request('sql_query_executed'), $dtf::get_request('remove_table_query'));
+					$result_delete = Dbt_fn::dbt_delete_from_sql(Dbt_fn::get_request('sql_query_executed'), Dbt_fn::get_request('remove_table_query'));
 					if ($result_delete != "") {
 						$msg_error = $result_delete;
 					} else {
@@ -493,12 +493,12 @@ class DBT_list_admin
 					}
 				}
 				
-				$dtf::add_request_filter_to_model($table_model, $this->max_show_items);
+				Dbt_fn::add_request_filter_to_model($table_model, $this->max_show_items);
 				$table_items = $table_model->get_list();
 				$table_model->update_items_with_setting($post->post_content);
-				$dtf::items_add_action($table_model, $post->post_content);
+				Dbt_fn::items_add_action($table_model, $post->post_content);
 				$table_model->check_for_filter();
-				$dtf::remove_hide_columns($table_model);
+				Dbt_fn::remove_hide_columns($table_model);
 				$html_table   = new Dbt_html_table();
 				//var_dump($table_model->items);
 				$html_content = $html_table->template_render($table_model); // lo uso nel template
@@ -520,8 +520,8 @@ class DBT_list_admin
 		wp_enqueue_script( 'jquery-ui-sortable' );
 		wp_enqueue_script( 'database-list-structure-js', plugin_dir_url( __FILE__ ) . 'js/database-list-structure.js',[],rand());
 		$dtf = new Dbt_fn();
-		$id = $dtf::get_request('dbt_id', 0, 'absint');
-		$action = $dtf::get_request('action', '', 'string');
+		$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
+		$action = Dbt_fn::get_request('action', '', 'string');
 		$msg = "";
 		$msg_error = "";
 		if ($action == 'list-structure-save') {
@@ -575,7 +575,7 @@ class DBT_list_admin
 	 */
 	private function list_structure_save() {
 		$dtf = new Dbt_fn();
-		$id = $dtf::get_request('dbt_id', 0, 'absint');
+		$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
 		if ($id > 0) {
 			$post = Dbt_functions_list::get_post_dbt($id);
 			$model = new Dbt_model();
@@ -644,8 +644,8 @@ class DBT_list_admin
 		$pages  = get_pages(['sort_column' => 'post_title']); 
 		
 		$dtf = new Dbt_fn();
-		$id = $dtf::get_request('dbt_id', 0, 'absint');
-		$action = $dtf::get_request('action', '', 'string');
+		$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
+		$action = Dbt_fn::get_request('action', '', 'string');
 		$render_content = "/dbt-content-list-setting.php";
 		$msg = $msg_error = "";
 		if ($id > 0) {
@@ -714,7 +714,7 @@ class DBT_list_admin
 	 */
 	private function list_setting_save($id) {
 		$dtf = new Dbt_fn();
-		$frontend_view = $dtf::get_request('frontend_view', []);
+		$frontend_view = Dbt_fn::get_request('frontend_view', []);
 		$frontend_view['content'] = stripslashes($frontend_view['content']);
 		$frontend_view['no_result_custom_text'] = stripslashes($frontend_view['no_result_custom_text']);
 		$frontend_view['detail_template'] = stripslashes($frontend_view['detail_template']);
@@ -747,9 +747,10 @@ class DBT_list_admin
 	private function list_form() {
 		wp_enqueue_script( 'jquery-ui-sortable' );
 		wp_enqueue_script( 'database-list-form-js', plugin_dir_url( __FILE__ ) . 'js/database-list-form.js',[], rand());
+		wp_enqueue_script( 'database-form2-js', plugin_dir_url( __FILE__ ) . 'js/database-form2.js',[], rand());
 		$dtf = new Dbt_fn();
-		$id = $dtf::get_request('dbt_id', 0, 'absint');
-		$action = $dtf::get_request('action', '', 'string');
+		$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
+		$action = Dbt_fn::get_request('action', '', 'string');
 		$msg = "";
 		$msg_error = "";
 		if ($action == 'list-form-save') {
@@ -821,7 +822,7 @@ class DBT_list_admin
 	 */
 	private function list_form_save() {
 		$dtf = new Dbt_fn();
-		$id = $dtf::get_request('dbt_id', 0, 'absint');
+		$id = Dbt_fn::get_request('dbt_id', 0, 'absint');
 		if ($id > 0) {
 			$post = Dbt_functions_list::get_post_dbt($id);
 			unset($post->post_content['form']);
@@ -850,6 +851,7 @@ class DBT_list_admin
 						'DATE'=>['DATE',''],
 						'DATETIME'=>['DATETIME',''],
 						'NUMERIC'=>['INT',''],
+						'NUMBER'=>['INT',''],
 						'SELECT'=>['VARCHAR',255],
 						'RADIO'=>['VARCHAR',255],
 						'CHECKBOX'=>['VARCHAR',255],

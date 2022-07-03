@@ -40,7 +40,10 @@ if (!defined('WPINC')) die;
                     <div class="dbt-structure-content js-structure-content" style="display:none" >
                         <div class="dbt-structure-grid">
                             <div class="dbt-form-row-column">
-                                <label><span class="dbt-form-label"><?php _e('Table title','database_tables'); ?></span>
+                                <label><span class="dbt-form-label"><?php _e('Table title','database_tables'); 
+                                Dbt_fn::echo_html_icon_help('dbt_list-list-structure','title');
+                                ?>
+                                </span>
                                     <input type="text" name="fields_title[]" value="" class="js-title dbt-input">
                                 </label>
                                 <input type="hidden" name="fields_origin[]" value="CUSTOM">
@@ -62,14 +65,18 @@ if (!defined('WPINC')) die;
                             </div>
 
                             <div class="dbt-form-row-column">
-                                <label><span class="dbt-form-label "><?php _e('Searchable','database_tables'); ?></span>
+                                <label><span class="dbt-form-label "><?php _e('Searchable','database_tables'); 
+                                Dbt_fn::echo_html_icon_help('dbt_list-list-structure','searchable');
+                                    ?></span>
                                     <input type="text" disabled value="No" class="dbt-input">
                                     <input type="hidden" name="fields_searchable[]" value="no" class="dbt-input">
                                 </label>
                             </div>
                         </div>
                         <div class="dbt-form-row js-form-row-custom-field">
-                            <label><span class="dbt-form-label "><?php _e('Print','database_tables'); ?></span>
+                            <label><span class="dbt-form-label "><?php _e('Print','database_tables'); 
+                                Dbt_fn::echo_html_icon_help('dbt_list-list-structure','print');
+                                ?></span>
                                 <div style="display:inline-block; min-width:80%">
                                     <input type="hidden" name="fields_custom_view[]" class="js-type-fields" onchange="dbt_change_custom_type(this)" value="CUSTOM">
                                     <textarea name="fields_custom_code[]" class="js-type-custom-code dbt-input" rows="2" style="display:inline-block; width:80%"></textarea>
@@ -81,14 +88,14 @@ if (!defined('WPINC')) die;
                         <h3>column formatting</h3>
                         <div class="dbt-structure-grid">
                             <div class="dbt-form-row-column js-form-row-custom-field">
-                                <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('change values','database_tables'); ?></span>
+                                <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('change values','database_tables'); Dbt_fn::echo_html_icon_help('dbt_list-list-structure','format'); ?></span>
                                 </label>
                                 <div style="display:inline-block; min-width:50%">
                                     <textarea name="fields_format_values[<?php echo esc_attr($item->name); ?>]" class="dbt-input" rows="4" style=" width:80%; min-width:250px"></textarea>
                                 </div>
                             </div>
                             <div class="dbt-form-row-column js-form-row-custom-field">
-                                <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('change styles','database_tables'); ?></span>
+                                <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('change styles','database_tables'); Dbt_fn::echo_html_icon_help('dbt_list-list-structure','styles'); ?></span>
                                 </label>
                                 <div style="display:inline-block; min-width:50%">
                                     <textarea name="fields_format_styles[<?php echo esc_attr($item->name); ?>]" class="dbt-input" rows="4" style="width:80%; min-width:250px"></textarea>
@@ -126,7 +133,9 @@ if (!defined('WPINC')) die;
                             <div class="dbt-structure-content js-structure-content" >
                                 <div class="dbt-structure-grid">
                                     <div class="dbt-form-row-column">
-                                        <label><span class="dbt-form-label"><?php _e('Table title','database_tables'); ?></span>
+                                        <label><span class="dbt-form-label"><?php _e('Table title','database_tables'); 
+                                        Dbt_fn::echo_html_icon_help('dbt_list-list-structure','title');
+                                        ?></span>
                                             <input type="text" name="fields_title[<?php echo esc_attr($item->name); ?>]" value="<?php echo esc_attr($item->title); ?>" class="js-title dbt-input">
                                         </label>
                                         <input type="hidden" name="fields_origin[<?php echo esc_attr($item->name); ?>]" value="<?php echo esc_attr($item->origin); ?>">
@@ -149,7 +158,9 @@ if (!defined('WPINC')) die;
                                     </div>
 
                                     <div class="dbt-form-row-column">
-                                        <label><span class="dbt-form-label "><?php _e('Searchable','database_tables'); ?></span>
+                                        <label><span class="dbt-form-label "><?php _e('Searchable','database_tables'); 
+                                        Dbt_fn::echo_html_icon_help('dbt_list-list-structure','searchable');
+                                        ?></span>
                                         <?php if ($item->mysql_name != "") : ?>
                                         <?php echo Dbt_fn::html_select(['no'=>'No', 'yes'=>'YES', 'LIKE' => 'the exact phrase as substring (%LIKE%)','='=>'the exact phrase as whole field (=)' ], true, 'name="fields_searchable['. esc_attr($item->name).']" class="js-width-fields"', $item->searchable); ?>
                                         <?php else : ?>
@@ -161,7 +172,9 @@ if (!defined('WPINC')) die;
                                
                                     
                                     <div class="dbt-form-row-column js-form-row-custom-field">
-                                        <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('Print','database_tables'); ?></span>
+                                        <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('Print','database_tables'); 
+                                        Dbt_fn::echo_html_icon_help('dbt_list-list-structure','print');
+                                        ?></span>
                                         </label>
                                         <div style="display:inline-block; min-width:50%">
                                             <?php
@@ -229,14 +242,14 @@ if (!defined('WPINC')) die;
                                    
                                 <div class="dbt-structure-grid">
                                     <div class="dbt-form-row-column js-form-row-custom-field">
-                                        <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('change values','database_tables'); ?></span>
+                                        <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('change values','database_tables'); Dbt_fn::echo_html_icon_help('dbt_list-list-structure','format');?></span>
                                         </label>
                                         <div style="display:inline-block; min-width:50%">
                                             <textarea name="fields_format_values[<?php echo esc_attr($item->name); ?>]" class="dbt-input" rows="4" style=" width:80%; min-width:250px"><?php echo esc_textarea($item->format_values); ?></textarea>
                                         </div>
                                     </div>
                                     <div class="dbt-form-row-column js-form-row-custom-field">
-                                        <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('change styles','database_tables'); ?></span>
+                                        <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('change styles','database_tables'); Dbt_fn::echo_html_icon_help('dbt_list-list-structure','styles') ?></span>
                                         </label>
                                         <div style="display:inline-block; min-width:50%">
                                             <textarea name="fields_format_styles[<?php echo esc_attr($item->name); ?>]" class="dbt-input" rows="4" style="width:80%; min-width:250px"><?php echo esc_textarea($item->format_styles); ?></textarea>

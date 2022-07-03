@@ -153,7 +153,7 @@ if (!defined('WPINC')) die;
             </div>
             <div id="dbt_edit_metadata_btn">
                 <?php if ($table_options['external_filter']) : ?>
-                  
+        
                 <?php else : ?>
                 <div onclick="dbt_show_edit_metadata()" class="dbt-submit-style-link"><?php _e('Edit Status & Description', 'database_tables'); ?></div>
                 <?php endif ; ?>

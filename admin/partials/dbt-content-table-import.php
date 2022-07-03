@@ -274,7 +274,10 @@ if (!defined('WPINC')) die;
         ?>
         <div class="dbt-content-margin">
             <h2 class="dbt-h2"><?php _e('File to import', 'database_tables'); ?></h2>
-            <p class="dbt-p"><?php _e('Upload an <b>sql</b> file with the queries to run', 'database_tables'); ?></p>
+            <p class="dbt-p"><?php 
+            _e('Upload an <b>sql</b> file with the queries to run', 'database_tables'); 
+            Dbt_fn::echo_html_icon_help('database_tables-table-import','sql'); 
+            ?></p>
             <form method="POST" action="<?php echo admin_url("admin.php?page=database_tables&section=table-import"); ?>" enctype="multipart/form-data" >
                 <input type="hidden" name="page" value="database_tables" />
                 <input type="hidden" name="section" value="table-import" />
@@ -285,7 +288,10 @@ if (!defined('WPINC')) die;
                 <input type="submit" class="dbt-submit" value="<?php _e('Execute import', 'database_tables'); ?>" />
             </form>
             <hr>
-            <p class="dbt-p"><?php _e('Upload a <b>csv</b> file and go ahead to configure the import', 'database_tables'); ?></p>
+            <p class="dbt-p"><?php 
+            _e('Upload a <b>csv</b> file and go ahead to configure the import', 'database_tables'); 
+            Dbt_fn::echo_html_icon_help('database_tables-table-import','csv');
+            ?></p>
             <form method="POST" action="<?php echo admin_url("admin.php?page=database_tables&section=table-import"); ?>" enctype="multipart/form-data" >
                 <input type="hidden" name="action" value="import-csv-file">
                 <input type="hidden" name="page" value="database_tables" />

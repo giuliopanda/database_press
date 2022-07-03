@@ -18,6 +18,9 @@ if (!defined('WPINC')) die;
         <div class="dbt-content-table js-id-dbt-content" >
             <h1 class="wp-heading-inline"><?php echo $list_title; ?></h1>
             <span class="page-title-action" onclick="dbt_edit_details_v2()"><?php  _e('Add New', 'database_tables') ;?></span>
+            <?php if (current_user_can('manage_options')) : ?>
+                <a href="<?php echo admin_url("admin.php?page=dbt_list&section=list-sql-edit&dbt_id=".$post->ID); ?>" class="page-title-action" target="blank"><span class="dashicons dashicons-admin-generic" style="vertical-align: sub;"></span></a>
+            <?php endif; ?>
             <form id="table_filter" method="post" action="<?php echo admin_url("admin.php?page=".$_REQUEST['page']); ?>">
 
                 <?php if ($table_model->last_error === false) : ?>

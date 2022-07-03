@@ -22,7 +22,7 @@ $table_bulk_ok = ($table_model->table_status() != 'CLOSE' && count($table_model-
  <div class="dbt-content-table js-id-dbt-content" >
     <?php 
     if ($table_bulk_ok) {
-    $append = '<span class="page-title-action" onclick="dbt_edit_details_v2()">' . __('Add new content', 'database_tables') . '</span>';
+        $append = '<span class="page-title-action" onclick="dbt_edit_details_v2()">' . __('Add new content', 'database_tables') . '</span>';
     } else {
         $append = '';
     }

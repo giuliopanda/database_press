@@ -11,6 +11,17 @@ jQuery(document).ready(function ($) {
     jQuery('.js-toggle-row').change();
     jQuery('.js-type-fields').change();
     jQuery('.js-structure-toggle').click();
+
+    // disegno la demo dei singoli field
+    jQuery('.js-dbt-lf-form-card').each(function() {
+        if ($(this).find('.js-show-hide-select').val() == "SHOW") {
+            dbt_lf_show_field_example($(this));
+        } else {
+            $(this).find('.js-lf-form-field-example').css('display','none');
+        }
+    })
+
+
 });
 
 /**
@@ -33,6 +44,8 @@ jQuery(document).ready(function ($) {
             jQuery(this).find('.js-prevent-exceeded-1000-lookup').remove();
         }
     });
+    jQuery('#list_form .js-dbt-example').empty();
+
 
     jQuery('#list_form').submit();
 }
@@ -44,15 +57,16 @@ function dbt_lf_form_toggle(el) {
     let $card = jQuery(el).parents('.js-dbt-lf-form-card');
     let $container_table = jQuery(el).parents('.js-lf-container-table');
     if ($container_table.find('.js-module-type').val() != "EDIT") {
-        alert ("Imposta il module type dentro show attributes in Editable");
+        alert ("Set the module type in show attributes in Editable");
         dbt_lf_toggle_attr($container_table.find('.js-lf-dbt-show').get(0), 1);
         return;
     }
     let $box = $card.find('.js-lf-form-content');
     if ($box.css('display') == "none") {
         $box.css('display','block');
+        $card.find('.js-lf-form-field-example').css('display','none');
     } else {
-        $box.css('display','none');
+        dbt_lf_show_field_example($card);
     }
 }
 
@@ -427,7 +441,7 @@ function dbt_duplicate_field(el) {
     $clone.find('.js-title-field').empty().html('NEW FIELD NAME: <input type="text" class="dbt-input js-fields-edit-new" name="fields_edit_new['+count+']" value="fl_'+count+'">');
     jQuery(el).before($clone);
 
-    let choose_field_type = {'Standard fields':{'VARCHAR':'Text (single line)', 'TEXT':'Text (multi line)', 'DATE':'Date', 'DATETIME':'Date time' , 'NUMERIC':'Number', 'SELECT':'Multiple Choice - Drop-down List (Single Answer)', 'RADIO':'Multiple Choice - Radio Buttons (Single Answer)', 'CHECKBOX':'Checkbox (Single Answer)','CHECKBOXES':'Checkboxes (Multiple Answers)'}, 'Special fields':{'READ_ONLY':'Read only','EDITOR_CODE':'Editor Code','EDITOR_TINYMCE':'Classic text editor', 'CREATION_DATE':'Record creation date', 'LAST_UPDATE_DATE':'Last update date', 'RECORD_OWNER':'Author (who created the record)', 'MODIFYING_USER':'Modifying user', 'CALCULATED_FIELD':'calculated field', 'LOOKUP':'lookup', 'UPLOAD_FIELD': 'Upload files in a custom dir'}, 'Wordpress field':{'POST':'post','USER':'user', 'MEDIA_GALLERY' : 'Media Gallery'}};
+    let choose_field_type = {'Standard fields':{'VARCHAR':'Text (single line)', 'TEXT':'Text (multi line)', 'DATE':'Date', 'DATETIME':'Date time' , 'NUMERIC':'Number','NUMBER':'Number', 'SELECT':'Multiple Choice - Drop-down List (Single Answer)', 'RADIO':'Multiple Choice - Radio Buttons (Single Answer)', 'CHECKBOX':'Checkbox (Single Answer)','CHECKBOXES':'Checkboxes (Multiple Answers)'}, 'Special fields':{'READ_ONLY':'Read only','EDITOR_CODE':'Editor Code','EDITOR_TINYMCE':'Classic text editor', 'CREATION_DATE':'Record creation date', 'LAST_UPDATE_DATE':'Last update date', 'RECORD_OWNER':'Author (who created the record)', 'MODIFYING_USER':'Modifying user', 'CALCULATED_FIELD':'calculated field', 'LOOKUP':'lookup', 'UPLOAD_FIELD': 'Upload files in a custom dir'}, 'Wordpress field':{'POST':'post','USER':'user', 'MEDIA_GALLERY' : 'Media Gallery'}};
     $clone.find('.js-fields-field-type').empty();
     for (field_label in choose_field_type) {
         $optgroup = jQuery('<optgroup label="'+field_label+'"></optgroup>');
@@ -451,9 +465,10 @@ function dbt_form_remove_field(el) {
         $box.find('.js-dragable-handle').css('display','none');
         $box.find('.js-show-hide-select').parent().css('display','none');
         $box.find('.js-title-field').css({'text-decoration':'line-through', 'color':'#922'});
-        $box.find('.js-lf-form-content').css('display','none');
         $box.find('.js-cancel-delete').css('display','inline-block');
         $box.find('.js-delete-field').val('1');
+        
+        dbt_lf_show_field_example($box)
     }
 }
 
@@ -464,6 +479,69 @@ function dbt_form_cancel_remove_field(el) {
     $box.find('.js-show-hide-select').parent().css('display','inline-block');
     $box.find('.js-title-field').css({'text-decoration':'none', 'color':'#50575e'});
     $box.find('.js-lf-form-content').css('display','block');
+    $box.find('.js-lf-form-field-example').css('display','none');
+
     $box.find('.js-cancel-delete').css('display','none');
     $box.find('.js-delete-field').val('');
+}
+
+
+function dbt_lf_select_onchange_toggle_field(el) {
+    $box = jQuery(el).parents('.js-dbt-lf-form-card');
+    $box.removeClass('dbt-form-hide-field');
+    if (jQuery(el).val() == "HIDE") {
+        $box.addClass('dbt-form-hide-field');
+        $box.find('.js-lf-form-content').css('display','none');
+        $box.find('.js-lf-form-field-example').css('display','none');
+    } else {
+        dbt_lf_show_field_example($box);
+    }
+}
+
+
+function dbt_lf_show_field_example($card) {
+    let type = $card.find('.js-fields-field-type').val();
+    let label = $card.find('.js-fields-label').val();
+    let m_options = $card.find('.js-fields-options').val();
+    let m_param = {id:'u'+dbt_uniqid()};
+    m_param.note = $card.find('.js-lf-fields-note').val();
+    m_param.options ={
+        "0" : {"value" : "0", "label" : "Not reported"}, 
+        "1" : {"value" : "1", "label" : "Male"}, 
+        "2" : {"value" : "2", "label": "Female"} };
+    if (type == "SELECT" || type == "RADIO"  || type == "CHECKBOXES") {
+        let options_temp = m_options.split("\n");
+        let m_param_options = {};
+        let add = true;
+        for (x in options_temp) {
+            console.log ("X "+x);
+            let ot = options_temp[x].split(",");
+            if (ot.length == 2) {
+                m_param_options[x] = {"value" : ot[0].trim(), "label" : ot[1].trim()}
+            } else {
+                m_param_options[x] = {"value" :'', "label" : options_temp[x]}
+            }
+        }
+        m_param.options = m_param_options;
+    }
+    if (type == "LOOKUP") {
+        m_param.lookup_sel_txt = $card.find('.js-lookup-select-text').val();
+        m_param.lookup_sel_val = $card.find('.js-lookup-select-value').val();
+        m_param.lookup_id = $card.find('.js-select-fields-lookup').val();
+    }
+    $example_field = gp_form_field(label, '', '', type, m_param);
+    $card.find('.js-lf-form-content').css('display','none');
+    $card.find('.js-lf-form-field-example').css('display','flex');
+    $card.find('.js-lf-form-field-example .js-dbt-example').empty().append($example_field);
+    if (type == "EDITOR_CODE" || type == "EDITOR_TINYMCE" ) {
+        $card.find('.js-add-tinymce-editor').height('100px');
+        gp_form_add_editor( $card.find('.js-lf-form-field-example'));
+        $card.find('.js-add-codemirror-editor').each(function() {
+            codeMirror_ext = jQuery(this).data('cm_editor');
+            codeMirror_ext.codemirror.setSize('100%', '100px');
+        });
+    }
+    if (type == "LOOKUP" || type == "USER" || type == "POST") {
+        $card.find('.js-lf-form-field-example .js-dbt-example').css({'overflow-y':'initial','overflow-x':'initial','overflow':'initial'});
+    }
 }

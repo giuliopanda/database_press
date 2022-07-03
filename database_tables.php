@@ -3,7 +3,7 @@
  * Database table
  * 
  *
- * @package          Database table
+ * @package          Database tables
  *
  * @wordpress-plugin
  * Plugin Name:       Easy Database tables

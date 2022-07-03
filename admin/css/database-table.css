@@ -1484,10 +1484,11 @@ table td.dtf-table-td {padding:0;}
 .alternate .dbt-cell-dark-blue, .striped>tbody>:nth-child(odd) .dbt-cell-dark-blue { background: #173f89 !important; color: #dde2f2 !important}
 
 
-.dbt-lf-container-table {background:#ececf1; padding:.4rem; margin-bottom:.2rem; border:1px solid #bebed1 }
-.dbt-lf-table-title {font-size:1rem; margin-bottom:.5rem;  padding-bottom:.2rem; border-bottom:1px solid #FFF;}
+.dbt-lf-container-table {background:#ececf1; padding:.4rem; margin-bottom:.2rem; border:1px solid #bebed1; margin-top:1rem; }
+.dbt-lf-container-table-pre {margin-bottom: -2rem; height: 0; line-height: 0;}
+.dbt-lf-table-title {font-size:1rem; margin-bottom:.5rem;  padding-bottom:.2rem; border-bottom:1px solid #FFF; min-height: 2rem; font-size: 1.2rem; line-height: 1.6rem;}
 .dbt-lf-field_box {border:1px solid #c3c3d3; background:#f9f9fa; }
-.dbt-lf-field-title { font-size:1rem; padding:.3rem 1rem;  border-bottom: 1px solid #dde6ec; vertical-align: middle; height: 2rem; line-height: 2rem;}
+.dbt-lf-field-title { font-size:1rem; padding:.3rem 1rem;  border-bottom: 1px solid #0a98f6; vertical-align: middle; height: 2rem; line-height: 2rem;     background: #cde0ef;  color: #22517e;}
 
 .dbt-lf-right {
     float: right;
@@ -1730,3 +1731,42 @@ input[type=checkbox].dbt-checkbox-left {float: left; margin-top: 0.1rem; margin-
 }
 
 #wpcontent {background:#FFF;}
+
+.dbt-form-hide-field .dbt-lf-field-title {
+    padding: 0 1rem .2rem;
+    opacity: .5;
+    background-color: #f9f9fa;
+    color:#AAA;
+    border:none;
+}
+.dbt-form-hide-field .dtf-alert-warning {
+    padding: 0.1rem 0.2rem 0.3rem;
+    background-color: #DDD;
+}
+
+
+.dbt-form-hide-field .dbt-edit-icon {
+    display: none;
+}
+
+.dbt-structure-field-example {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 1rem;
+}
+.dbt-form-example-field {
+    max-width: 600px;
+    max-height: 350px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 2rem;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.dbt-form-columns-2 {
+    float: left;
+    width: 47%;
+    margin: 0 0% 0 2%;
+}

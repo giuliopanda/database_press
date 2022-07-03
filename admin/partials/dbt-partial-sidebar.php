@@ -86,7 +86,8 @@ $request_dbt_id =  @$_REQUEST['dbt_id'];
         </div>
     </div>
     <div id="dbt_documentation_box" class="js-sidebar-block"  data-open="no_database_tables2" data-homepage="<?php echo $_REQUEST['page'].((isset($_REQUEST['section'])) ? '-'.$_REQUEST['section'] : '');?>">
-        <h3 class="js-sidebar-title dbt-sidebar-title"><?php _e('HELP', 'database_tables'); ?></h3>
+        <h3 class="js-sidebar-title dbt-sidebar-title" style="display:none"></h3>
+        <br>
         <div id="searchPinaResult" class="js-sidebar-content dbt-sidebar-content" style="display: block !important; overflow: visible !important; height: initial !important; max-height: 0 !important; margin-top: 0.6rem;"></div>
     </div>
 </div>
