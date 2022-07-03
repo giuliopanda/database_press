@@ -12,10 +12,14 @@ namespace DatabaseTables;
 if (!defined('WPINC')) die;
 ?>
 <div class="dbt-content-margin">
-    <p>dal tab import è possibile importare istruzioni sql o serie di dati in csv.</p>
-    <p>I file sql vengono eseguiti senza fare nessun controllo sui dati.</p>
-    <p>Inserimento o aggiornamento dei dati tramite CSV</p>
-    <p>Fate attenzione a caricare i file sql o csv correttamente nei rispettivi moduli di inserimento.</p>
+    <p>Dal tab import è possibile importare istruzioni sql o serie di dati in csv.</p>
+    <div id="dbt_help_sql" class="dbt_help_div">
+        <p>I file sql vengono eseguiti senza fare nessun controllo sui dati.</p>
+    </div>
+    <div id="dbt_help_csv" class="dbt_help_div">
+        <h3>Inserimento o aggiornamento dei dati tramite CSV </h3>
+        <p>Fate attenzione a caricare i file sql o csv correttamente nei rispettivi moduli di inserimento.</p>
+    </div>
     <div id="dbt_help_delimiter" class="dbt_help_div">
         <ul>
             <li><b>Delimiter</b> è il carattere usato per dividere i dati delle colonne nel csv</li>
@@ -35,10 +39,9 @@ if (!defined('WPINC')) die;
             <p>Puoi selezionare più tabelle e scegliere quali colonne del csv inserire in una o nell'altra tabella. Ogni volta che viene inserita o aggiornata una colonna viene generato un campo che potrai inserire nella tabella successiva per creare una relazione tra le due tabelle.</p>
             <p>Se vuoi modificare un campo che stai inserendo, dopo averlo selezionato nella tabella delle associazioni, cambia la selezione in [custom text]. Apparirà lo shortcode relativo. A questo punto puoi utilizzare tutte le istruzioni del <a href="<?php echo add_query_arg('get_page','pina-intro.php', $link); ?>">template engine integrato</a>.</p>
         </div>  
-   
-        <h3>Test the import</h3> 
-        <p>Genera ed esegue un test di importazione su delle tabelle temporanee e ne mostra il risultato. Verificalo con attenzione per non avere spiacevoli sorprese quando importerai i dati. Se una colonna non sembra contenere i dati attesi forse stai cercando di inserire un tipo di dato non corretto (ad esempio un numero in un campo data).</p>
-        <h3>Mi sento fortunato, importa i dati</h3>
-        <p>Esegue l'importazione dei dati. Una volta avviata l'operazione non si può tornare indietro. Una volta completata l'importazione scarica il report, questo conterrà le righe del csv con nuove colonne con gli id associati all'importazione e il risultato delle query.</p>
     </div>
+    <h3>Test the import</h3> 
+    <p>Genera ed esegue un test di importazione su delle tabelle temporanee e ne mostra il risultato. Verificalo con attenzione per non avere spiacevoli sorprese quando importerai i dati. Se una colonna non sembra contenere i dati attesi forse stai cercando di inserire un tipo di dato non corretto (ad esempio un numero in un campo data).</p>
+    <h3>Mi sento fortunato, importa i dati</h3>
+    <p>Esegue l'importazione dei dati. Una volta avviata l'operazione non si può tornare indietro. Una volta completata l'importazione scarica il report, questo conterrà le righe del csv con nuove colonne con gli id associati all'importazione e il risultato delle query.</p>
 </div>

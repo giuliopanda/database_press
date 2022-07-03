@@ -7,43 +7,43 @@ if (!defined('WPINC')) die;
     
 <h2 class="dbt-h2"> <a href="<?php echo admin_url("admin.php?page=dbt_docs") ?>">Doc</a><span class="dashicons dashicons-arrow-right-alt2"></span><?php _e('LIST FORM js script','database_tables'); ?></h2>
 
-    <p>Using javascript you can improve the insertion experience for example by hiding fields or verifying the data entered.</p>
+    <p>Usando il javascript puoi migliorare l'esperienza di inserimento ad esempio nascondendo campi o verificando i dati inseriti.</p>
     <hr>
-    <p>Inside the lists go to the form tab.</p>
-    <p>Inside the individual fields there is a textarea to insert custom javascript.</p>  
-    <p>The javascript inserted is executed when the form is loaded, when it is submitted and every time an element of the form is modified. You can use the <b> status </b> variable to identify when the function is called.</p>
+    <p>All'interno delle liste vai nel tab form.</p>
+    <p>Dentro i singoli campi c'è una textarea per inserire del javascript custom.</p>  
+    <p>Il javascript inserito viene eseguito  al caricamento della form, quando viene inviata e ogni volta che un elemento della form viene modificato. Puoi utilizzare la variabile <b>status</b> per identificare quando viene chiamata la funzione.</p>
     <pre class="dbt-code">
     if (status == 'start') {
-        // The form is started
+        // Viene avviato il form
     }
     if (status == 'field_change') {
-        // The field is changed
+        // Viene modificato il campo
     }
     if (status == 'form_change') {
-        // Any other field on the form is changed
+        // Viene modificato un qualsiasi altro campo della form
     }
     if (status == 'submit') {
         // Viene inviata al form. Puoi bloccare l'invio impostando un campo come invalid.
     }
     </pre>
-    <p>You can use the <b> field </b> variable to refer to the field in which you are writing the code. This variable extends the dbt_field object which has the following functions:</p> 
+    <p>Puoi usare la variabile <b>field</b> per riferirti al campo in cui stai scrivendo il codice. Questa variabile estende l'oggetto dbt_field che ha le seguenti funzioni:</p> 
     
     <ul>
-        <li><b>field.val(val)</b> // val optional if set it sets the variable</li>
-        <li><b>field.valid(boolean, msg)</b> // msg optional</li>
-        <li><b>field.isValid()</b> // returns if it is valid</li>
+        <li><b>field.val(val)</b> // val opzionale se impostato setta la variabile</li>
+        <li><b>field.valid(boolean, msg)</b> // msg opzionale</li>
+        <li><b>field.isValid()</b> // ritorna se è valido</li>
         <li><b>field.toggle(boolean)</b></li>
-        <li><b>field.dom()</b> // the dom of the field returns</li>
+        <li><b>field.dom()</b> // ritorna il dom del campo</li>
         <li><b>field.addClass(class_name)</b></li>
         <li><b>field.removeClass()</b></li>
-        <li><b>field.msg(str)</b> // Insert a message below the field</li>
+        <li><b>field.msg(str)</b> // Inserisce un messaggio sotto il campo</li>
         <li><b>field.valid_date()</b></li>
         <li><b>field.valid_range(min,max)</b></li>
-        <li><b>field.choices()</b> // modify the options of a select</li>
+        <li><b>field.choices()</b> // modifica le opzioni di un select</li>
         <li><b>field.required(boolean);</b></li>
     </ul>
 
-    <p>You can refer to the other fields on the form through the form variable which extends dbt_form</p> 
+    <p>Puoi fare riferimento agli altri campi della form attraverso la variabile form che estend dbt_form</p> 
             <ul>
                 <li><b>form.get(field)</b> // field name | field  label </li>
                 <li><b>form.get(table.field)</b> // current occurence</li>
@@ -53,37 +53,37 @@ if (!defined('WPINC')) die;
             </ul>
         </p>
     <br>
-    <p>You don't have to enter the tag code &lt;script&gt;&lt;/script&gt;.</p>
+    <p> Non devi inserire il codice tag &lt;script&gt;&lt;/script&gt;.</p>
     <br>
-    <p>Attention a required field even if hidden remains required! In general, a hidden invalid field prevents the form from being submitted.</p>
-    <h4>Examples:</h4>
-    <p>I show a field only if the checkbox is checked. For the single checkbox, val returns null if it is not selected, otherwise it returns the value of the checkbox. In the example the checkbox has value = "1"</p>
+    <p>Attenzione un campo required anche se nascosto rimane required! In generale un campo invalid nascosto impedisce alla form di essere inviata.</p>
+    <h4>Esempi:</h4>
+    <p>Mostro un campo solo se il checkbox è selezionato. Per il checkbox singolo val ritorna null se non è selezionato, altrimenti ritorna il valore del checkbox. Nell'esempio il checkbox ha value="1"</p>
     <pre class="dbt-code">
     field.toggle(form.get('mycheckboxlabel').val() == 1);
     </pre>
-    <p>I show a field only if a particular option of a checkbox is checked.</p>
+    <p>Mostro un campo solo se un'opzione particolare di un checkboxex è selezionata.</p>
     <pre class="dbt-code">
     field.toggle(form.get('n.categories').val().indexOf('Blue') > -1);
     </pre>
-    <p>I set the checkboxes with the option values (must be an array). If I want a defaul I use the array in the default field.</p>
+    <p>Setto i checkboxes con i valori delle opzioni (deve essere un array). Se voglio un defaul uso l'array nel campo di default.</p>
     <pre class="dbt-code">
     field.val(["opt_val1","opt_val5"]);
     </pre>
 
-    <p>Valid a field only if it is greater than 10</p>
+    <p>Valido un campo solo se è maggiore di 10</p>
     <pre class="dbt-code">
-        field.valid( field.val() < 10, 'The field must be greater than 10');
+        field.valid( field.val() < 10, 'Il campo deve essere maggiore di 10');
     </pre>
-    <p>Valid a date only if the start is greater than the date_start field
+    <p>Valido una data solo se l'inizio è superiore al campo date_start
     <pre class="dbt-code">
     let a = form.get('r.date_start').val();
     field.valid_range(a);
     </pre>
-    <p>The field is valid only if it is less than 100
+    <p>Valido il campo solo se è minore di 100
     <pre class="dbt-code">
     field.valid_range(false,100);
     </pre>
-    <p>In a repeating table I validate the next_order field saying that it must be greater than the previous instance</p>
+    <p>In una tabella ripetuta valido il campo next_order dicendo che deve essere maggiore dell'istanza  precedente</p>
     <pre class="dbt-code">
     if (status == 'form_change') {
     let prev_val = parseInt(form.get('my_table.next_order.prev').val());
@@ -92,7 +92,7 @@ if (!defined('WPINC')) die;
     }
     }
     </pre>
-    <p>Given due select changes the second's options each time the first is changed</p>
+    <p>Dati due select cambia le opzioni del secondo ogni volta che viene cambiato il primo</p>
     <pre class="dbt-code">
     if (status == 'start' || status == 'form_change') {
         if (form.get('PROVIN').val() == 'scelta 1') {

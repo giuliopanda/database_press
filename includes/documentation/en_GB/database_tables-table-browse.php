@@ -4,7 +4,7 @@
  * header-title: Table Browse
  * header-order: 04
  * header-tags:sql browse query filtra merge, meta  data metadata edit inline create list.
- * header-description: Mostra i dati di una query. Puoi filtrarli modificare i dati, esportarli o salvare la query iniziando così la creazione di una nuova lista!
+ * header-description: Show data from a query. You can filter them modify the data, export them or save the query thus starting the creation of a new list.
  * header-package-title: Manage DB
  * header-package-link: manage-db.php
  */
@@ -14,7 +14,7 @@ Dbt_fn::require_init();
 $all_columns = Dbt_fn::get_all_columns();
 ?>
 <div class="dbt-content-margin">
-    <p>Elenco delle tabelle e colonne del Database</p>
+    <p>List of database tables and columns</p>
     <div class="dbt-form-row">
     <input type="text" class="form-input-edit " onkeyup="dbt_help_filter(this)" data-idfilter="dbtHelpListTableFields" style="width: 99%;">
     </div>

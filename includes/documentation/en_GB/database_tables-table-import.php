@@ -3,7 +3,7 @@
 * header-type:doc
 * header-title: Import
  * header-order: 03
-* header-description: Come importare dati sql o csv
+* header-description: How to import sql or csv data
 * header-tags:Import, sql, csv
 * header-package-title: Manage DB
 * header-package-link: manage-db.php
@@ -12,33 +12,36 @@ namespace DatabaseTables;
 if (!defined('WPINC')) die;
 ?>
 <div class="dbt-content-margin">
-    <p>dal tab import è possibile importare istruzioni sql o serie di dati in csv.</p>
-    <p>I file sql vengono eseguiti senza fare nessun controllo sui dati.</p>
-    <p>Inserimento o aggiornamento dei dati tramite CSV</p>
-    <p>Fate attenzione a caricare i file sql o csv correttamente nei rispettivi moduli di inserimento.</p>
+    <p>From the import tab it is possible to import sql statements or data series in csv.</p>
+    <div id="dbt_help_sql" class="dbt_help_div">
+        <p>The sql files are executed without doing any checks on the data.</p>
+    </div>
+    <div id="dbt_help_csv" class="dbt_help_div">
+        <h3> Enter or update data via CSV </h3>
+        <p> Be careful to load the sql or csv files correctly in their respective input forms. </p>
+    </div>
     <div id="dbt_help_delimiter" class="dbt_help_div">
         <ul>
-            <li><b>Delimiter</b> è il carattere usato per dividere i dati delle colonne nel csv</li>
-            <li><b>Use first row as Headers</b> Se spuntato la prima riga non verrà importata</li>
-            <li><b>Update Preview</b> Aggiorna le impostazioni scelte.</li>
+            <li> <b> Delimiter </b> is the character used to divide the column data in the csv </li>
+             <li> <b> Use first row as Headers </b> If checked the first row will not be imported </li>
+             <li> <b> Update Preview </b> Updates your chosen settings. </li>
         </ul>
     </div>
     <div id="dbt_help_choose_action" class="dbt_help_div">
         <h3>Choose Action</h3>
         <div id="dbt_help_create_table" class="dbt_help_div">
-            <h4>Create table</h4> 
-            <p>Crei una tabella nel database a partire dalle colonne del csv. Sceglierai in un secondo momento quali campi associare. </p>
+            <h4> Create table </h4>
+             <p> Create a table in the database starting from the columns of the csv. You will choose later which fields to associate. </p>
         </div>
         <div id="dbt_help_insert_record" class="dbt_help_div">
-            <h4>Insert/Update records</h4>
-            <p>Seleziona la tabella e collega i campi del csv da inserire. Se associ la chiave primaria ad un campo, se questo esiste eseguirà l'aggiornamento della riga, altrimenti creerà un nuovo record.</p>
-            <p>Puoi selezionare più tabelle e scegliere quali colonne del csv inserire in una o nell'altra tabella. Ogni volta che viene inserita o aggiornata una colonna viene generato un campo che potrai inserire nella tabella successiva per creare una relazione tra le due tabelle.</p>
-            <p>Se vuoi modificare un campo che stai inserendo, dopo averlo selezionato nella tabella delle associazioni, cambia la selezione in [custom text]. Apparirà lo shortcode relativo. A questo punto puoi utilizzare tutte le istruzioni del <a href="<?php echo add_query_arg('get_page','pina-intro.php', $link); ?>">template engine integrato</a>.</p>
+            <h4> Insert / Update records </h4>
+             <p> Select the table and link the fields of the csv to insert. If you associate the primary key with a field, if it exists it will update the row, otherwise it will create a new record. </p>
+             <p> You can select multiple tables and choose which csv columns to insert in one or the other table. Each time a column is inserted or updated, a field is generated that you can insert in the next table to create a relationship between the two tables. </p>
+             <p> If you want to modify a field you are inserting, after selecting it in the associations table, change the selection to [custom text]. The related shortcode will appear. At this point you can use all the instructions of the <a href="<?php echo add_query_arg('get_page','pina-intro.php', $link); ?>">integrated template engine</a>.</p>
         </div>  
-   
-        <h3>Test the import</h3> 
-        <p>Genera ed esegue un test di importazione su delle tabelle temporanee e ne mostra il risultato. Verificalo con attenzione per non avere spiacevoli sorprese quando importerai i dati. Se una colonna non sembra contenere i dati attesi forse stai cercando di inserire un tipo di dato non corretto (ad esempio un numero in un campo data).</p>
-        <h3>Mi sento fortunato, importa i dati</h3>
-        <p>Esegue l'importazione dei dati. Una volta avviata l'operazione non si può tornare indietro. Una volta completata l'importazione scarica il report, questo conterrà le righe del csv con nuove colonne con gli id associati all'importazione e il risultato delle query.</p>
     </div>
+    <h3>Test the import</h3> 
+    <p> Generates and runs an import test on temporary tables and displays the result. Check it carefully to avoid any unpleasant surprises when you import the data. If a column does not appear to contain the expected data, perhaps you are trying to insert an incorrect data type (such as a number in a date field). </p>
+     <h3> I feel lucky, import the data </h3>
+     <p> Import the data. Once the operation has started, there is no going back. Once the import is complete, download the report, it will contain the rows of the csv with new columns with the ids associated with the import and the result of the queries. </p>
 </div>

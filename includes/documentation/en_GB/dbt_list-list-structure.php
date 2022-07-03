@@ -10,50 +10,58 @@ namespace DatabaseTables;
 if (!defined('WPINC')) die;
 ?>
 <div class="dbt-content-margin">
-    <p>la lista presenta tutte le colonne che vengono estratte dalla tabella. Puoi cambiare l'ordine di visualizzazione,  scegliere di nascondere una colonna o modificare come i dati vengono visualizzati.</p>
-    <p> Puoi aggiungere nuove colonne lavorando i dati estratti attraverso il template engine, ma se vuoi estrarre altri dati dovrai modificare la query di estrazione</p>
+    <p> the list presents all the columns that are extracted from the table. You can change the display order, choose to hide a column or change how the data is displayed. </p>
+     <p> You can add new columns by working the extracted data through the template engine, but if you want to extract more data you will need to modify the extraction query </p>
 
-    <h4>Table title</h4>
-    <p>Il titolo che avrà la colonna, non infuenza i dati o i nomi che dei dati estratti dal template engine</p>
-    <h4>Searchable</h4>
-    <p>Quando usi il campo di ricerca  questo cercherà in tutte le colonne in chi è è stato scelto un tipo di ricerca. LIKE vuol dire che cerca all'interno del testo mentre = cercherà solo le colonne uguali al testo cercato.</p>
-    <h4>Print</h4>
-    <p>Modifica il testo visualizzato a seconda del formato scelto. Custom permette di usare gli shortcode per visualizzare il contenuto della colonna. Dall'Help puoi cliccare vars per vedere la lista delle variabili da usare</p>
-    <h3>column formatting</h3>
-    <h4>change values</h4>
-    <p>Cambia il valore del contenuto secondo il csv inserito</p>
-    <p>I valori del csv devono essere separati da virgola. Il primo valore è quello della colonna, il secondo è come deve essere trasformato</p>
-    <p>È possibile usare le scritture speciali <b>< x, > x, o =x-y</b> per un intervallo, dove x e y sono numeri.</p>
-    esempio: 
-    <pre class="dbt-code">
-0, NO
-1, YES
->1, MAYBE
-    </pre>
-
-    <h4>change styles</h4>
-    <p>Aggiunge una classe condizionata a seconda del valore del csv inserito</p>
-    <p>
-    <p>È possibile usare le scritture speciali <b>< x, > x, o =x-y</b> per un intervallo, dove x e y sono numeri.<br>
-    ecco l'elenco delle classi già configurate:
-        <ul>
-            <li>dbt-cell-red</li>
-            <li>dbt-cell-yellow </li>
-            <li>dbt-cell-green</li>
-            <li>dbt-cell-blue</li>
-            <li>dbt-cell-dark-red</li>
-            <li>dbt-cell-dark-yellow </li>
-            <li>dbt-cell-dark-green </li>
-            <li>dbt-cell-dark-blue</li>
-            <li>dbt-cell-text-red </li>
-            <li>dbt-cell-text-yellow </li>
-            <li>dbt-cell-text-green</li>
-            <li>dbt-cell-text-blue</li> 
-        </ul>
-    </p>
-    esempio: 
-    <pre class="dbt-code">
-0, dbt-cell-red
-=1-10, dbt-cell-green
-    </pre>
+    <div id="dbt_help_title" class="dbt_help_div">
+        <h4>Table title</h4>
+        <p> The title that the column will have does not affect the data or the names of the data extracted from the template engine </p>
+    </div>
+    <div id="dbt_help_searchable" class="dbt_help_div">
+        <h4>Searchable</h4>
+        <p> When you use the search field it will search all columns for who a search type has been chosen. LIKE means that it searches within the text while = will only search for columns that match the searched text. </p>
+    </div>
+    <div id="dbt_help_print" class="dbt_help_div">
+        <h4>Print</h4>
+        <p> Changes the displayed text according to the chosen format. Custom allows you to use shortcodes to display the contents of the column. From the Help you can click vars to see the list of variables to use </p>
+    </div>
+    <div id="dbt_help_format" class="dbt_help_div">
+        <h3>column formatting</h3>
+        <h4>change values</h4>
+        <p> Change the content value according to the entered csv </p>
+         <p> The csv values must be separated by commas. The first value is that of the column, the second is how it should be transformed </p>
+         <p> You can use the special scripts <b> <x,> x, o = x-y </b> for a range, where x and y are numbers. </p>
+         example:
+        <pre class="dbt-code">
+    0, NO
+    1, YES
+    >1, MAYBE
+        </pre>
+    </div>
+    <div id="dbt_help_styles" class="dbt_help_div">
+        <h4>change styles</h4>
+        <p> Adds a conditional class depending on the value of the csv inserted </p>
+         <p> You can use the special writes <b> <x,> x, o = x-y </b> for a range, where x and y are numbers. <br>
+         here is the list of classes already configured:
+            <ul>
+                <li>dbt-cell-red</li>
+                <li>dbt-cell-yellow </li>
+                <li>dbt-cell-green</li>
+                <li>dbt-cell-blue</li>
+                <li>dbt-cell-dark-red</li>
+                <li>dbt-cell-dark-yellow </li>
+                <li>dbt-cell-dark-green </li>
+                <li>dbt-cell-dark-blue</li>
+                <li>dbt-cell-text-red </li>
+                <li>dbt-cell-text-yellow </li>
+                <li>dbt-cell-text-green</li>
+                <li>dbt-cell-text-blue</li> 
+            </ul>
+        </p>
+        example: 
+        <pre class="dbt-code">
+    0, dbt-cell-red
+    =1-10, dbt-cell-green
+        </pre>
+    </div>
 </div>

@@ -8,19 +8,19 @@ if (!defined('WPINC')) die;
     <h2 class="dbt-h2"> <a href="<?php echo admin_url("admin.php?page=dbt_docs") ?>">Doc</a><span class="dashicons dashicons-arrow-right-alt2"></span><?php _e('Hooks & filters','database_tables'); ?></h2>
     <hr>
     <h2 class="dbt-h2"> apply_filter('<b>dbt_frontend_link_columns_to_link_to</b>', $selected, $list_id, $columns);</h2>
-    In the frontend tables it allows you to decide which columns to link to to show the detail
+    Nelle tabelle del frontend permette di decidere le colonne a cui inserire il link per mostrare il dettaglio
     <hr>
     <h4 class="dbt-h4">Parameters</h4>
     <div class="dbt-help-p">
         <ul>
             <li><b>$selected</b>
-                <br>(Array) The names of the columns to which to insert the link for the detail.
+                <br>(Array) i nomi delle colonne a cui inserire il link per il dettaglio.
             </li>
             <li><b>$list_id</b>
-                <br>(int) The id of the list
+                <br>(int) L'id della lista
             </li>
             <li><b>$columns</b>
-                <br>(Array) The names of the columns in the table
+                <br>(Array) i nomi delle colonne della tabella
             </li>
         </ul>
         </div>
@@ -32,7 +32,7 @@ if (!defined('WPINC')) die;
     <div class="dbt-help-p">
         <pre class="dbt-code">
         /**
-        * In the frontend table: change which columns have the link to the detail (in this case all)
+        * Nella tabella del frontend: modifica quali colonne hanno il link al dettaglio (in questo caso tutte)
         */
         add_filter('dbt_frontend_link_columns_to_link_to', 'all_cols', 10, 3);
         function all_cols($selected, $dbt_id, $columns) {
@@ -43,16 +43,16 @@ if (!defined('WPINC')) die;
 
     <hr>
     <h2 class="dbt-h2"> apply_filters('<b>dbt_frontend_build_custom_link</b>', $custom_link, $dbt_id, $primary_values, $col_value, $col_key);</h2>
-    In the frontend in the creation of custom links to open the detailed results.
+    Nel frontend nella creazione dei link personalizzati per aprire il dettaglio dei risultati.
     <hr>
     <h4 class="dbt-h4">Parameters</h4>
     <div class="dbt-help-p">
         <ul>
             <li><b>$custom_link</b>
-                <br>(string) The link that will be displayed
+                <br>(string) il link che verrà visualizzato
             </li>
             <li><b>$list_id</b>
-                <br>(int) The id of the list
+                <br>(int) L'id della lista
             </li>
             <li><b>$primary_values</b>
                 <br>(Array) 
@@ -70,10 +70,10 @@ if (!defined('WPINC')) die;
 
     <h4 class="dbt-h4">Example</h4>
     <div class="dbt-help-p">
-        The example shows loading data into a custom div. This is possible thanks to the javascript function setup_dbt_load_ajax_custom_div (el_container)
+        L'esempio mostra il caricamento dei dati in un div personalizzato. Questo è possibile grazie alla funzione javascript setup_dbt_load_ajax_custom_div(el_container)
         <pre class="dbt-code">
         /**
-        * In the frontend table: In the HTML where the shortcode [dbt_list id = xx] has been put I insert a custom html'<div id="dbt_div_target_link"></div>'
+        * Nella tabella del frontend:  Nell'HTML dove è stato messo lo shortcode [dbt_list id=xx] inserisco un html personalizzato '<div id="dbt_div_target_link"></div>'
         */
         function load_in_custom_box($custom_link, $dbt_id, $primary_values, $col_value, $col_key) {
             return '<a class="js-dbt-load-ajax-custom-div" href="'.esc_url(add_query_arg($primary_values, admin_url('admin-ajax.php'))).'" target="_blank">'
@@ -87,25 +87,25 @@ if (!defined('WPINC')) die;
 
     <hr>
     <h2 class="dbt-h2">apply_filters('<b>dbt_frontend_total_items</b>', $total_items_text, $dbt_id, $total_items,  $limit, $curr_page, $pages );</h2>
-    In the tables it changes the writing of the total of the elements
+    Nelle tabelle modifica la scritta del totale degli elementi
     <hr>
     <h4 class="dbt-h4">Parameters</h4>
     <div class="dbt-help-p">
         <ul>
             <li><b>$total_items_text</b>
-                <br>(string) The text showing
+                <br>(string) Il testo che mostra
             </li>
             <li><b>$list_id</b>
-                <br>(int) The id of the list
+                <br>(int) L'id della lista
             </li>
             <li><b>$total_items</b>
-                <br>(int) The total number of items
+                <br>(int) Il numero totale degli elementi
             </li>
             <li><b>$limit</b>
-                <br>(int) The number of items per page
+                <br>(int) Il numero di elementi per pagina 
             </li>
             <li><b>$curr_page</b>
-                <br>(int) The current page
+                <br>(int) La pagina corrente
             </li>
             <li><b>$page</b>
                 <br>(int) Il numero di pagine totali
@@ -119,7 +119,7 @@ if (!defined('WPINC')) die;
     <div class="dbt-help-p">
         <pre class="dbt-code">
         /**
-        * In the frontend table: Show alternate text in the total displayed elements of a table
+        * Nella tabella del frontend: Mostra un testo alternativo nel totale degli elementi mostrati di una tabella
         */
         function dbt_total_items( $total_items_text, $dbt_id, $total_items,  $limit, $curr_page, $pages) {
             $min = (($curr_page -1) * $limit) + 1;
@@ -137,19 +137,19 @@ if (!defined('WPINC')) die;
 
     <hr>
     <h2 class="dbt-h2">apply_filters('<b>dbt_frontend_table_thead</b>', header_text, $dbt_id, $array_thead);</h2>
-    In the frontend print the table titles.
+    Nel frontend stampa i titoli della tabella. 
     <hr>
     <h4 class="dbt-h4">Parameters</h4>
     <div class="dbt-help-p">
         <ul>
             <li><b>$header_text</b>
-                <br>(string) The text showing
+                <br>(string) Il testo che mostra
             </li>
             <li><b>$list_id</b>
-                <br>(int) The id of the list
+                <br>(int) L'id della lista
             </li>
             <li><b>$array_thead</b>
-                <br>(Array) The data to print the columns
+                <br>(Array) I dati per stampare le colonne
             </li>
         </ul>
         </div>
@@ -160,7 +160,7 @@ if (!defined('WPINC')) die;
     <div class="dbt-help-p">
         <pre class="dbt-code">
         /**
-        * Hide the header
+        * Nascondo l'header
         */
         function dbt_total_items($header_text, $dbt_id, $array_thead) {
             return '';
@@ -174,16 +174,16 @@ if (!defined('WPINC')) die;
 
     <hr>
     <h2 class="dbt-h2">apply_filters('<b>dbt_table_status</b>', $status, $table);</h2>
-    Change the state of a table (DRAFT|PUBLISH|CLOSE)
+    Cambia lo stato di una tabella (DRAFT|PUBLISH|CLOSE)
     <hr>
     <h4 class="dbt-h4">Parameters</h4>
     <div class="dbt-help-p">
         <ul>
             <li><b>$status</b>
-                <br>(string) The focus of the table
+                <br>(string) Lo stato attivo della tabella
             </li>
             <li><b>$table</b>
-                <br>(string) The name of the table
+                <br>(string) Il nome della tabella
             </li>
         </ul>
         </div>
@@ -194,7 +194,7 @@ if (!defined('WPINC')) die;
     <div class="dbt-help-p">
         <pre class="dbt-code">
         /**
-        * I prevent modification of the post table
+        * impedisco la modifica della tabella post
         */
         function dbt_lock_post_table($status, $table) {
             global $wpdb; 
@@ -212,19 +212,19 @@ if (!defined('WPINC')) die;
 
     <hr>
     <h2 class="dbt-h2">apply_filters('<b>dbt_save_data</b>', $query_to_execute, $dbt_id, $origin)</h2>
-    Edit the data you are about to save in the database
+    Modifica i dati che si stanno per salvare nel database
     <hr>
     <h4 class="dbt-h4">Parameters</h4>
     <div class="dbt-help-p">
         <ul>
             <li><b>$query_to_execute</b>
-                <br>(array) of records that are about to be inserted or modified in the database
+                <br>(array) di record che stanno per essere inseriti o modificati nel database
             </li>
             <li><b>$dbt_id</b>
-                <br>(int) The name of the table
+                <br>(int) Il nome della tabella
             </li>
             <li><b>$origin</b>
-                <br>(string) Defines where the data is entered from
+                <br>(string) Definisce da dove vengono immessi i dati
             </li>
         </ul>
         </div>
@@ -235,10 +235,10 @@ if (!defined('WPINC')) die;
     <div class="dbt-help-p">
         <pre class="dbt-code">
     /**
-    * I save a post and change the title from the filter
+    * Salvo un post e ne modifico il titolo dal filtro
     */
     function test_dbt($status, $table) {
-        $dbt_id = '[number_of_list_id]'; // it is a list that loads the post data;
+        $dbt_id = '[number_of_list_id]'; // è una lista che carica i dati dei post;
         $row = new StdClass();
         $row->post_title = "new record";
         $ris = DatabaseTables\Dbt::save_data($dbtid, $row);
@@ -246,6 +246,7 @@ if (!defined('WPINC')) die;
     add_action( 'init', 'test_dbt' );
     
     function dbt_action_in_save_data($query_to_execute, $dbt_id, $where) {
+        // cambio il titolo
         $query_to_execute[0]['sql_to_save']['post_title'] = "Change the title";
         return $query_to_execute;
     }
@@ -256,13 +257,16 @@ if (!defined('WPINC')) die;
 
 
     <h2 class="dbt-h2">apply_filters( 'pinacode_attribute_tmpl_'.$param, $gvalue, $param, $shortcode_obj);</h2>
-    If the template attribute is called it is possible to filter the passed parameter
+    Se viene chiamato l'attributo template è possibile filtrare il parametro passato
     <hr>
+    <p> I parametri accettati sono: $param, $gvalue, $count_for</p>
+
+
     <h4 class="dbt-h4">Parameters</h4>
     <div class="dbt-help-p">
         <ul>
             <li><b>$gvalue</b>
-                <br>(object) The focus of the table
+                <br>(object) Lo stato attivo della tabella
             </li>
             <li><b>$param</b>
                 <br>(string)
@@ -292,6 +296,9 @@ if (!defined('WPINC')) die;
     }
         </pre>
     </div>
+
+
+
 
 </div>
 

@@ -14,9 +14,8 @@ Dbt_fn::require_init();
 $all_columns = Dbt_fn::get_all_columns();
 ?>
 <div class="dbt-content-margin">
-   
 
-    <p>Elenco delle tabelle e colonne del Database</p>
+    <p>List of database tables and columns</p>
 
     <div class="dbt-form-row">
     <input type="text" class="form-input-edit " onkeyup="dbt_help_filter(this)" data-idfilter="dbtHelpListTableFields" style="width: 99%;">

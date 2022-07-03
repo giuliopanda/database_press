@@ -3,7 +3,7 @@
  * header-type:doc
  * header-title: List Tab Settings
 * header-tags:
-* header-description: Definisci la query da eseguire, chi può modificare la lista ecc..
+* header-description: Define the query to be executed, who can modify the list, etc.
 * header-package-title: Manage List
 * header-package-link: manage-list.php
 */
@@ -13,45 +13,45 @@ if (!defined('WPINC')) die;
 <div class="dbt-content-margin">
     <div id="dbt_help_admin_sidebar_menu" class="dbt_help_div">
         <h3>Admin sidebar menu</h3>
-        Aggiungi una voce di menu nella tua amministrazione e decidi chi può accedere. <br>Se non vedi subito cambiare le impostazioni ricarica la pagina.
+        Add a menu item in your administration and decide who can access. <br> If you don't see the settings change immediately, reload the page.
     </div>
 
     <div id="dbt_help_admin_sidebar_menu_icon" class="dbt_help_div">
         <h4>Add Icon</h4> 
-        <p>Puoi scegliere un'icona tra quelle presenti in questa pagina: <a href="https://developer.wordpress.org/resource/dashicons" target="blank" class="js-simple-link">developer.wordpress.org/resource/dashicons</a> Clicca sull'icona che vuoi inserire e premi copia HTML. Nell'alert che apparirà prendi la seconda classe. es: <i>dashicons-image-rotate-right</i>. Copia la classe nel campo. </p>
+        <p>You can choose an icon from those on this page: <a href="https://developer.wordpress.org/resource/dashicons" target="blank" class="js-simple-link">developer.wordpress.org/resource/dashicons</a> Clicca sull'icona che vuoi inserire e premi copia HTML. Nell'alert che apparirà prendi la seconda classe. es: <i>dashicons-image-rotate-right</i>. Copia la classe nel campo. </p>
     </div>
 
     <div id="dbt_help_admin_sidebar_menu_position" class="dbt_help_div">
         <h4>Position (number)</h4> 
-        <p>Scegli a che altezza mostrare la voce di menu.  </p>
+        <p>Choose at what height to show the menu item.</p>
     </div>
 
     <div id="dbt_help_admin_sidebar_menu_permissions" class="dbt_help_div">
         <h4>Permissions</h4> 
-        <p>Scegli chi può modificare la lista. Tra i permessi è presenta anche l'amministratore. Tu potrai sempre visualizzare e modificare la lista all'interno del plugin, ma puoi scegliere di non farla apparire nel menu.</p>
+        <p>Choose who can edit the list. Among the permissions there is also the administrator. You will always be able to view and edit the list within the plugin, but you can choose not to show it in the menu. </p>
     </div>
 
     <div id="dbt_help_admin_query" class="dbt_help_div">
         <h3>Query</h3>
-        <p>Puoi scegliere di estrarre tutti i dati di una tabella, oppure filtrarli aggiungendo clausule WHERE. Puoi estrarre solo alcuni campi o aggiungere campi calcolati. Alcune query più complesse potrebbero non funzionare correttamente. Se vuoi collegare altre tabelle usa la clausola LEFT JOIN ... ON.</p>
+        <p> You can choose to extract all data from a table, or filter it by adding WHERE clauses. You can extract only some fields or add calculated fields. Some more complex queries may not work correctly. If you want to link other tables use the LEFT JOIN ... ON clause. </p>
     </div>
 
     <div id="dbt_help_admin_filter" class="dbt_help_div">
         <h3>Filter</h3>
-        <p>Aggiunge un filtro quando la lista riceve un determinato parametro. </p>
-        <p> I parametri vengono scritti come shortcode e sono:</p>
+        <p> Adds a filter when the list receives a certain parameter. </p>
+        <p> Parameters are written as shortcodes and are: </p>
         
         <ul>
-            <li><b>[%params.xxx]</b> sono i parametri aggiunti negli shortcode</li>
-            <li><b>[%data.xxx]</b> per i dati incapsulati</li>
-            <li><b>[%request.xxx]</b> per i dati ricevuti nell'url</li>
+            <li><b>[%params.xxx]</b> are the parameters added in the shortcodes</li>
+            <li><b>[%data.xxx]</b> for encapsulated data</li>
+            <li><b>[%request.xxx]</b> for the data received in the url</li>
         </ul> 
-        <p>Se è selezionato required ma non viene passato il valore la query non torna risultati. Se invece required non è selezionato e non viene passato nessun parametro la query torna i risultati non filtrati</p>
+        <p>If required is selected but the value is not passed, the query returns no results. If required is not selected and no parameters are passed, the query returns the unfiltered results</p>
     </div>
 
     <div id="dbt_help_delete_options" class="dbt_help_div">
         <h3>DELETE OPTIONS</h3>
-        <p>Se è presente una sola tabella scegli se è possibile eliminare o no i record dalla lista. <br> Se la query estrae più tabelle scegli quali devono essere rimosse quando si elimina un file.<br>Se selezioni no a tutte le tabelle, allora i record non possono essere rimossi nella lista.</p>
+        <p>If there is only one table, choose whether or not records can be deleted from the list. <br> If the query extracts multiple tables, choose which ones should be removed when deleting a file. <br> If you select no to all tables, then the records cannot be removed in the list.</p>
     </div>
     
 </div>
