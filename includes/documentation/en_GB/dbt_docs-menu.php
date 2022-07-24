@@ -1,10 +1,8 @@
 <?php
 /**
- * header-type:doc
- * header-title: Indice della documentazione
-* header-tags: document index
-* header-description: L'indice delle pagine della documentazione
-* header-lang:ITA
+ * header-type:rif
+ * header-title: Documentation index
+ * header-tags: document index php hook javascript template engine
 */
 namespace DatabaseTables;
 if (!defined('WPINC')) die;

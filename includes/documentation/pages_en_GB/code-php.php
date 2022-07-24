@@ -10,7 +10,7 @@ if (!defined('WPINC')) die;
     <div class="dbt-help-p">
        
         <hr>
-        <h2 class="dbt-h2">Dbt::get_list($dbt_id, $ajax = false)</h2>
+        <h2 class="dbt-h2">Dbt::get_list($dbt_id, $only_table = false, $params=[], $prefix = "")</h2>
         <p>Load a list from an id and return the html. Pretty much the same thing that the shortcode does!</p>
         <h4 class="dbt-h4">Parameters</h4>
         <ul>
@@ -18,6 +18,10 @@ if (!defined('WPINC')) die;
                 (integer) The id of the list</li>
                 <li><b>$ajax</b><br>
                 (bool) Whether to print the filters and the form that groups the table or not.</li>
+                <li><b>$params</b><br>  
+                (Array) Any additional parameters to further filter the table [%params]
+                <li><b>$prefix</b><br>  
+                (String) A prefix for the names of the fields to be sent in the form to avoid collisions on multiple tables within the same page
         </ul>
         <h4 class="dbt-h4">Return</h4>
         <p>Html</p>
@@ -137,6 +141,29 @@ if (!defined('WPINC')) die;
         <p>array</p>
 
 
+        <h2 class="dbt-h2">Dbt::render($dbt_id, $mode)</h2>
+        <p>Restituisce la classe Dbt_render_list</p>
+        <h4 class="dbt-h4">Parameters</h4>
+        <ul>
+                <li><b>$dbt_id</b><br>
+                (integer) L'id della lista</li>
+                <li><b>$mode</b><br>
+                (string) Sceglie come gestire i dati se in get|post|ajax o link (gestione parziale)</li>
+        </ul>
+
+        <h4 class="dbt-h4">Return</h4>
+        <p>Dbt_render_list</p>
+
+        <h4 class="dbt-h4">Example</h4>
+        <pre class="dbt-code">$list =  DatabaseTables\Dbt::render(6, 'get'); // ($list_id:int, $mode:string); $mode is optional
+$list->set_color('pink'); // Change the color of the list from the one you choose
+$list->table("", false); // (custom_class:string, table_sort:bool)
+$list->search(false); // optional (show_button:bool)
+$list->single_field_search('column_name'); // Adds a text field to search in a single column 
+$list->submit(); // Adds buttons for search
+$list->pagination('select');
+$list->end(); // Required!</pre>
+
 
     </div>
 
@@ -166,7 +193,7 @@ if (!defined('WPINC')) die;
     PinaCode::set_var('global.search_container.status', 'open');
     return $string;	
 }
-pinacode_set_functions('hello_world', 'pinacode_fn_search_open_container');</pre>
+pinacode_set_functions('hello_world', 'pinacode_fn_hello_world');</pre>
 
         <h3>Set a new attributes</h3>
         <pre class="code">function pinacode_attr_fn_new_upper($gvalue, $param, $shortcode_obj) {

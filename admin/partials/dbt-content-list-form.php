@@ -1,9 +1,8 @@
 <?php
 /**
- * La struttura di una lista identifica quali campi mostrare, 
- *  quali nascondere
- * l'ordine
- * eventuali campi calcolati
+ * I campi della form
+ * 
+ * /admin.php?page=dbt_list&section=list-form&dbt_id=xxx
  *  (come deve essere gestito un campo? Ad esempio: se lo voglio lavorare come numero e quindi fare il cast se è un testo, oppure come un link, o come un serializzato, o ancora come un'immagine.)
  * @var $items Lo schema della tabella
  */

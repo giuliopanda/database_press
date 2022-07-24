@@ -54,16 +54,12 @@ class Dbt_loader {
 		// Verifico una query mentre la si sta scrivendo
 		add_action('wp_ajax_dbt_check_query', [$this, 'check_query']);
 
-
 		// Questa una chiamata che deve rispondere un csv
 		add_action( 'admin_post_dbt_download_multiquery_report', [$this, 'dbt_download_multiquery_report']);
 		// Nell'init (backend gestisco eventuali redirect)
 		add_action('init',  [$this, 'template_redirect']);
 		add_action('init',  [$this, 'init_get_msg_cookie'] );
 	
-
-		
-		
 		// Aggiungo css e js nel frontend
 		add_action( 'wp_enqueue_scripts', [$this, 'frontend_enqueue_scripts'] );
 
@@ -115,7 +111,7 @@ class Dbt_loader {
 		require_once(DBT_DIR . "admin/class-dbt-list-admin.php");
 		require_once(DBT_DIR . "admin/class-dbt-docs-admin.php");
 		$db_admin = new database_tables_admin();
-		add_menu_page( 'Database table', 'Database table', 'manage_options', 'database_tables', [$db_admin, 'controller'], 'dashicons-database-view');
+		add_menu_page( '', 'Database tables', 'manage_options', 'database_tables', [$db_admin, 'controller'], 'dashicons-database-view');
 
 		$db_admin = new DBT_list_admin();
 		add_submenu_page(  'database_tables', 'List', 'List', 'manage_options', 'dbt_list', [$db_admin, 'controller']);
@@ -202,13 +198,13 @@ class Dbt_loader {
 		$error = "";
 		// TODO REQUEST TABLE E COLUMN devono trasformarsi in un generico attributes... perché esistono più tipi di distinct values (e in alcuni casi potrebbero non essere distinct (?!))
 		if (isset($params['type']) && $params['type'] == "post") {
-			
 			$count = 2000;
 			$array_params = array(
 				'post_limits'      => 100,
 				'orderby'          => 'post_title',
 				'order'            => 'ASC',
-				'post_type'        => $params['post_types']
+				'post_type'        => $params['post_types'],
+				'post_status'      => 'publish'
 			);
 			if (isset($params['cats']) && is_countable(($params['cats']))) {
 				$array_params['category__in'] = $params['cats'];
@@ -400,11 +396,16 @@ class Dbt_loader {
 	}
 
     /**
-     * Restituisce una lista chiamata in ajax
+     * Restituisce una lista chiamata in ajax (per il frontend - da verificare che sia nel singolo giorno)
      */
     public function get_list() {
 	    Dbt_fn::require_init();
 	    $result['div'] = $_REQUEST['dbt_div_id'];
+		if (isset($_REQUEST['dbt_prefix'])) {
+			$prefix = $_REQUEST['dbt_prefix'];
+		} else {
+			$prefix = "";
+		}
 	    if (isset($_REQUEST['dbt_extra_attr'])) {
 		   $extra_attr = json_decode(base64_decode($_REQUEST['dbt_extra_attr']), true);
 		    if (json_last_error() == JSON_ERROR_NONE) {
@@ -414,18 +415,18 @@ class Dbt_loader {
 				    }
 					pinacode::set_var('request', $extra_attr['request']);
 			    }
-			    if (isset($extra_attr['params'])) {
-					pinacode::set_var('params', $extra_attr['params']);
-				}
+			    //if (isset($extra_attr['params'])) {
+				//	pinacode::set_var('params', $extra_attr['params']);
+				//}
 				if (isset($extra_attr['data'])) {
 					pinacode::set_var('data', $extra_attr['data']);
 				}
-				$result['html'] = Dbt::get_list($_REQUEST['dbt_list_id'], true);
+				$result['html'] = Dbt::get_list($_REQUEST['dbt_list_id'], true, $extra_attr['params'], $prefix);
 			} else {
 				$result['html'] = 'OPS an error occurred';
 			}
 		} else {
-			$result['html'] = Dbt::get_list($_REQUEST['dbt_list_id'], true);
+			$result['html'] = Dbt::get_list($_REQUEST['dbt_list_id'], true, [], $prefix);
 		}
 		wp_send_json($result);
 	    die();
@@ -507,7 +508,8 @@ class Dbt_loader {
 			wp_send_json($json_send);
 			die();
 		}
-		$json_send['edit_ids'] = $_REQUEST['ids'];
+		
+		$json_send['edit_ids'] = Dbt_fn::get_request('ids', 0);
 		
 		if (isset($_REQUEST['sql']) && $_REQUEST['sql'] != "") {
             $form = new Dbt_class_form($_REQUEST['sql']);
@@ -628,7 +630,7 @@ class Dbt_loader {
 						if ($exists == 0) {
 							$sql[$primary_key] = $primary_value;
 						}
-					}else {
+					} else {
 						$sql[$primary_key] = $primary_value;
 					}
 					$setting = false;
@@ -705,7 +707,7 @@ class Dbt_loader {
 				wp_send_json($json_result);
 				die();
 			} else {
-				$queries_executed[] =  $r->query;
+				$queries_executed[] =  $r['query'];
 			} 
 		}
 
@@ -1397,7 +1399,7 @@ class Dbt_loader {
 		}
 		$filter = [];
 		
-		$json_send['edit_ids'] = $_REQUEST['ids'];
+		$json_send['edit_ids'] = Dbt_fn::get_request('ids', 0);
 		foreach ($_REQUEST['ids'] as $column => $id) {
 			$column = str_replace("`", "", $column );
 			$column = "`".str_replace(".", "`.`", $column )."`";

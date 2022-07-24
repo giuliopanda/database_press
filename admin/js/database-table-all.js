@@ -168,6 +168,7 @@ function anchor_help_scroll(anchor) {
  * Chiude il popup della sidebar
  */
 function dbt_close_sidebar_popup() {
+	console.log ('dbt_close_sidebar_popup');
 	jQuery('#dbt_container').css('overflow','hidden');
  	jQuery('#dbt_sidebar_popup').animate({'right':'-200px', 'opacity':0}, 200, function() {jQuery(this).css('display','none');  jQuery('#dbt_container').css('overflow','');});
 	jQuery('#dbt_dbp_content').data('dbtstatus','');

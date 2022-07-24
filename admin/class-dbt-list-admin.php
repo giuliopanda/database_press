@@ -272,9 +272,29 @@ class DBT_list_admin
 		$show_query = false;
 		if ($id > 0) {
 			$post = Dbt_functions_list::get_post_dbt($id);
-			if (isset($_REQUEST['custom_query'])) {
-				$post->post_content['sql'] = html_entity_decode($_REQUEST['custom_query']);
+			if (isset($_REQUEST['custom_query']) && $_REQUEST['custom_query'] !== '') {
+				// aggiungo tutti i primary id e li salvo a parte 
+				$table_model = new Dbt_model();
+           		$table_model->prepare($_REQUEST['custom_query']);
+				
+				if ($table_model->sql_type() != "select") {
+					return [ __('Only a single select query is allowed in the lists', 'database_tables'), true];
+					$show_query = true;
+				} else {
+					$table_model->add_primary_ids();
+					// TODO se aggiungo qualche valore dovrei metterlo hidden in list view formatting!
+					$table_model->list_add_limit(0, 1);
+					$items = $table_model->get_list();
+					if ($table_model->last_error == "") {
+						$post->post_content['sql'] = html_entity_decode($table_model->get_current_query());
+					} else {
+						return [__(sprintf("I didn't save the query because it was wrong!.<br><h3>Error:</h3>%s<h3>Query:</h3>%s", $table_model->last_error, $post->post_content['sql']), 'database_tables'), true];
+					}
+				}
+			} else {
+				return [__('The query is required', 'database_tables'), true];
 			}
+
 			$post->post_content['sql_limit'] = sanitize_text_field(stripslashes($_REQUEST['sql_limit']));
 			if ($_REQUEST['sql_order']['field'] != "") {
 				$post->post_content['sql_order'] = ['field'=>sanitize_text_field($_REQUEST['sql_order']['field']),'sort'=>sanitize_text_field($_REQUEST['sql_order']['sort'])] ;
@@ -297,9 +317,6 @@ class DBT_list_admin
 				$post->post_content['delete_params']['remove_tables_alias'][sanitize_text_field($remove_tables_alias)] = absint($allow);
 			}
 
-			// Rigenero list_structure perché risalvando la query potrebbero essere cambiati i parametri!
-			$table_model = new Dbt_model();
-			$table_model->prepare($post->post_content['sql']);
 
 			// Verifico che nella query non vengano cambiati gli alias delle tabelle
 			$from_query = $table_model->get_partial_query_from(true);
@@ -337,71 +354,59 @@ class DBT_list_admin
 			}
 			$post->post_content['sql_from'] = $from;
 
-			if ($post->post_content['sql'] != "") {
-				if ($table_model->sql_type() != "select") {
-					$return = __('Only a single select query is allowed in the lists', 'database_tables');
-					$show_query = true;
-				} else {
-					$table_model->list_add_limit(0, 1);
-					$items = $table_model->get_list();
-					if ($table_model->last_error == "") {
-						$show_query = false;
-						/**
-						 * @var DbtDs_list_setting[] $setting_custom_list
-						 */
-						$setting_custom_list =  Dbt_functions_list::get_list_structure_config($items, $post->post_content['list_setting']);
-						foreach ($setting_custom_list as $key_list=>$list) {
-							$post->post_content['list_setting'][$key_list] = $list->get_for_saving_in_the_db();
-						}
-						$post_title = Dbt_fn::get_request('post_title', '');
-						
-						if ($post_title != "") {
-							wp_update_post(array(
-								'ID'           => $id,
-								'post_title' 	=> sanitize_text_field($post_title),
-								'post_excerpt' 	=> sanitize_textarea_field(Dbt_fn::get_request('post_excerpt')),
-								'post_content' => addslashes(maybe_serialize($post->post_content)),
-							));
-						} else {
-							$return = __('The title is required', 'database_tables');
-						}
-					} else {
-						$return = __(sprintf("I didn't save the query because it was wrong!.<br><h3>Error:</h3>%s<h3>Query:</h3>%s", $table_model->last_error, $post->post_content['sql']), 'database_tables');
-						$show_query = true;
-					}
+		
+		
+			$show_query = false;
+			/**
+			 * @var DbtDs_list_setting[] $setting_custom_list
+			 */
+			$setting_custom_list =  Dbt_functions_list::get_list_structure_config($items, $post->post_content['list_setting']);
+			foreach ($setting_custom_list as $key_list=>$list) {
+				$post->post_content['list_setting'][$key_list] = $list->get_for_saving_in_the_db();
+			}
+			$post_title = Dbt_fn::get_request('post_title', '');
+			
+			if ($post_title != "") {
+				wp_update_post(array(
+					'ID'           => $id,
+					'post_title' 	=> sanitize_text_field($post_title),
+					'post_excerpt' 	=> sanitize_textarea_field(Dbt_fn::get_request('post_excerpt')),
+					'post_content' => addslashes(maybe_serialize($post->post_content)),
+				));
+			} else {
+				$return = __('The title is required', 'database_tables');
+			}
+			
 
-					// permessi e menu admin
-					$post_title = Dbt_fn::get_request('post_title', '');
-					$old = get_post_meta($id,'_dbt_admin_show', true);
-					$title =  (@$post_title != "") ? $post_title : $_REQUEST['menu_title'];
-	
-					$dbt_admin_show  = ['page_title'=>sanitize_text_field($_REQUEST['menu_title']), 'menu_title'=>sanitize_text_field($_REQUEST['menu_title']), 'menu_icon'=>sanitize_text_field(trim($_REQUEST['menu_icon'])), 'menu_position'=>absint($_REQUEST['menu_position']), 'capability'=>'dbt_manage_'.$id, 'slug'=>'dbt_'.$id,'show'=>(isset($_REQUEST['show_admin_menu']) && $_REQUEST['show_admin_menu'] == 1) ? 1 : 0];
-				
+			// permessi e menu admin
+			$post_title = Dbt_fn::get_request('post_title', '');
+			$old = get_post_meta($id,'_dbt_admin_show', true);
+			$title =  (@$post_title != "") ? $post_title : $_REQUEST['menu_title'];
+
+			$dbt_admin_show  = ['page_title'=>sanitize_text_field($_REQUEST['menu_title']), 'menu_title'=>sanitize_text_field($_REQUEST['menu_title']), 'menu_icon'=>sanitize_text_field(trim($_REQUEST['menu_icon'])), 'menu_position'=>absint($_REQUEST['menu_position']), 'capability'=>'dbt_manage_'.$id, 'slug'=>'dbt_'.$id,'show'=>(isset($_REQUEST['show_admin_menu']) && $_REQUEST['show_admin_menu'] == 1) ? 1 : 0];
+		
+			
+			if ($old != false) {
+				update_post_meta($id, '_dbt_admin_show', $dbt_admin_show);
+			} else {
+				add_post_meta($id,'_dbt_admin_show', $dbt_admin_show, false);
+			}
+			if (isset($_REQUEST['show_admin_menu']) && $_REQUEST['show_admin_menu']) {
+				foreach ($wp_roles->get_names() as $role_key => $_role_label) { 
+					$role = get_role( $role_key );
 					
-					if ($old != false) {
-						update_post_meta($id, '_dbt_admin_show', $dbt_admin_show);
+					if (isset( $_REQUEST['add_role_cap']) && in_array ($role_key, $_REQUEST['add_role_cap'])) {
+						$role->add_cap( 'dbt_manage_'.$id, true );
 					} else {
-						add_post_meta($id,'_dbt_admin_show', $dbt_admin_show, false);
+						$role->remove_cap('dbt_manage_'.$id);
 					}
-					if (isset($_REQUEST['show_admin_menu']) && $_REQUEST['show_admin_menu']) {
-						foreach ($wp_roles->get_names() as $role_key => $_role_label) { 
-							$role = get_role( $role_key );
-							
-							if (isset( $_REQUEST['add_role_cap']) && in_array ($role_key, $_REQUEST['add_role_cap'])) {
-								$role->add_cap( 'dbt_manage_'.$id, true );
-							} else {
-								$role->remove_cap('dbt_manage_'.$id);
-							}
-						}
-					} else {
-						// tolgo il post_meta?
-					}
-				
 				}
 			} else {
-				$show_query = true;
-				$return = __('The query is required', 'database_tables');
+				//TODO tolgo il post_meta?
 			}
+			
+			
+			
 		} else {
 			$return = __('You have not selected any list', 'database_tables');
 		}
@@ -419,10 +424,10 @@ class DBT_list_admin
 		$file = plugin_dir_path( __FILE__  );
 		$dbt_css_ver = date("ymdGi", filemtime( plugin_dir_path($file) . 'frontend/database-table.css' ));
 		$dbt_js_ver = date("ymdGi", filemtime( plugin_dir_path($file) . 'frontend/database-table.js' ));
-		wp_register_style( 'dbt_frontend_css',  plugins_url( 'frontend/database-table.css',  $file), false,   $dbt_css_ver );
-		wp_enqueue_style( 'dbt_frontend_css' );
+		//wp_register_style( 'dbt_frontend_css',  plugins_url( 'frontend/database-table.css',  $file), false,   $dbt_css_ver );
+		//wp_enqueue_style( 'dbt_frontend_css' );
 		// lo mette nel footer
-		wp_register_script( 'dbt_frontend_js',  plugins_url( 'frontend/database-table.js',  $file), false,   $dbt_js_ver, true );
+		//wp_register_script( 'dbt_frontend_js',  plugins_url( 'frontend/database-table.js',  $file), false,   $dbt_js_ver, true );
 
 		wp_add_inline_script( 'dbt_frontend_js', 'dbt_post = "'.esc_url( admin_url('admin-ajax.php')).'";', 'before' );
 		wp_enqueue_script( 'dbt_frontend_js' );
@@ -457,7 +462,8 @@ class DBT_list_admin
 				//  NON GESTISCO MULTIQUERY NELLE LISTE
 				$msg_error = __('No Multiquery permitted in list', 'database_tables');
 			} else if ($table_model->sql_type() == "select") {
-
+				// se sto renderizzando questa tabella una form è stata già aperta
+				Dbt_fn::set_open_form(); 
 				// cancello le righe selezionate!
 				if ($action == "delete_rows" && isset($_REQUEST["remove_ids"]) && is_array($_REQUEST["remove_ids"])) {
 					$result_delete = Dbt_fn::delete_rows($_REQUEST["remove_ids"], '', $id);
@@ -503,7 +509,7 @@ class DBT_list_admin
 				//var_dump($table_model->items);
 				$html_content = $html_table->template_render($table_model); // lo uso nel template
 				//print (get_class($table_model) );	
-			
+				Dbt_fn::set_close_form(); 
 			} else {
 				$msg_error = __('You need to create a select query for the lists', 'database_tables');
 			}
@@ -720,7 +726,7 @@ class DBT_list_admin
 		$frontend_view['detail_template'] = stripslashes($frontend_view['detail_template']);
 		$frontend_view['content_header'] = stripslashes($frontend_view['content_header']);
 		$frontend_view['content_footer'] = stripslashes($frontend_view['content_footer']);
-		$frontend_view['detail_page'] = absint($frontend_view['detail_page']);
+		$frontend_view['detail_type'] = stripslashes($frontend_view['detail_type']);
 		if (@$frontend_view['checkif'] == 1 && $frontend_view['if_textarea'] != "") {
 			$frontend_view['content_else'] = stripslashes($frontend_view['content_else']);
 			$frontend_view['if_textarea'] = stripslashes($frontend_view['if_textarea']);
@@ -728,7 +734,10 @@ class DBT_list_admin
 			$frontend_view['checkif'] = 0;
 			$frontend_view['content_else'] = '';
 		}
-
+		if ($frontend_view['type'] == "EDITOR") {
+			$frontend_view['table_update'] = Dbt_fn::get_request('editor_table_update');
+			$frontend_view['table_pagination_style'] = Dbt_fn::get_request('editor_table_pagination_style');
+		} 
 		$post = Dbt_functions_list::get_post_dbt($id);
 		$post->post_content['frontend_view'] = $frontend_view;
 
@@ -851,7 +860,7 @@ class DBT_list_admin
 						'DATE'=>['DATE',''],
 						'DATETIME'=>['DATETIME',''],
 						'NUMERIC'=>['INT',''],
-						'NUMBER'=>['INT',''],
+						'FLOAT'=>['FLOAT','2'],
 						'SELECT'=>['VARCHAR',255],
 						'RADIO'=>['VARCHAR',255],
 						'CHECKBOX'=>['VARCHAR',255],

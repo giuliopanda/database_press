@@ -599,6 +599,10 @@ if (!function_exists('pinacode_fn_wp_link')) {
 }
 pinacode_set_functions('link', 'pinacode_fn_wp_link');
 */
+
+/**
+ * [^LINK id=PAGEID]
+ */
 if (!function_exists('pinacode_fn_wp_link')) {
 	function pinacode_fn_wp_link($short_code_name, $attributes) { 
 
@@ -606,9 +610,14 @@ if (!function_exists('pinacode_fn_wp_link')) {
 			$id = PinaCode::get_registry()->short_code($attributes['page_id']);
 			$link = get_permalink($id);
 			unset($attributes['page_id']);
-		}  else {
+		} elseif (@array_key_exists('post_id', $attributes)) {
+			$id = PinaCode::get_registry()->short_code($attributes['post_id']);
+			$link = get_permalink($id);
+			unset($attributes['post_id']);
+		} else {
 			$link = get_permalink();
 		}
+		
 		if (count ($attributes) > 0) {
 			foreach ($attributes as $key=>$attr) {
 				$attributes[$key] = PinaCode::get_registry()->short_code($attr);
@@ -740,3 +749,57 @@ if (!function_exists('pinacode_fn_is_user_logged_in')) {
 	}
 }
 pinacode_set_functions('is_user_logged_in', 'pinacode_fn_is_user_logged_in');
+
+/**
+ * [^is_admin]
+ */
+if (!function_exists('pinacode_fn_is_admin')) {
+	function pinacode_fn_is_admin($short_code_name, $attributes) { 
+		return (is_admin()) ? 1 : 0;
+	}
+}
+pinacode_set_functions('is_admin', 'pinacode_fn_is_admin');
+
+
+/**
+ * [^counter name= start=0 step=1]
+ */
+if (!function_exists('pinacode_fn_counter')) {
+	function pinacode_fn_counter($short_code_name, $attributes) {
+
+		if (@array_key_exists('start', $attributes)) {
+			$start = absint(PinaCode::get_registry()->short_code($attributes['start']));
+		} else {
+			$start = 0;
+		}
+		$step = 1;
+		if (@array_key_exists('step', $attributes)) {
+			$step = (float)PinaCode::get_registry()->short_code($attributes['step']);
+			if (!is_numeric($step)) {
+				$step = 1;
+			}
+		}
+		
+		if (@array_key_exists('name', $attributes)) {
+			$name = PinaCode::get_registry()->short_code($attributes['name']);
+		} else {
+			$name = "_main";
+		}
+		$pina_counter = get_option('dbt_pina_counter');
+		if (!is_array($pina_counter)) {
+			$pina_counter = [];
+		}
+		if (!isset($pina_counter[$name]) || ($pina_counter[$name] < $start && $step > 0) ||  ($pina_counter[$name] > $start && $step < 0) ) {
+			$pina_counter[$name] = (float)$start;
+		} else {
+			$pina_counter[$name] = (float)$pina_counter[$name];
+		}
+		if ($step != 0) {
+			$pina_counter[$name] = $pina_counter[$name]+$step;
+			update_option('dbt_pina_counter',$pina_counter, false);
+		}
+
+		return $pina_counter[$name];
+	}
+}
+pinacode_set_functions('counter', 'pinacode_fn_counter');

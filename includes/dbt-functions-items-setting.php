@@ -29,11 +29,15 @@ class Dbt_items_list_setting {
 	 * @param DbtDs_list_setting[] $settings_fields
 	 * @return Array
 	 */
-	public function execute_list_settings($original_items, $settings_fields = false, $general_settings = false) {
+	public function execute_list_settings($original_items, $settings_fields = false, $general_settings = []) {
         if (!is_array($original_items) || count ($original_items) == 0) return false;
 		
         $this->settings_fields = $settings_fields;
-        $this->general_settings = $general_settings;
+		if (!is_array( $general_settings)) {
+			$this->general_settings = [];
+		} else {
+        	$this->general_settings = $general_settings;
+		}
 		$items = array_map(function ($object) {
 			if (is_object($object)) {
 				return clone $object; 
@@ -93,7 +97,8 @@ class Dbt_items_list_setting {
         $count = 0;
 	
         foreach ($items as $count=>&$item) {
-            $item = (object)$item;
+			$item = (object)$item;
+			//PinaCode::set_var('data',  $item);
             foreach ($array_thead as $key=>$setting) { 
 				$count++;
 				if (isset($setting['schema']) && ($setting['schema']->type =="WP_HTML" || $setting['schema']->type =="CHECKBOX")) {
@@ -140,7 +145,7 @@ class Dbt_items_list_setting {
 						$new_first_key[$key] = ['schema'=>(object)['type'=>'CUSTOM', 'name'=>$key]];
 					}
 					$new_first_key[$key]['setting'] = $setting;
-					if (isset($setting->view) && $setting->view != "") {
+					if ($setting->isset('view') && $setting->view != "") {
 						$new_first_key[$key]['schema']->type =  $setting->view;
 					} else {
 						$new_first_key[$key]['schema']->type = Dbt_fn::h_type2txt($new_first_key[$key]['schema']->type);
@@ -269,18 +274,18 @@ class Dbt_items_list_setting {
 				} 
 				
 			}  else if (@$setting['setting']->view == "TEXT" || @$setting['setting']->view == "VARCHAR"  || @$setting['setting']->view == "") {
-				$value = htmlentities($value);
+				$value = $this->html_entities($value);
 				if (isset($setting['custom_param']) && $setting['custom_param'] > 0) {
 					$max_char_show = $setting['custom_param'] ;
 				}
 			}  else if (@$setting['setting']->view == "LINK" ) {
 				$max_char_show = 20000;
 				if (filter_var($value, FILTER_VALIDATE_URL) ) {
-					$value = '<a href="'.$value.'" target="_blank">'.htmlentities($value).'</a>';
+					$value = '<a href="'.$value.'" target="_blank">'.$this->html_entities($value).'</a>';
 				} 
 			}  else if (@$setting['setting']->view == "IMAGE" ) {
 				$max_char_show = 2000;
-				$value = htmlentities($value);
+				$value = $this->html_entities($value);
 				if (filter_var($value, FILTER_VALIDATE_URL) ) {
 					$value = '<img src="'.esc_attr($value).'" class="dbt-table-image" />';
 				} else {
@@ -293,6 +298,8 @@ class Dbt_items_list_setting {
 				$array_insert = [];
 				// ciclo i campi da importare
 				PinaCode::set_var('data', (array)$item) ;
+				//print "<p>".$setting['setting']->custom_code." =". PinaCode::execute_shortcode('[%data.ID]')."</p>";
+				//$value = "CC : ".$setting['setting']->custom_code;
 				$value = PinaCode::execute_shortcode($setting['setting']->custom_code);
 				if (is_object($value) || is_array($value)) {
 					$value = $this->show_obj($value,1, $this->max_text_length(), $this->max_depth());
@@ -302,16 +309,20 @@ class Dbt_items_list_setting {
 				$ris = Dbt::get_data($setting['setting']->lookup_id, 'items', [['op'=>"=",'column'=> esc_sql($setting['setting']->lookup_sel_val), 'value'=>$value]]);
 				if (is_countable($ris) && count($ris) == 1) {
 					$ris =array_shift($ris);
-					$value = htmlentities($ris->$txt);
+					$value = $this->html_entities($ris->$txt);
 				} 
 				
 			}
 		} else  {
-			$value = htmlentities($value);
+			$value = $this->html_entities($value);
 		}
 
 		if (strlen($value) > $max_char_show && $max_char_show > -1) {
-			$value = substr($value,0 , floor($max_char_show))." ..."; 
+			if (isset($this->general_settings['htmlentities']) && $this->general_settings['htmlentities'] == true) {
+				$value = substr($value,0 , floor($max_char_show))." ..."; 
+			} else {
+				$value = substr(strip_tags($value),0 , floor($max_char_show))." ..."; 
+			}
 		}
 		
 		return $value;
@@ -387,7 +398,19 @@ class Dbt_items_list_setting {
 		if (!isset($max_char_show) || $max_char_show == 0) {
 			$max_char_show = 100;
 		}
+		if ($max_char_show == -1) {
+			$max_char_show = 99999999;
+		}
 		return $max_char_show;
+	}
+
+	private function html_entities($text) {
+		if (isset($this->general_settings['htmlentities']) && $this->general_settings['htmlentities'] == true) {
+			return htmlentities($text);
+		} else {
+			return $text;	
+		} 
+		
 	}
 
 	/**
@@ -449,7 +472,7 @@ class Dbt_items_list_setting {
 
     private function get_width_class($setting) {
 		if (isset($setting) && is_object($setting)) {
-			if (isset($setting->width) && $setting->width != "") {
+			if ($setting->isset('width') && $setting->width != "") {
 				return " dbt-td-width-".$setting->width;
 			}
 		}

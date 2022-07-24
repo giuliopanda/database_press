@@ -28,7 +28,7 @@ $table_bulk_ok = ($table_model->table_status() != 'CLOSE' && count($table_model-
     }
     if ($dtf::echo_html_title_box('list', $list_title, $description, '',  $msg_error, $append)) :
         wp_enqueue_media();
-    ?>
+        ?>
         <form id="table_filter" method="post" action="<?php echo admin_url("admin.php?page=dbt_list&section=list-browse&dbt_id=".$id); ?>">
             <textarea style="display:none" id="sql_query_executed"><?php echo esc_textarea($table_model->get_current_query()); ?></textarea>
             <textarea style="display:none" id="sql_query_edit"><?php echo esc_textarea($table_model->get_default_query()); ?></textarea>
@@ -45,7 +45,9 @@ $table_bulk_ok = ($table_model->table_status() != 'CLOSE' && count($table_model-
                     <input type="number" name="filter[limit]" id="Element_per_page" class="dtf-pagination-input" value="<?php echo absint($table_model->limit); ?>" style="width:3.4rem; padding-right:0;" min="1" max="500">
                     <div name="change_limit_start" class="button action dtf-pagination-input"  onclick="dtf_submit_table_filter('change_limit')" >Apply</div>
                     <?php $dtf::get_pagination($table_model->total_items, $table_model->limit_start, $table_model->limit); ?>
-                    <div id="dbt-bnt-clear-filter-query" class="button"  onclick="dbt_clear_filter()"><?php _e('Clear Filter','database_tables'); ?></div>
+                    <?php if (Dbt_fn::is_query_filtered())  : ?>
+                        <div id="dbt-bnt-clear-filter-query" class="button"  onclick="dbt_clear_filter()"><?php _e('Clear Filter','database_tables'); ?></div>
+                    <?php endif; ?>
                 
                     <br class="clear">
                 </div>

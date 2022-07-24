@@ -3,14 +3,14 @@
  * header-type:doc
  * header-title: List
 * header-tags:
-* header-description: Le liste permettono di salvare una query e gestire la sua visualizzazione e modifica in modo più avanzato.
+* header-description:Lists allow you to save a query and manage its display and modification in a more advanced way.
 * header-lang:ITA
 */
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
 ?>
 <div class="dbt-content-margin">
-    <p>A partire da una query, una lista permette di gestire la modifica e la visualizzazione dei dati in modo più avanzato.</p>
-    <p>Da una lista viene generato uno shortcode per la visualizzazione del frontend.</p>
-    <p>È possibile visualizzare il link per la modifica di una lista al di fuori del plugin in una voce di menu apposita dalle impostazioni della lista stessa</p>
+<p> Starting from a query, a list allows you to manage the modification and display of data in a more advanced way. </p>
+     <p> A shortcode for displaying the frontend is generated from a list. </p>
+     <p> You can view the link for editing a list outside the plugin in a specific menu item from the list settings </p>
 </div>

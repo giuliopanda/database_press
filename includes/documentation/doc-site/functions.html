@@ -1,0 +1,167 @@
+<html>
+<head>
+    <style>
+ h2, h3 {
+    clear: left;
+    font-family: Georgia, Times, serif;
+    margin-bottom: .5em;
+    color: #1e1e1e;
+ }
+ h2 {color:#258;}
+ h3 {
+     font-size:1.1em;
+     }
+ pre {
+    background: #F2F2F2;
+    padding: 10px;
+    max-width: 700px;
+    max-height: 500px;
+    overflow: hidden;
+    overflow-y: auto;
+ }
+ .result {
+    background: #F2F2F2;
+    border:1px solid #444444;
+    padding: 10px;
+    max-width: 700px;
+    max-height: 500px;
+    overflow: hidden;
+    overflow-y: auto; 
+ }
+
+    </style>
+</head>
+<body>
+<h1>Funzioni</h1>
+<p>Quando richiami una funzione il simbolo che devi mettere prima è la ^</p>
+
+
+<h2>USER</h2>
+<p>Carica un utente wordpress e i suoi metadata</p>
+<p>I parametri che possono essere passati sono:<br>
+  id|slug|email|login per il caricamento di un singolo utente.<br>Se non si passa nessun parametro allora viene caricato
+  l'utente che si è loggato
+</p>
+
+<pre class="code">[^user]</pre>
+<div class="result">
+    {"login":"admin","email":"admin^admin.it","roles":["administrator"],"registered":"2020-01-08
+    13:31:57","nickname":"admin"}
+</div>
+
+<pre class="code">[^IF [^user]==""]
+non sei loggato
+[^else]
+Sei loggato
+[^endif]</pre>
+Esegue un codice diverso se si è loggati oppure no.
+<pre class="code">[^IF [^user] == ""]
+  non sei loggato
+[^else]
+  [//  ^if "administrator" ==  [^user.roles]  non funziona perché uno è una stringa l'altro è un array //]
+  [^if "administrator" IN [^user.roles]]
+    Sei un amministratore (i tuoi ruoli sono: [^user.roles sep=", "])
+  [^else]
+    Sei loggato
+  [^endif]
+[^endif] </pre>
+
+<h2>NOW</h2>
+<p>Torna la data di oggi</p>
+<pre class="code">[^now]
+[^now date-format="d-m-Y" date-modify="+2 days"]
+[^now timestamp]
+</pre>
+
+
+<h2>POST</h2>
+<div class="result">
+  "id","author","date":"2020-01-08 14:31:57","content","title","excerpt","status","comment_status","name","modified":"2020-12-28
+        14:27:07","parent","guid","menu_order","type","mime_type","comment_count","filter"
+  </div>
+  <p>A questi si aggiungono tutti i post meta e i seguenti tag speciali. Questo gruppo di informazioni viene caricato solo se non è presente il tag light_load</p>   
+      "title_link", "read_more_link", "author_id", "author_name", "author_email", "author_roles", "author_link", "author":"diventa il link con il nome" [post_meta]
+      "image", "image_link"
+<p>Trova i post di un record.<br>I parametri sono:</p>
+<p>Per estrarre un articolo singolo</p>
+<p><b>id</b>= trova il post con un determinato id.<br></p>
+<p>Per estrarre più articoli</p>
+<p>
+<p>type</p>= Il post_type (post, page ecc...)
+<b>cat</b>= trova i post di una determinata categoria. Se è un numero usa l'id, se è una stringa cerca la categoria con quello slug (NON IL NOME)<br>
+<b>author</b>= trova i post per un determinato autore. Se è un numero usa l'id altrimenti lo user_nicename (NON IL NOME)<br>
+<b>limit</b>= Limita il numero di articoli da visualizzare<br>
+<b>offset</b>= Visualizza gli articoli a partire da<br>
+<b>order</b>= Il campo su cui ordinare<br>
+<b>ASC</b> Ordine crescente<br>
+<b>DESC</b> Ordine decrescente<br>
+Mostrare gli articoli associati ad un certo periodo di tempo.<br>
+<b>year</b>= Gli articoli di un determinato anno (es 2020)<br>
+<b>month</b>= Gli articoli di un determinato mese (1-12)<br>
+<b>week</b>= Gli articoli di una determinata settimana (week)<br>
+<b>day</b>= Gli articoli di un determinato giorno (day)<br>
+<b>image</b>= La dimensione dell'immagine thumb|thumbnail|medium|large|post-thumbnail<br>
+
+</p>
+<p>Ricerca nei postMeta:</p>
+<p>è possibile cercare nei postmeta inserendo il tipo di filtro nell'attributo meta_query. Se si vogliono ricercare più parametri questi possono essere aggiunti divisi da spazi. In automatico verranno collegati come AND. Se si vogliono aggiungere OR e AND all'interno della ricerca questi vengono inseriti come funzioni. Le condizioni all'interno della funzione vengono collegate dalla congiunzione logica inserita. </p>
+<pre class="code">meta_query=[: AND(a>=b
+OR (
+b<=var c!=ccc L IN (3,2,5,3,52,34) ) .c LIKE ("% ") 
+                .d=" [%pippo]" parametro=) c> 2 :]
+</pre>
+<p>Altri parametri:</p>
+<p><b>read_more</b>= Il testo da mettere nella variabile link_read_more. Se non presente aggiunge ... . Se light_load è presente il tag è inutilizzabile</p>
+<p><b>image</b>= La dimensione dell'immagine di apertura: thumbnail, medium, large, full. Se non impostata carica post-thumbnail</p>
+<p><b>light_load</b> Esclude dal caricamento i post_meta e altri dati aggiunti per semplificare la gestione dei post.</p>
+<pre class="code">
+  [^POSt id=141 print=[:
+  [%item for=[:<p><b>[%key]</b>: [%item trim_words] </p>:]]
+  :]]
+</pre>
+<p>Se si caricano direttamente le immagini allora image, image_link sono le immagini stesse.</p>
+<pre class="code">
+  [^POST type=attachment mime_type=image status=inherit limit=4 offset=3 order=ID ASC light_load image=thumbnail print=[:
+  &lt;div style=&quot;width:150px; height:150px; float:left; margin:10px;&quot;&gt;
+    [%item.image_link]
+  &lt;/div&gt;
+  :]]
+</pre>
+
+<pre class="code">
+  [^POST get=["title","author"] type=post tmpl=table]
+</pre>
+<p>Estrae il titolo e l'autore di tutti post e lo stampa tramite tabella (la tabella è un purticolare tipo di template gestito tramite i filtri di wordpress </p>
+<pre class="code">[^POST id=2 .custom_link=[:[^link post=[%item] text="custom link"]:]] </pre>
+<p>Creo un capoi link_custom con un link personalizzato per i post</p>
+<br>
+<h2>LINK</h2>
+<p>Link come dice il nome stesso serve a generare i link del sito.<br>
+<p>Accetta i parametri id e post.</p>
+<pre class="code">[^POST id=2 .custom_link=[^link]]</pre>
+
+<h2>SET</h2>
+<p>Definisce nuove variabili</p>
+<pre class="code">
+  [^SET variable=value var2=val2]
+</pre>
+<p>è possibile inserire istruzioni sia nei valori che nei nomi delle variabili purché si rispetti la regola di non mettere spazi</p>
+<pre class="code">
+  [^SET ser='a:3:{s:1:"a";i:1;s:1:"b";i:2;s:1:"c";i:3;}' unser={"d":4,"e":5,"f":6}]
+  [^SET nu=[%ser unserialize]]
+  [%unser tmpl=[:[^SET nu.[%key]=[%item]]:]]
+  [%nu]
+</pre>
+<p>Nell'esempio vengono impostati un array (unser) e una stringa serializzaa (ser). Poi viene settata una nuova variabile nu con l'array estratto da ser, infine viene ciclato unser e i suoi valori vengono inseriti in nu.</p>
+<h2>get_the_id</h2>
+<p>Torna l'id di un post, identico a get_the_id di wordpress</p>
+
+<h2>is_user_logged_in</h2>
+<p>Torna 1 se l'utente è loggato altrimenti 0</p>
+
+<h2>is_*</h2>
+<p>is_page_author, is_page_archive, is_page_tag, is_page_date, is_page_tax</p>
+<p>Torna 1 se è la pagina richiesta, altrimenti 0 </p>
+</body>
+</html>
+

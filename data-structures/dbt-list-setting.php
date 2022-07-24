@@ -100,6 +100,10 @@ class DbtDs_list_setting
     return $this;
     }
 
+    /**
+     * la funzione isset del php nelle variabili delle classi non può essere usato.
+     * @param String $property
+     */
     public function isset($property) {
         return  (property_exists($this, $property) && $this->$property != null && $this->$property != '');
     }

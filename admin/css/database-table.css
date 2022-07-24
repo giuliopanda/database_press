@@ -923,6 +923,7 @@
     margin: 0 2%;
     margin-bottom: .5rem;
     position: relative;
+    clear: both;
 }
 .dbt-form-row .dbt-form-label, .dbt-form-row-column .dbt-form-label{
     display: inline-block;
@@ -1531,7 +1532,6 @@ input[type=checkbox].dbt-checkbox-left {float: left; margin-top: 0.1rem; margin-
     margin-bottom: .5rem;
 }
 
-.dbt-table-admin-menu { width:100%; }
 
 .dbt-sidebar-test-formula-params {
     max-height: 300px;
@@ -1769,4 +1769,5 @@ input[type=checkbox].dbt-checkbox-left {float: left; margin-top: 0.1rem; margin-
     float: left;
     width: 47%;
     margin: 0 0% 0 2%;
+    clear:none;
 }

@@ -6,42 +6,47 @@
  */
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+$append = '<span class="dbt-submit" onclick="dbt_submit_list_setting()">' . __('Save', 'database_tables') . '</span>';
+
 ?>
 <div class="dbt-content-header">
     <?php require(dirname(__FILE__) . '/dbt-partial-tabs.php'); ?>
 </div>
 
 <div class="dbt-content-table js-id-dbt-content">
-    <?php $dtf::echo_html_title_box('list', $list_title, '', $msg,  $msg_error); ?>
+
+    <?php $dtf::echo_html_title_box('list', $list_title, '', $msg,  $msg_error, $append); ?>
     <div class="dbt-content-margin">
         <form id="list_setting_form" method="POST" action="<?php echo admin_url("admin.php?page=dbt_list&section=list-setting&dbt_id=" . $id); ?>" id="dbt_create_table">
             <input type="hidden" name="action" value="list-setting-save" />
            
-            <h3 class="dbt-h3 dbt-margin-top"><?php _e('List of records', 'database_tables'); ?></h3>
+            <h3 class="dbt-h3 dbt-margin-top">
+                <?php _e('List of records', 'database_tables'); ?>
+                <?php  Dbt_fn::echo_html_icon_help('dbt_list-list-setting','list_of_records');  ?>
+            </h3>
             <p>
                 <?php _e('You can publish the list in the frontend using this shortcode: ', 'database_tables'); ?>
                 <b>[dbt_list id=<?php echo $post->ID; ?>]</b> <?php echo ($post->shortcode_param!= "") ? __('Attributes', 'database_tables').":<b>".$post->shortcode_param.'</b>' : ''; ?>
             </p>
 
-            
-            <div class="dbt-form-row dbt-show-if">
-                <label style="vertical-align: top;">
-                    <span class="dbt-form-label"><input type="checkbox" name="frontend_view[checkif]" value="1" id="checkbox_show_if" onchange="dbt_checkif()" <?php echo (@$few['checkif'] == 1) ? 'checked="checked"' : ''; ?>)> <?php _e('Show IF', 'database_tables'); ?></span>
-                </label>
-                    <div id="dbt_textarea_if"> 
-                        <textarea class="dbt-form-textarea" rows="2" name="frontend_view[if_textarea]"><?php echo esc_textarea(stripslashes(@$few['if_textarea'])); ?></textarea>
-                        <div ><span class="dbt-link-click" onclick="show_pinacode_vars()">show shortcode variables</span></div>
-                    </div>
-               
-                <?php if (@$few['checkif'] == 1) : ?>
-                    <?php if ($errors_if_textarea == "") : ?>
-                    <?php else : ?>
-                    <span class="dashicons dashicons-warning dbt-dashicons-red" title="<?php echo esc_attr($errors_if_textarea); ?>"></span>
+            <div id="block_if">
+                <div class="dbt-form-row dbt-show-if">
+                    <label style="vertical-align: top;">
+                        <span class="dbt-form-label"><input type="checkbox" name="frontend_view[checkif]" value="1" id="checkbox_show_if" onchange="dbt_checkif()" <?php echo (@$few['checkif'] == 1) ? 'checked="checked"' : ''; ?>)> <?php _e('Show IF', 'database_tables'); ?>  <?php  Dbt_fn::echo_html_icon_help('dbt_list-list-setting','show_if');  ?></span>
+                    </label>
+                        <div id="dbt_textarea_if"> 
+                            <textarea class="dbt-form-textarea" rows="2" name="frontend_view[if_textarea]"><?php echo esc_textarea(stripslashes(@$few['if_textarea'])); ?></textarea>
+                            <div ><span class="dbt-link-click" onclick="show_pinacode_vars()">show shortcode variables</span></div>
+                        </div>
+                
+                    <?php if (@$few['checkif'] == 1) : ?>
+                        <?php if ($errors_if_textarea == "") : ?>
+                        <?php else : ?>
+                        <span class="dashicons dashicons-warning dbt-dashicons-red" title="<?php echo esc_attr($errors_if_textarea); ?>"></span>
+                        <?php endif; ?>
                     <?php endif; ?>
-                <?php endif; ?>
+                </div>
             </div>
-
-
 
             <div class="dbt-form-row dbt-list-setting-color-margin-left-first">
                 <label>
@@ -183,18 +188,44 @@ if (!defined('WPINC')) die;
 
             <div id="frontend_view_editor">
                 <div class="dbt-list-setting-color-margin-left">
-
+                    <div class="dbt-grid-3-columns">
+                        <div class="dbt-form-row">
+                            <label>
+                                <span class="dbt-form-label">
+                                    <?php _e('Table update', 'database_tables'); ?>
+                                    <?php  Dbt_fn::echo_html_icon_help('dbt_list-list-setting','table_update');  ?>
+                                </span>
+                                <?php echo Dbt_fn::html_select(['none' => 'None', 'get' => 'Get', 'post' => 'Post', 'ajax' => 'Ajax', 'link'=>'Link'], true, 'name="editor_table_update" onchange="select_editor_table_update()" id="select_editor_table_upldate"', @$few['table_update']); ?>
+                            </label>
+                        </div>
+                        <div class="dbt-form-row" id="dbt_pagination_style_row_2">
+                            <label>
+                                <span class="dbt-form-label"><?php _e('Pagination style', 'database_tables'); ?></span>
+                                <?php echo Dbt_fn::html_select(['select' => 'Select', 'numeric' => 'Numeric'], true, 'name="editor_table_pagination_style"', @$few['table_pagination_style']); ?>
+                            </label>
+                        </div>
+                    </div>
                     <div class="dbt-form-row">
                         <label>
-                            <span class="dbt-form-label-long"><?php _e('Header (first special row)', 'database_tables'); ?></span>
+                            <span class="dbt-form-label-long"><b><?php _e('Header (first special row)', 'database_tables'); ?></b></span>
+                            <p class="dtf-alert-gray" style="margin-top:-.5rem">
+                            Special variables: [%html.pagination], [%html.search], [%total_row], [%key], [%data]
+                            </p>
                             <textarea id="editor_content_header" name="frontend_view[content_header]"><?php echo esc_textarea(@$few['content_header']); ?></textarea>
+                            <span class="dbt-link-click" onclick="show_pinacode_vars()">show shortcode variables</span>
                         </label>
                     </div>
-
+                  
                     <div class="dbt-form-row">
                         <label>
-                            <span class="dbt-form-label-long"><?php _e('Loop the data', 'database_tables'); ?></span>
+                            <span class="dbt-form-label-long"><b><?php _e('Loop the data', 'database_tables'); ?></b>
+                                <?php  Dbt_fn::echo_html_icon_help('dbt_list-list-setting','loop_data');  ?>
+                            </span>
+                            <p class="dtf-alert-gray" style="margin-top:-.5rem">
+                            If 'Detailed view' is active, you can create a link that opens the popup to show the details box. Example <?php echo htmlentities('<a href="[%data._popup_link]" class="js-dbt-popup">detail</a>'); ?> <br> Other special variables: [%key], [%data]</p>
+
                             <textarea id="editor_content" name="frontend_view[content]"><?php echo esc_textarea(@$few['content']); ?></textarea>
+                            <span class="dbt-link-click" onclick="show_pinacode_vars()">show shortcode variables</span>
                         </label>
                     </div>
 
@@ -202,6 +233,7 @@ if (!defined('WPINC')) die;
                         <label>
                             <span class="dbt-form-label-long"><?php _e('Footer', 'database_tables'); ?></span>
                             <textarea id="editor_content_footer" name="frontend_view[content_footer]"><?php echo esc_textarea(@$few['content_footer']); ?></textarea>
+                            <span class="dbt-link-click" onclick="show_pinacode_vars()">show shortcode variables</span>
                         </label>
                     </div>
 
@@ -218,18 +250,25 @@ if (!defined('WPINC')) die;
                     <textarea id="editor_else" name="frontend_view[content_else]" style="height:300px"><?php echo esc_textarea(@$few['content_else']); ?></textarea>
                 </div>
             </div>
-
-            <h3 class="dbt-h3 dbt-margin-top"><?php _e('No result', 'database_tables'); ?></h3>
-            <div>
-                <div class="dbt-form-row">
-                    <span class="dbt-form-label"><?php _e('What appears if there are no results', 'database_tables'); ?></span>
-                    <textarea class="dbt-form-textarea" id="editor_no_result" rows="2" name="frontend_view[no_result_custom_text]"><?php echo esc_textarea(stripslashes(@$few['no_result_custom_text'])); ?></textarea>
+            <div id="no_result">
+                <h3 class="dbt-h3 dbt-margin-top"><?php _e('No result', 'database_tables'); ?></h3>
+                <p class="dtf-alert-gray" style="margin-top:-1rem">
+                <?php _e('What appears if there are no results.','database_tables');  ?>
+                </p>
+                <div>
+                    <div class="dbt-form-row">
+                        <textarea class="dbt-form-textarea" id="editor_no_result" rows="2" name="frontend_view[no_result_custom_text]"><?php echo esc_textarea(stripslashes(@$few['no_result_custom_text'])); ?></textarea>
+                    </div>
                 </div>
             </div>
 
             <h3 class="dbt-h3 dbt-margin-top"><?php _e('Detailed view', 'database_tables'); ?></h3>
+            <p class="dtf-alert-gray" style="margin-top:-1rem">
+                <?php _e('You can choose to view the content detail on a page.','database_tables'); 
+                Dbt_fn::echo_html_icon_help('dbt_list-list-setting','detail');
+                ?>
+            </p>
             <div>
-                <?php _e('Puoi scegliere di visualizzare il dettaglio del contenuto in una pagina.', 'database_tables'); ?>
                 <div class="dbt-form-row">
                     <label><span class="dbt-form-label"><?php _e('Detail ', 'database_tables'); ?></span><?php  Dbt_fn::html_select(['no'=>'Deactivated',  'yes'=>'Active'], true, 'name="frontend_view[detail_type]" id="select_detail_toggle" onchange="detail_toggle()"', @$few['detail_type']); ?>
                     </label>

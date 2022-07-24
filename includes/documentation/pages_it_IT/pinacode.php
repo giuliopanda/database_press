@@ -303,8 +303,46 @@ Donec et accumsan nulla, at tempus metus
         <p>Link come dice il nome stesso serve a generare un link del sito.<br>
         Per la scelta della pagina o del post il parametro è page_id. SE page_id non è inserito, il link è alla pagina corrente. Qualsiasi altro parametro inserito viene registrato come nuovo elemento dell'url</p>
         <pre class="dbt-code">&lt;a href=&quot;[^LINK page_id=xxx id=yyy action=zzz]&quot;&gt;link&lt;/a&gt;</pre>
+        <h3> Examples </h3>
+        <pre class="dbt-code"><a href="[^LINK post_id=[%data.ID]]">[%data.post_title]</a></pre>
+        <p>
+            Se colleghi a post con post_type personalizzati ricordati di registrare il post_type su  function.php del tuo template</p>
+            <pre class="dbt-code">add_action( 'init', 'register_my_post_type' );
+function register_my_post_type() {
+    register_post_type(
+    'my_post_type',
+    array (
+        'public'             => true,
+        'rewrite'            => array('slug' => 'my_post_type'),
+        'show_in_menu'      => false,
+        'show_in_nav_menus' => false,
+        'show_in_rest' 		=> false
+    )
+    );
+}</pre>
+    
     </div>
 
+    <h3>[^ADMIN_URL]</h3>
+    <div class="dbt-help-p">
+        <p>Fa un link ad una lista amministrativa. Puoi passare ulteriori parametri per filtrare i dati passati</p>
+            <h4 class="dbt-h4">Parameters</h4>
+            <ul>
+                    <li><b>id</b><br>
+                    (integer) L'id della lista</li>
+                    <li><b>some_other_params</b><br>
+                    (string) Puoi aggiungere altri parametri che verranno passati nell'url</li>
+            </ul>
+            <p>Esempio: In una lista mostra i dati di un'altra lista filtrati e il bottone per andare a modificare i dati.<br>
+                1. crea una lista collegata ai post con una colonna post_id.<br>
+                2. Aggiungi un po' di record collegati ai post.<br>
+                3. Crea una seconda lista in cui estrai i post di wordpress<br>
+                4. Sulla nuova lista apri List view formatting e clicca in fondo add row<br>
+            </p>
+            <pre class="dbt-code">[^DBT_LIST ID=xx post_id=[%data.ID]]
+    <a href="[^ADMIN_URL id=xx post_id=[%data.ID]]">Edit</a></pre>
+    </div>
+    
     <h3>[^SET]</h3>
     <div class="dbt-help-p">
         <p>Definisce nuove variabili</p>
@@ -356,7 +394,13 @@ Donec et accumsan nulla, at tempus metus
     <div class="dbt-help-p">
         <p>Torna 1 se l'utente è loggato altrimenti 0</p>
     </div>
-  <h3>is_*</h3>
+
+    <h3>[^IS_ADMIN]</h3>
+    <div class="dbt-help-p">
+        <p>Torna 1 se è una pagina amministrativa</p>
+    </div>
+
+     <h3>is_*</h3>
     <div class="dbt-help-p">
         <p>[^IS_PAGE_AUTHOR], [^IS_PAGE_ARCHIVE], [^IS_PAGE_TAG], [^IS_PAGE_DATE], [^IS_PAGE_TAX]</p>
         <p>Torna 1 se è la pagina richiesta, altrimenti 0 </p>

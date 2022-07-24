@@ -254,8 +254,83 @@ if (!defined('WPINC')) die;
     </div>
 
 
+    <h2 class="dbt-h2">apply_filters( '<b>dbt_frontend_search</b>', $field_name, $request_field_name, $list_id);</h2>
+    Allows you to edit the search form in the frontend
+    <hr>
+    <h4 class="dbt-h4">Parameters</h4>
+    <div class="dbt-help-p">
+        <ul>
+            <li><b>$field_name</b>
+                <br>(string) the name of the column you are searching for or 'search' if it is the classic search field.
+            </li>
+            <li><b>$request_field_name</b>
+                <br>(string) The name of the field to submit in the form.
+            </li>
+            <li><b>$list_id</b>
+                <br>(int) The id of the list
+            </li>
+        </ul>
+        </div>
+    <h4  class="dbt-h4">Source</h4>
+    <div class="dbt-help-p">./includes/dbt-render-list.php</div>
+    
+    <h4 class="dbt-h4">Example</h4>
+    <div class="dbt-help-p">
+        <pre class="dbt-code">/**
+ * change search form example 
+ */
+function dbt_frontend_field_search_fn($field_name, $input_field_name, $list_id) {
+	if ($field_name == &quot;search&quot;) {
+		?&gt;
+		&lt;div class=&quot;dbt-search-row&quot;&gt;
+			&lt;label&gt;&lt;span class=&quot;dbt-search-label&quot;&gt;Search Field&lt;/span&gt;	
+			&lt;?php DatabaseTables\Dbt_fn::html_select(['0'=&gt;'No','1'=&gt;'Yes'], true, 'class=&quot;dbt-search-input js-dbt-search-input&quot; name=&quot;'. esc_attr($input_field_name).'&quot;', @$_REQUEST[$input_field_name]); ?&gt;
+			&lt;/label&gt;
+			&lt;div class=&quot;dbt-search-button dbt-search-button-blue&quot; onclick=&quot;dbt_submit_simple_search(this)&quot;&gt;&lt;?php _e('Search', 'database_tables'); ?&gt;&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;?php 
+		// to prevent input printing
+		return '';
+	} else {
+		// print the search field normally
+		return $field_name;
+	}
+}
+add_filter('dbt_frontend_search', 'dbt_frontend_field_search_fn', 10, 3);</pre>
+</div>
 
-    <h2 class="dbt-h2">apply_filters( 'pinacode_attribute_tmpl_'.$param, $gvalue, $param, $shortcode_obj);</h2>
+    <h2 class="dbt-h2">apply_filters('<b>dbt_frontend_get_list</b>', $html, $list_id);</h2>
+            It allows you to redesign the display of a list in php.
+            <hr>
+            <h4 class="dbt-h4">Parameters</h4>
+            <div class="dbt-help-p">
+                <ul>
+                    <li><b>$html</b>
+                        <br>(string)
+                    </li>
+                    <li><b>$list_id</b>
+                        <br>(int) The id of the list
+                    </li>
+                </ul>
+                </div>
+            <h4  class="dbt-h4">Source</h4>
+            <div class="dbt-help-p">./includes/dbt-render-list.php</div>
+            
+            <h4 class="dbt-h4">Example</h4>
+            <div class="dbt-help-p">
+                <pre class="dbt-code">function my_custom_list($render_data, $list_id) {
+    if ($list_id != 6) return ''; // 6 is an example
+    ob_start();
+    $list =  DatabaseTables\Dbt::render($list_id, 'ajax'); 
+    $list->table(); 
+    $list->pagination();
+    $list->end(); // Required!
+    return ob_get_clean();
+} 
+add_filter('dbt_frontend_get_list', 'my_custom_list', 10, 2);</pre>
+        </div>
+
+    <h2 class="dbt-h2">apply_filters( '<b>pinacode_attribute_tmpl_'.$param</b>, $gvalue, $param, $shortcode_obj);</h2>
     If the template attribute is called it is possible to filter the passed parameter
     <hr>
     <h4 class="dbt-h4">Parameters</h4>

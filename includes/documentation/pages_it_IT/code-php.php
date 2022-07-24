@@ -10,14 +10,18 @@ if (!defined('WPINC')) die;
     <div class="dbt-help-p">
        
         <hr>
-        <h2 class="dbt-h2">Dbt::get_list($dbt_id, $ajax = false)</h2>
+        <h2 class="dbt-h2">Dbt::get_list($dbt_id, $only_table = false, $params=[], $prefix = "")</h2>
         <p>Carica una lista da un id e ne ritorna l'html. </p>
         <h4 class="dbt-h4">Parameters</h4>
         <ul>
                 <li><b>$dbt_id</b><br>
                 (integer) L'id della lista</li>
-                <li><b>$ajax</b><br>
+                <li><b>$only_table</b><br>
                 (bool) Se stampare i filtri e la form che la raggruppa la tabella oppure no.</li>
+                <li><b>$params</b><br>  
+                (Array) Eventuali parametri aggiuntivi per filtrare ulteriormente la tabella [%params]
+                <li><b>$prefix</b><br>  
+                (String) un prefisso per i nomi dei campi da inviare nella form per evitare collisioni su più tabelle all'interno della stessa pagina
         </ul>
         <h4 class="dbt-h4">Return</h4>
         <p>Html</p>
@@ -138,6 +142,31 @@ if (!defined('WPINC')) die;
 
 
 
+        <h2 class="dbt-h2">Dbt::render($dbt_id, $mode)</h2>
+        <p>Restituisce la classe Dbt_render_list</p>
+        <h4 class="dbt-h4">Parameters</h4>
+        <ul>
+                <li><b>$dbt_id</b><br>
+                (integer) L'id della lista</li>
+                <li><b>$mode</b><br>
+                (string) Sceglie come gestire i dati se in get|post|ajax o link (gestione parziale)</li>
+        </ul>
+
+        <h4 class="dbt-h4">Return</h4>
+        <p>Dbt_render_list</p>
+
+        <h4 class="dbt-h4">Example</h4>
+        <pre class="dbt-code">$list =  DatabaseTables\Dbt::render(6, 'get'); // ($list_id:int, $mode:string); $mode is optional
+$list->set_color('pink'); // Cambia il colore della lista rispetto a quello scelto 
+$list->table("", false); // (custom_class:string, table_sort:bool)
+$list->search(false); // optional (show_button:bool)
+$list->single_field_search('column_name'); // aggiunge un campo di testo per ricercare in una singola colonna 
+$list->submit(); // Aggiunge i bottoni per la ricerca 
+$list->pagination('select');
+$list->end(); // Required!</pre>
+
+
+
     </div>
 
     <h1 style="border-bottom:1px solid #CCC">Template engine</h1>
@@ -176,7 +205,7 @@ if (!defined('WPINC')) die;
         return $string;	
 
     }
-    pinacode_set_functions('hello_world', 'pinacode_fn_search_open_container');
+    pinacode_set_functions('hello_world', 'pinacode_fn_hello_world');
         </pre>
 
         <h3>Set a new attributes</h3>

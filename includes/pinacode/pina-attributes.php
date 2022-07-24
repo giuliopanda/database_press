@@ -1009,7 +1009,7 @@ pinacode_set_attribute('abs', 'pinacode_attr_fn_abs');
 
 
 /**
- * [% vector-sum]
+ * [% sum]
  */
 if (!function_exists('pinacode_attr_fn_vectorsum')) {
 	/*

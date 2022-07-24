@@ -3,14 +3,19 @@
  * @param {String} id 
  * @param {Number} val 
  */
-function dbt_submit_pagination(id, val) {
-    let el = document.getElementById(id);
+function dbt_submit_pagination(form_el, val) {
+    if (form_el == false) {
+        console.log ("The form is not present in the dom");
+        return;
+    }
+    console.log ('form_el');
+    console.log (form_el);
+    el = form_el.getElementsByClassName('js-dbt-page')[0];
+    if (el != false) {
     el.value = val;
-    let form_el = gp_parents(el,'form');
-    if (form_el != false) {
         dbt_submit_form_choose_mode(form_el);
     } else {
-        console.log ("The form is not present in the dom");
+        console.log ("The pagination is not inside the form :");
     }
 }
 /**
@@ -57,8 +62,10 @@ function dbt_submit_simple_search(el) {
 }
 
 function dbt_submit_clean_simple_search(el) {
-    let input_form = el.parentNode.querySelector('.js-dbt-search-input');
-    input_form.value = "";
+    let form_el = gp_parents(el, 'form');
+    form_el.querySelectorAll('.js-dbt-search-input').forEach(function (element) {
+        element.value = '';
+    });
     dbt_submit_simple_search(el);
 }
 

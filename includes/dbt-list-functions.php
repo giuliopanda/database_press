@@ -207,7 +207,7 @@ class Dbt_functions_list {
                     $table_model->list_add_order($post_content['sql_order']['field'], $post_content['sql_order']['sort']);
                     }
                 }
-
+             
                 // aggiungo eventuali dbt_extra_attr 
                 if (isset($_REQUEST['dbt_extra_attr'])) {
                     $extra_attr = json_decode(base64_decode($_REQUEST['dbt_extra_attr']), true);
@@ -219,14 +219,15 @@ class Dbt_functions_list {
                              pinacode::set_var('request', $extra_attr['request']);
                          }
                          if (isset($extra_attr['params'])) {
-                             pinacode::set_var('params', $extra_attr['params']);
+                            $params = (array)PinaCode::get_var('params');
+				            $params = array_merge($extra_attr['params'], $params);
+				            PinaCode::set_var('params', $params);
                          }
                          if (isset($extra_attr['data'])) {
                              pinacode::set_var('data', $extra_attr['data']);
                          }
                      } 
                 } 
-
                 if (isset($post_content['sql_filter']) && is_array($post_content['sql_filter'])) {
                     $table_model->list_add_where($post_content['sql_filter']);
                 }
@@ -239,6 +240,7 @@ class Dbt_functions_list {
     }
      /**
      * estraggo le variabili pinacode dei filtri request, params
+     * @TODO da rivedere ora che i params vengono passati dentro la funzione stessa...
      * @param Array $post_content
      * @return Model|false; 
      */
@@ -261,24 +263,28 @@ class Dbt_functions_list {
             $param = PinaCode::execute_shortcode('[%params]');
             if (is_array($param)) {
                 foreach ($shortcode_param as $val) {
-                    $temp = $param[$val];
-                    if ($temp != '' && !is_countable($temp)) {
-                        if (!isset($extra_value_pina['params'])) {
-                            $extra_value_pina['params'] = [];
+                    if (isset($param[$val])) {
+                        $temp = $param[$val];
+                        if ($temp != '' && !is_countable($temp)) {
+                            if (!isset($extra_value_pina['params'])) {
+                                $extra_value_pina['params'] = [];
+                            }
+                            $extra_value_pina['params'][$val] = $temp;
                         }
-                        $extra_value_pina['params'][$val] = $temp;
                     }
                 }
             }
             $param = PinaCode::execute_shortcode('[%request]');
             if (is_array($param)) {
                 foreach ($shortcode_request as $val) {
-                    $temp = $param[$val];
-                    if ($temp != '' && !is_countable($temp)) {
-                        if (!isset($extra_value_pina['request'])) {
-                            $extra_value_pina['request'] = [];
+                    if (isset($param[$val])) {
+                        $temp = $param[$val];
+                        if ($temp != '' && !is_countable($temp)) {
+                            if (!isset($extra_value_pina['request'])) {
+                                $extra_value_pina['request'] = [];
+                            }
+                            $extra_value_pina['request'][$val] = $temp;
                         }
-                        $extra_value_pina['request'][$val] = $temp;
                     }
                 }
             }
@@ -300,15 +306,21 @@ class Dbt_functions_list {
     }
      /**
      * Funzione per aggiungere limit (paginazione), order e altri where nel frontend.  Il risultato lo mette dentro il model. 
-     * @param Class $table_model
-     * @param String $request_path  {$request_path}_page = [] {$request_path}_sort
+     * @param \DatabaseTables\Dbt_model $table_model
+     * @param Array $post_content  Il content della lista
+     * @param Int $list_id  L'id della list
+     * @param String $prefix Nelle chiamate post/get/ajax sceglie un prefisso per non impicciarsi
      */
-    static function add_frontend_request_filter_to_model(&$table_model, $post_content, $list_id) {
-        $request_path = "dbt".$list_id;
+    static function add_frontend_request_filter_to_model(&$table_model, $post_content, $list_id, $prefix = "") {
+        if ($prefix == "") {
+            $request_path = "dbt".$list_id;
+        } else {
+            $request_path = $prefix;
+        }
         $list_settings =  $post_content['list_setting'];
         $table_model->get_count();
         $table_limit 			= $table_model->limit;
-        $table_limit_start 		= Dbt_fn::get_request_limit_start( $request_path .'_page', 1, ceil($table_model->total_items/$table_limit )) ;
+        $table_limit_start 		= Dbt_fn::get_request_limit_start( $request_path .'_page', 1, ceil( $table_model->total_items / $table_limit )) ;
         
         $limit_start = ($table_limit_start -1) * $table_limit;
         $table_model->list_add_limit($limit_start, $table_limit);
@@ -348,8 +360,7 @@ class Dbt_functions_list {
         foreach ($_REQUEST as $req => $req_val) {
             if (substr($req,0, strlen($request_path)) == $request_path && $req != $request_path . '_search') {
                 $request_field = substr($req, strlen($request_path)+1);
-               // print "<p>request_fiel ".$request_field."</p>";
-                $filter_temp =  Dbt_fn::convert_head_column_in_filter_array($list_setting, $request_field, $req_val);
+                $filter_temp =  Dbt_fn::convert_head_column_in_filter_array($list_settings, $request_field, $req_val);
                 if ($filter_temp != false) {
                     $filter[] =$filter_temp ;
                 }
@@ -628,7 +639,7 @@ class Dbt_functions_list {
                             $qtx['sql_to_save'][$setting->name] =  PinaCode::execute_shortcode($setting->custom_value);
                         }
                         // setto i default dei campi che non vengono passati
-                        if ( $setting->default_value != "" &&  !isset($qtx['sql_to_save'][$setting->name])) {
+                        if ( $setting->default_value != "" &&  !isset($qtx['sql_to_save'][$setting->name]) && $setting->name !=  "_dbt_alias_table_") {
                             $qtx['sql_to_save'][$setting->name] = $setting->default_value;
                         }
                       

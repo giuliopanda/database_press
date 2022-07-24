@@ -14,9 +14,9 @@ if ($sort !== false) :
  * Non è l'alias (alias_column), ma il nome della colonna
  */
 ?>
-    <div class="dtf-table-sort <?php echo $sort_desc_class ; ?>" data-dtf_sort_key="<?php echo esc_attr($original_field_name); ?>" data-dtf_sort_order="DESC"><?php _e('Sorting Desending', 'database_tables'); ?></div>
-    <div class="dtf-table-sort <?php echo $sort_asc_class ; ?>" data-dtf_sort_key="<?php echo esc_attr($original_field_name); ?>" data-dtf_sort_order="ASC"><?php _e('Sorting Ascending', 'database_tables'); ?></div>
-    <div class="dtf-table-sort <?php echo $sort_remove_class ; ?>" ><?php _e('Remove sorting', 'database_tables'); ?></div>
+    <div class="dtf-table-sort <?php echo $sort_desc_class ; ?>" data-dtf_sort_key="<?php echo esc_attr($original_field_name); ?>" data-dtf_sort_order="DESC"><?php _e('Sort Desending', 'database_tables'); ?></div>
+    <div class="dtf-table-sort <?php echo $sort_asc_class ; ?>" data-dtf_sort_key="<?php echo esc_attr($original_field_name); ?>" data-dtf_sort_order="ASC"><?php _e('Sort Ascending', 'database_tables'); ?></div>
+    <div class="dtf-table-sort <?php echo $sort_remove_class ; ?>" ><?php _e('Remove sort', 'database_tables'); ?></div>
 <?php endif; ?>
 <?php /* ricerca */ ?>
 <?php if ($original_field_name != "" && $filter !== false) : ?>

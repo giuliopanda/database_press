@@ -21,13 +21,14 @@ class Dbt_init_shortcode {
     public function dbt_list($attrs = []) {
         if (is_admin()) return;
         Dbt_fn::require_init();
+        $prefix = "";
+        if (isset($attrs['prefix']) && $attrs['prefix'] != "") {
+            $prefix = $attrs['prefix'];
+        }
         if ($attrs['id'] > 0) {
             $post_id = $attrs['id'];
             unset($attrs['id']);
-            if (count($attrs) > 0) {
-                PinaCode::set_var('params', $attrs);
-            }
-        	return Dbt::get_list($post_id);
+        	return Dbt::get_list($post_id, false, $attrs, $prefix);
         }
     }
     

@@ -27,6 +27,10 @@ class Dbt_fn {
      */
     static $cookie_msgs = [];
     /**
+     * @static Array cookie_msgs
+     */
+    static $is_form_open = [];
+    /**
      * Carica le classi per le query e i risultati delle query
      */
     static function require_init() {
@@ -42,7 +46,11 @@ class Dbt_fn {
         require_once(DBT_DIR . "includes/dbt-model-structure.php");
         require_once(DBT_DIR . "includes/dbt-html-simple-table.php");
         require_once(DBT_DIR . "includes/dbt-form.php");
+
+        require_once(DBT_DIR . "includes/dbt-render-list.php");
+       
         if (is_admin()) {
+            // non funziona!?
             ini_set( 'max_input_vars' , '3000' );
         }
     }
@@ -677,13 +685,13 @@ class Dbt_fn {
 
     /**
      * Sempre per il frontend cerca il nome del column_name e ne ritorna la colonna per la query sql
-     * @param DbtDs_list_setting[] $list_setting
+     * @param DbtDs_list_setting[] $list_settings
      * @param string $column_name
      * @return string|false
      */
-    static function convert_head_column_in_filter_array($list_setting, $column_name, $value) {
-        foreach ($list_setting as $row) {
-            if (strtolower($row->name_request) == strtolower($column_name) && isset($row->mysql_name) && $row->mysql_name != "") {
+    static function convert_head_column_in_filter_array($list_settings, $column_name, $value) {
+        foreach ($list_settings as $row) {
+            if (strtolower($row->name_request) == strtolower($column_name) && $row->mysql_name != "") {
                 return  ['op'=>$row->searchable, 'column'=> $row->mysql_name, 'value' => $value, 'table' => $row->mysql_table]; 
             }
         }
@@ -1223,6 +1231,11 @@ class Dbt_fn {
         $table_header = reset($table_model->items);
         $table_model->add_primary_ids();
         $primaries = $table_model->get_pirmaries();
+        
+        // var_dump ($primaries1);
+        // print "\n\n";
+        // var_dump ($primaries2);
+        // print "\n\n";
         $first_table_header = 0;
         foreach ($table_header as $key=>$v) {
             if ($v->toggle != "HIDE") {
@@ -1241,30 +1254,56 @@ class Dbt_fn {
         foreach ($table_model->items as $key => $_) {
             if ($key == 0) continue;
             $primary_values = [];
-            $primary_values['dbt_ids'] = self::data_primaries_values($primaries , $table_header, $table_model->items[$key]);
+            $primary_values['dbt_ids'] = self::data_primaries_values($primaries, $table_header, $table_model->items[$key]);
             $primary_values['dbt_id'] = $dbt_id;
             $primary_values['action'] = 'dbt_get_detail';
             $link = esc_url(add_query_arg($primary_values, admin_url('admin-ajax.php')));
 
             foreach ($columns_link as $col_link) {
-               
                 $custom_link = '<a href="'.esc_url($link).'" class="js-dbt-popup">'
                 .strip_tags($table_model->items[$key]->$col_link).'</a>';
-
                 $table_model->items[$key]->$col_link =  apply_filters('dbt_frontend_build_custom_link',$custom_link, $dbt_id, $primary_values, $table_model->items[$key]->$col_link, $col_link) ;
             }
         }
     }
 
+    /**
+     * aggiunge un parametro all'array dei dati:  popup_link
+     */
+    static function add_items_frontend_popup_link(&$table_model, $dbt_id) {
+        if (!is_countable($table_model->items) || count($table_model->items) == 0 ){
+            return false;
+        }
+        $table_header = reset($table_model->items);
+        $table_model->add_primary_ids();
+        $primaries = $table_model->get_pirmaries();
+
+        foreach ($table_model->items as $key => $_) {
+            if ($key == 0) continue;
+            $primary_values = [];
+            $primary_values['dbt_ids'] = self::data_primaries_values($primaries, $table_header, $table_model->items[$key]);
+            $primary_values['dbt_id'] = $dbt_id;
+            $primary_values['action'] = 'dbt_get_detail';
+
+            $table_model->items[$key]->_popup_link = esc_url(add_query_arg($primary_values, admin_url('admin-ajax.php')));
+
+            //  $custom_link = '<a href="'.esc_url($link).'" class="js-dbt-popup">'
+             
+        }
+    }
 
     /**
      * Trova i valori delle colonne primarie di un record
      * $row = $table_model->items[$key]
      * @param [type] $table_model
+     * @param string $key_name il nome che si vuole estrarre. Se si vuole estrarre il nome del campo allora scrivo "name.
      * @return void
      */
     static function data_primaries_values($primaries, $table_header, $row, $key_name ='name_request') {
         $primary_values = [];
+        //var_dump ($row);
+        //var_dump ($table_header);
+        //die();
         foreach ($table_header as $k=>$th) {
             if (isset($th->table) && $th->original_table != "" && isset($primaries[$th->original_table]) && $primaries[$th->original_table] == $th->original_name && $row->$k > 0) {
                 $primary_values[$th->$key_name] =  $row->$k;
@@ -1924,6 +1963,39 @@ class Dbt_fn {
         }
         return $lists;
     }
+
+    /**
+     * Le tre funzioni is_form_open open_form e close form servono ad identificare se
+     * c'è una form aperta dal plugin così da non aprirne altre se ci sono tabelle annidate.
+     * Verifica se una form è aperta oppure no
+     *
+     * @return array
+     */
+    static function is_form_open() {
+        return self::$is_form_open;
+    }
+    static function set_open_form() {
+        self::$is_form_open = true;
+    }
+    static function set_close_form() {
+        self::$is_form_open = false;
+    }
+
+
+    /**
+     * Verifica se è stato passato almeno un filtro 
+     */
+    static function is_query_filtered() {
+        if (isset($_REQUEST['filter']['search']) && is_array($_REQUEST['filter']['search'])) {
+            foreach ($_REQUEST['filter']['search'] as $key => $value) {
+                if (isset($value['value']) && $value['value'] != "") {
+                    return true;
+                }
+            } 
+        }
+        return false;
+    }
+
 
 }
 // setto 'inizio dell'esecuzione dello script;

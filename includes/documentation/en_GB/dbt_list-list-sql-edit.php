@@ -18,7 +18,7 @@ if (!defined('WPINC')) die;
 
     <div id="dbt_help_admin_sidebar_menu_icon" class="dbt_help_div">
         <h4>Add Icon</h4> 
-        <p>You can choose an icon from those on this page: <a href="https://developer.wordpress.org/resource/dashicons" target="blank" class="js-simple-link">developer.wordpress.org/resource/dashicons</a> Clicca sull'icona che vuoi inserire e premi copia HTML. Nell'alert che apparirà prendi la seconda classe. es: <i>dashicons-image-rotate-right</i>. Copia la classe nel campo. </p>
+        <p>You can choose an icon from those on this page: <a href="https://developer.wordpress.org/resource/dashicons" target="_blank" class="js-simple-link">developer.wordpress.org/resource/dashicons</a> Clicca sull'icona che vuoi inserire e premi copia HTML. Nell'alert che apparirà prendi la seconda classe. es: <i>dashicons-image-rotate-right</i>. Copia la classe nel campo. </p>
     </div>
 
     <div id="dbt_help_admin_sidebar_menu_position" class="dbt_help_div">
@@ -43,7 +43,6 @@ if (!defined('WPINC')) die;
         
         <ul>
             <li><b>[%params.xxx]</b> are the parameters added in the shortcodes</li>
-            <li><b>[%data.xxx]</b> for encapsulated data</li>
             <li><b>[%request.xxx]</b> for the data received in the url</li>
         </ul> 
         <p>If required is selected but the value is not passed, the query returns no results. If required is not selected and no parameters are passed, the query returns the unfiltered results</p>

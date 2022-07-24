@@ -95,6 +95,9 @@ class database_tables_admin
 				$this->table_browse();
 				break;
 			case 'home' :
+				//TODO Aggiungere un popup introduttivo
+				// https://www.designbombs.com/adding-modal-windows-in-the-wordpress-admin/
+
 				wp_enqueue_script( 'jquery-ui-sortable' );
 				wp_enqueue_script( 'database-sql-editor-js', plugin_dir_url( __FILE__ ) . 'js/database-sql-editor.js',[],rand());
 				wp_register_script( 'dbt-new-list', plugin_dir_url( __FILE__ ) . 'js/dbt-new-list.js',false, rand());
@@ -104,16 +107,24 @@ class database_tables_admin
 
 				add_filter( 'dbt_render_sql_btns', [$this, 'home_render_sql_btns'] );
 
-				$user_permission = $wpdb->get_results(" SHOW GRANTS FOR '".esc_sql(DB_USER)."'");
 				$permission_list = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'RELOAD', 'INDEX', 'ALTER', 'SHOW DATABASES', 'CREATE TEMPORARY TABLES', 'CREATE VIEW', 'SHOW VIEW'];
-				foreach ($user_permission as $up1) {
-					foreach ($up1 as $up) {
-						foreach ($permission_list as $k=>$pl) {
-							if (stripos($up, $pl) !== false) {
-								unset($permission_list[$k]);
+				$user_permission = $wpdb->get_results("SHOW GRANTS");
+				if (!is_array($user_permission) || count($user_permission) >0) {
+					$user_permission = $wpdb->get_results("SHOW GRANTS FOR '".esc_sql(DB_USER)."'@localhost'");
+				} 
+				if (is_array($user_permission) && count($user_permission) > 0) {
+				
+					foreach ($user_permission as $up1) {
+						foreach ($up1 as $up) {
+							foreach ($permission_list as $k=>$pl) {
+								if (stripos($up, $pl) !== false) {
+									unset($permission_list[$k]);
+								}
 							}
 						}
 					}
+				} else {
+					$permission_list = false;
 				}
 				$processlist = [];
 				$processlist_sql = $wpdb->get_results("SHOW processlist;");

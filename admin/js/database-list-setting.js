@@ -30,6 +30,7 @@ jQuery(document).ready(function () {
     dbt_list_setting(jQuery('#dbt_choose_type_frontend_view'));
     dbt_checkif();
     detail_toggle();
+    select_editor_table_update();
 });
 /**
  * Aggiorno gli stili per la tabella
@@ -137,9 +138,13 @@ function dbt_list_setting(el) {
     if (val == "TABLE_BASE") {
         jQuery('#frontend_view_table').css('display','block');
         jQuery('#frontend_view_editor').css('display','none');
+        jQuery('#block_if').css('display','block');
+        jQuery('#no_result').css('display','block');
     } else {
         jQuery('#frontend_view_table').css('display','none');
         jQuery('#frontend_view_editor').css('display','block');
+        jQuery('#block_if').css('display','none');
+        jQuery('#no_result').css('display','none');
     }
 }
 
@@ -283,5 +288,14 @@ function detail_toggle() {
         jQuery('#detail_text').css('display','none');
     } else {
         jQuery('#detail_text').css('display','block');
+    }
+}
+
+
+function select_editor_table_update() {
+    if (jQuery('#select_editor_table_upldate').val() == "none") {
+        jQuery('#dbt_pagination_style_row_2').css('display','none');
+    } else {
+        jQuery('#dbt_pagination_style_row_2').css('display','block');
     }
 }

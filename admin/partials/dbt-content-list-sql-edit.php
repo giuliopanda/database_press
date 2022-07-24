@@ -13,12 +13,15 @@
  */
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
+$append = '<span class="dbt-submit" onclick="dtf_submit_list_sql()">' . __('Save', 'database_tables') . '</span>';
+
 ?>
 <div class="dbt-content-header">
     <?php require(dirname(__FILE__).'/dbt-partial-tabs.php'); ?>
 </div>
 <div class="dbt-content-table js-id-dbt-content" >
-    <?php $dtf::echo_html_title_box('list', $list_title, '', $msg,  $msg_error); ?>
+    <?php $dtf::echo_html_title_box('list', $list_title, '', $msg,  $msg_error, $append); ?>
     <form id="table_filter" method="post" action="<?php echo admin_url("admin.php?page=dbt_list&section=list-sql-edit&dbt_id=".esc_attr($id)); ?>">
         <div class="dbt-content-margin">
             <input type="hidden" name="section" value="list-sql-edit">
@@ -42,7 +45,7 @@ if (!defined('WPINC')) die;
 
             <h3 class="dbt-h3 dbt-margin-top"><?php _e('Admin sidebar menu', 'database_tables'); ?></h3>
             <p class="dtf-alert-gray" style="margin-top:-1rem">
-                <?php _e('Aggiungo la lista nel menu della sidebar. ','database_tables'); 
+                <?php _e('Add the list in the sidebar menu.','database_tables'); 
                 Dbt_fn::echo_html_icon_help('dbt_list-list-sql-edit','admin_sidebar_menu');
                 ?>
             </p>
@@ -121,7 +124,7 @@ if (!defined('WPINC')) die;
                 </div>
 
                 <h3 class="dbt-h3"><?php _e('Filter (in frontend And admin plugin)', 'database_tables'); ?></h3>
-                <p class="dtf-alert-gray" style="margin-top:-1rem"><?php _e('Aggiungi filtri da dati esterni (url, post, ecc..)', 'database_tables');
+                <p class="dtf-alert-gray" style="margin-top:-1rem"><?php _e('Add filters from external data', 'database_tables');
                 Dbt_fn::echo_html_icon_help('dbt_list-list-sql-edit','admin_filter');?></p>
                 <?php if (count($info_rows) > 0) : ?>
                     <div class="dbt-form-row" id="dbt_clone_master" style="display:none">
@@ -158,7 +161,7 @@ if (!defined('WPINC')) die;
         
                 <br>
                 <h3 class="dbt-h3"><?php _e('Delete options', 'database_tables'); ?></h3>
-                <p class="dtf-alert-gray" style="margin-top:-1rem"><?php _e('Quando viene eliminato uno o più record, scegli quali tabelle della query vuoi che vengano eliminate.', 'database_tables');
+                <p class="dtf-alert-gray" style="margin-top:-1rem"><?php _e('When one or more records are deleted, you choose which tables in the query you want to be deleted.', 'database_tables');
                 Dbt_fn::echo_html_icon_help('dbt_list-list-sql-edit','delete_options');?></p>
                 <?php
                 /** @var array $delete_tables [[table, as, where, la parte di stringa elaborata], ...] */

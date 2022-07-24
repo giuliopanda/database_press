@@ -99,6 +99,7 @@ jQuery(document).ready(function ($) {
             } else {
                 new_val =  new_val + "#AND#" + between_val;
             }
+            if (new_val == "#AND#") new_val = '';
         } 
         $("#dbt_dropdown_search_value_" + rif).val(new_val);
     });
@@ -506,7 +507,11 @@ function dtf_submit_table_filter(action) {
  * Cancella i filtri di ricerca
  */
 function dbt_clear_filter() {
-    dtf_submit_table_filter('custom_query');
+    if (typeof dbt_global_list_id != 'undefined' && dbt_global_list_id > 0) {
+        window.location.href = 'admin.php?page=dbt_'+dbt_global_list_id;
+    } else {
+        dtf_submit_table_filter('custom_query');
+    }
 }
 
 /**
@@ -780,7 +785,7 @@ function dbt_view_details(json) {
 
 function gp_form_btns_new() {
     jQuery('#dbt_dbp_title > .dbt-edit-btns').remove();
-    return jQuery('<div class="dbt-edit-btns"><div class="dbt-submit js-sidebar-btn" onclick="gp_submit_form()">SAVE</div></div>');
+    return jQuery('<div class="dbt-edit-btns"><h3>NEW CONTENT</h3><div class="dbt-submit js-sidebar-btn" onclick="gp_submit_form()">SAVE</div> <div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
 }
 
 /**
@@ -790,7 +795,7 @@ function gp_form_btns_new() {
  */
 function gp_form_btns_edit() {
     jQuery('#dbt_dbp_title > .dbt-edit-btns').remove();
-    return jQuery('<div class="dbt-edit-btns"><h3>EDIT ROW</h3><div class="dbt-submit js-sidebar-btn" onclick="gp_submit_form()">SAVE</div> <div class="dbt-submit-warning js-sidebar-btn" onclick="gp_delete_form_edit()">DELETE</div></div>');
+    return jQuery('<div class="dbt-edit-btns"><h3>EDIT CONTENT</h3><div class="dbt-submit js-sidebar-btn" onclick="gp_submit_form()">SAVE</div> <div class="dbt-submit-warning js-sidebar-btn" onclick="gp_delete_form_edit()">DELETE</div> <div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
 }
 
 
@@ -873,11 +878,15 @@ function gp_submit_form() {
         processData: false,
         contentType: false,
         success: function(response) {
+            console.log ("RESPONSE: ");
+            console.log (response);
+            dbt_close_sidebar_loading();
+            let $form = jQuery('#dbt_edit_details');
             if (response.error != "") {
                 $form.prepend('<div class="dtf-alert-sql-error" style="margin-bottom:1rem">'+response.error+'</div>');
                 $form.css('display','block');
-                //jQuery('#dbt_cookie_error').empty().html(response.error).css('display','block');
-                // delete_cookie('dbt_error');
+                jQuery('#dbt_cookie_error').empty().html(response.error).css('display','block');
+                 delete_cookie('dbt_error');
             } else if (response.reload == 1) {
                 dtf_submit_table_filter('limit_start');
             } else {

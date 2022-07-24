@@ -29,11 +29,11 @@ class Dbt_model {
      */
     public $last_error = false;
     /**
-     * @var Integer $limit_start 
+     * @var Int $limit_start 
      */
     public  $limit_start = 0;
     /**
-     * @var Integer $limit 
+     * @var Int $limit 
      */
     public  $limit = 100;
      /**
@@ -61,7 +61,7 @@ class Dbt_model {
      */
     protected  $ulitities_marks = false;
       /**
-     * @var Integer $effected_row Il numero di righe interessate dalla query
+     * @var Int $effected_row Il numero di righe interessate dalla query
      */
     public $effected_row = -1;
     /**
@@ -845,8 +845,11 @@ class Dbt_model {
     /**
      * Nelle liste vengono settati dei parametri di visualizzazione.
      * Questi vengono elaborati in questa fase. Vedi la classe Dbt_items_list_setting per maggiori dettagli
+     * @param Array $post_content
+     * @param Boolean $htmlentities se è nel frontend (o nel menu esterno) non posso mostrare i tag html, ma devo fare lo striptag se taglio il testo, altrimenti li mostro 
+     * @param int $text_length quando estraggo i dati di una lista se lascio text_length = 0 allora uso i parametri settati, se metto -1 allora lo mette per intero
      */
-    public function update_items_with_setting($post_content = false) {
+    public function update_items_with_setting($post_content = false, $htmlentities = true, $text_length = 0) {
         if (is_array($post_content) && isset($post_content['list_setting'])) {
             $setting_custom_list =  Dbt_functions_list::get_list_structure_config($this->items, $post_content['list_setting']);
         } else {
@@ -855,8 +858,15 @@ class Dbt_model {
         if (is_array($post_content) && isset($post_content['list_general_setting'])) {
             $list_general_setting = $post_content['list_general_setting']; 
         } else {
-            $list_general_setting = false;
-        }      
+            $list_general_setting = [];
+        }
+        $list_general_setting['htmlentities'] = $htmlentities;
+        if ($text_length != 0) {
+            $list_general_setting['text_length'] = $text_length;
+        } else {
+            // TODO ???
+            $list_general_setting['text_length'] = 80;
+        }
         $setting = new Dbt_items_list_setting();
         $this->items = $setting->execute_list_settings($this->items, $setting_custom_list, $list_general_setting);
        // var_dump (reset($this->items));
@@ -1068,6 +1078,7 @@ class Dbt_model {
     public function get_pirmaries($alias = false) {
         // Trovo tutte le chiavi primari autoincrement di tutte le tabelle.
         $primaries = [];
+        $this->add_primary_ids();
         $tables = $this->get_partial_query_from(true);
         if (!$alias) {
             foreach ($tables as $table) {
@@ -1122,7 +1133,7 @@ class Dbt_model {
      * Aggiunge ai select le chiavi primarie per ogni tabella inserita 
      * così da poter gestire form di modifica ed inserimento.
      * @todo mettere in qualche modo queste colonne come hidden di default.
-     * @return Void
+     * @return Array all primaries
      */
     public function add_primary_ids() {
         $current_query_select = $this->get_partial_query_select();
@@ -1154,6 +1165,7 @@ class Dbt_model {
   
         // verifico se c'è la chiave primaria, oppure segno che deve essere aggiunta
         $add_select_pri = [];
+        $all_primaries = [];
         foreach ( $field_group as $group) {
           
             // group [table:String, fields:[]]
@@ -1163,6 +1175,7 @@ class Dbt_model {
                 foreach ($group['fields'] as $fields) {
                     if ($fields->orgname == $all_pri_ids[$group['table']]) {
                         $exist_pri = true;
+                        $all_primaries[$fields->table] = $all_pri_ids[$group['table']];
                         break;
                     }
                 }
@@ -1170,6 +1183,7 @@ class Dbt_model {
                     $alias = Dbt_fn::get_column_alias($group['alias_table']."_".$all_pri_ids[$group['table']], $current_query_select);
                     $add_select_pri[] =  '`'. $group['alias_table'].'`.`'.$all_pri_ids[$group['table']].'` AS `'.$alias.'`';
                     $current_query_select .= " ".$alias;
+                    $all_primaries[$fields->table] = $all_pri_ids[$group['table']];
                 }
             }
         }
@@ -1178,6 +1192,7 @@ class Dbt_model {
         if (count($add_select_pri) > 0) {
             $this->list_add_select(implode(", ", $add_select_pri));
         }
+        return $all_primaries;
     }
 
      /**
@@ -1275,7 +1290,6 @@ class Dbt_model {
         global $wpdb;
         $array_where = [];
       
-              
         if (is_array($filter) && count($filter) > 0) {
             foreach ($filter as $f) {
                 if (is_object($f)) $f = (array)$f;

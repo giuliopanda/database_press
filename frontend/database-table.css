@@ -57,27 +57,27 @@
 .dbt-block-table-big { font-size:1.2em;}
 
 
-.dbt-table-blue thead tr { background-color: #004798; color:#FFF;}
+.dbt-table-blue thead tr, .dbt-table-blue thead tr>th  { background-color: #004798; color:#FFF;}
 .dbt-table-blue tbody tr:last-of-type {  border-bottom: 2px solid #003a7c;}
 .dbt-table-blue tbody tr:nth-of-type(even) {    background-color: #e9e9f1;}
 
-.dbt-table-green thead tr { background-color: #009879; color:#FFF}
+.dbt-table-green thead tr, .dbt-table-green thead tr>th { background-color: #009879; color:#FFF}
 .dbt-table-green tbody tr:last-of-type {  border-bottom: 2px solid #009879;}
 .dbt-table-green tbody tr:nth-of-type(even) {    background-color: #f1faf8;}
 
-.dbt-table-red thead tr { background-color: #c91616; color:#FFF}
+.dbt-table-red thead tr, .dbt-table-red thead tr>th { background-color: #c91616; color:#FFF}
 .dbt-table-red tbody tr:last-of-type {  border-bottom: 2px solid #c91616;}
 .dbt-table-red tbody tr:nth-of-type(even) {    background-color: #fdefef;}
 
-.dbt-table-pink thead tr { background-color: #ffa3a3; color:#1f0000}
+.dbt-table-pink thead tr, .dbt-table-pink thead tr>th { background-color: #ffa3a3; color:#1f0000}
 .dbt-table-pink tbody tr:last-of-type {  border-bottom: 2px solid #ffa3a3;}
 .dbt-table-pink tbody tr:nth-of-type(even) {    background-color: #fdf1f1;}
 
-.dbt-table-yellow thead tr { background-color: #eaec41; color:#1f0000}
+.dbt-table-yellow thead tr, .dbt-table-yellow thead tr>th { background-color: #eaec41; color:#1f0000}
 .dbt-table-yellow tbody tr:last-of-type {  border-bottom: 2px solid #eaec41;}
 .dbt-table-yellow tbody tr:nth-of-type(even) {    background-color: #fafded;}
 
-.dbt-table-gray thead tr { background-color: #5e5e5e;  color:#FFF}
+.dbt-table-gray thead tr, .dbt-table-gray thead tr>th { background-color: #5e5e5e;  color:#FFF}
 .dbt-table-gray tbody tr:last-of-type {  border-bottom: 1px solid #5e5e5e;}
 .dbt-table-gray tbody tr:nth-of-type(even) {    background-color: #f5f5f5;}
 
@@ -262,8 +262,12 @@ vertical-align: middle;
 .dbt-table .dbt-td-width-regular{min-width: 6em; max-width: 20em;}
 .dbt-table .dbt-td-width-min{min-width: 1em; max-width: 10em; padding-left:.2em; padding-right:.2em}
 
-.dbt-max-large-table {max-width: 100%; overflow-y: auto;}
+.dbt-max-large-table {max-width: 100%;}
 
+.dbt-table-overflow {
+    overflow: auto;
+    max-width: 100%;
+}
 .pina_debug_box {font-size: 14px; margin-bottom: 12 px ; border: 1 px solid #CCC; background: #ffffff; padding: 6 px ;}
 .pina_debug_box .code { font-size: 11px; line-height: 14px; display:inline-block; background:#F2F2F2; border:1px solid #EEE; padding:5px; margin-right:5px;}
 

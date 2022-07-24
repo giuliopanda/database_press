@@ -28,9 +28,10 @@ class Dbt_list_loader {
         if (!isset($_REQUEST['table_choose']) && !isset($_REQUEST['new_sql'])) {
             wp_redirect( admin_url("admin.php?page=dbt_list&section=list-all&msg=create_list_error"));
         }
+        $title = wp_strip_all_tags( $_REQUEST['new_title'] );
        // TODO: if (!is_admin()) return;
         $create_list = array(
-            'post_title'    => wp_strip_all_tags( $_REQUEST['new_title'] ),
+            'post_title'    => $title,
             'post_content'  => '{}',
             'post_status'   => 'publish',
             'comment_status' =>'closed',
@@ -46,15 +47,13 @@ class Dbt_list_loader {
                 $sql = html_entity_decode ($_REQUEST['new_sql']);
             } else if (isset($_REQUEST['table_choose'])) {
                 if ($_REQUEST['table_choose'] == 'create_new_table') {
-                    
                     // il nome della tabella
-                    $table_name = (isset($_REQUEST['new_table_name'])) ? $_REQUEST['new_table_name'] :  $_REQUEST['new_title'];
-                    $table_name = str_replace($wpdb->prefix, '', Dbt_fn::clean_string($table_name));
+                    $table_name = str_replace($wpdb->prefix, '', Dbt_fn::clean_string($title));
                     $count = 0;
                     if ($table_name == "") {
-                       $table_name = "dbt_".uniqid();
+                       $table_name = uniqid();
                     }
-                    $table_name = $wpdb->prefix.$table_name;
+                    $table_name = $wpdb->prefix."dbt_".$table_name;
                     $table_name_temp = $table_name;
                     
                     while (Dbt_fn::exists_table($table_name)) {
@@ -67,7 +66,7 @@ class Dbt_list_loader {
                     if ($charset == "") {
                         $charset = 'utf8mb4';
                     }
-                    $ris = $wpdb->query('CREATE TABLE `'.$table_name.'`   ( `dbt_id` INT UNSIGNED NOT NULL AUTO_INCREMENT , PRIMARY KEY (`dbt_id`))   ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET='.$charset);
+                    $ris = $wpdb->query('CREATE TABLE `'.$table_name.'` ( `dbt_id` INT UNSIGNED NOT NULL AUTO_INCREMENT , PRIMARY KEY (`dbt_id`))   ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET='.$charset);
                     
                     $sql = 'SELECT `'.$table_as.'`.* FROM `'.$table_name.'` `'.$table_as.'`';
                     // TODO METTO LA TABELLA IN DRAFT MODE!
@@ -81,53 +80,56 @@ class Dbt_list_loader {
                     $sql = 'SELECT `'.$table_as.'`.* FROM `'.$table_name.'` `'.$table_as.'`';
                 }
             }
-                $post = Dbt_functions_list::get_post_dbt($id);
-                if ($sql != "") {
-                    $table_model = new Dbt_model();
-                    $table_model->prepare($sql);
-                    if ($table_model->sql_type() != "select") {
-                        //TODO Al momento il messaggio di errore non è usato da impostare con i cookie !!!!
-                        $msg = __('Only a single select query is allowed in the lists', 'database_tables');
-                        wp_redirect( admin_url("admin.php?page=dbt_list&section=list-sql-edit&msg=list_created&dbt_id=".$id));
-                    } else {
-                        $limit = $table_model->remove_limit();
-                        if ($limit > 0) {
-                            $post->post_content['sql_limit'] = $limit;
-                        }
-                        // TODO separo anche l'ORDER
-                        //	$post->post_content['sql_order'] = ['field'=>sanitize_text_field($_REQUEST['sql_order']['field']),'sort'=>sanitize_text_field($_REQUEST['sql_order']['sort'])] ;
-                        $post->post_content['sql'] = $table_model->get_current_query();
-
-                        // Questo pezzo di codice è copiato pari pari da class-database-list-admin.php > list_sql_save()
-                        // Rigenero list_structure perché risalvando la query potrebbero essere cambiati i parametri!
-                        $table_model->list_add_limit(0, 1);
-                        $items = $table_model->get_list();
-                        if (isset($post->post_content['list_setting'])) {
-                            $list_setting = $post->post_content['list_setting'];
-                        } else {
-                            $list_setting = [];
-                        }
-                        $setting_custom_list =  Dbt_functions_list::get_list_structure_config($items, $list_setting);
-                
-                        $post->post_content['list_setting'] = [];
-                        foreach ($setting_custom_list as $column_key => $list) {
-                            $post->post_content['list_setting'][$column_key] =  $list->get_for_saving_in_the_db();
-                        }
-
-                        // TODO FORM options
-
-                        // TODO DELETE options
-
-                        // TODO MENU options
-
-                        
-                    
-                        wp_update_post(array(
-                            'ID'           => $id,
-                            'post_content' => addslashes(maybe_serialize($post->post_content)),
-                        ));
+            $post = Dbt_functions_list::get_post_dbt($id);
+            if ($sql != "") {
+                $table_model = new Dbt_model();
+                $table_model->prepare($sql);
+                if ($table_model->sql_type() != "select") {
+                    //TODO Al momento il messaggio di errore non è usato da impostare con i cookie !!!!
+                    $msg = __('Only a single select query is allowed in the lists', 'database_tables');
+                    wp_redirect( admin_url("admin.php?page=dbt_list&section=list-sql-edit&msg=list_created&dbt_id=".$id));
+                } else {
+                    $limit = $table_model->remove_limit();
+                    if ($limit > 0) {
+                        $post->post_content['sql_limit'] = $limit;
                     }
+                    // TODO separo anche l'ORDER
+                    //	$post->post_content['sql_order'] = ['field'=>sanitize_text_field($_REQUEST['sql_order']['field']),'sort'=>sanitize_text_field($_REQUEST['sql_order']['sort'])] ;
+                    $post->post_content['sql'] = $table_model->get_current_query();
+
+                    // Questo pezzo di codice è copiato pari pari da class-database-list-admin.php > list_sql_save()
+                    // Rigenero list_structure perché risalvando la query potrebbero essere cambiati i parametri!
+                    $table_model->list_add_limit(0, 1);
+                    $items = $table_model->get_list();
+                    if (isset($post->post_content['list_setting'])) {
+                        $list_setting = $post->post_content['list_setting'];
+                    } else {
+                        $list_setting = [];
+                    }
+                    $setting_custom_list =  Dbt_functions_list::get_list_structure_config($items, $list_setting);
+            
+                    $post->post_content['list_setting'] = [];
+                    foreach ($setting_custom_list as $column_key => $list) {
+                        $post->post_content['list_setting'][$column_key] =  $list->get_for_saving_in_the_db();
+                    }
+
+                    // TODO FORM options
+
+                    // TODO DELETE options
+
+                    // TODO MENU options
+                    $dbt_admin_show  = ['page_title'=>sanitize_text_field($title), 'menu_title'=>sanitize_text_field($title), 'menu_icon'=>'dashicons-database', 'menu_position' => 120, 'capability'=>'dbt_manage_'.$id, 'slug'=> 'dbt_'.$id, 'show' => 1];
+                    add_post_meta($id,'_dbt_admin_show', $dbt_admin_show, false);
+                
+                    wp_update_post(array(
+                        'ID'           => $id,
+                        'post_content' => addslashes(maybe_serialize($post->post_content)),
+                    ));
+                    $role = get_role( 'administrator' );
+                    $role->add_cap( 'dbt_manage_'.$id, true );
+
                 }
+            }
             // ridirigo alla gestione della form 
             wp_redirect( admin_url("admin.php?page=dbt_list&section=list-form&msg=list_created&dbt_id=".$id));
         }

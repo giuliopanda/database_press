@@ -69,10 +69,12 @@ if (!defined('WPINC')) die;
                                     }
                                     ?></div><?php 
                                 }
-                                if (count($permission_list) > 0) {
-                                    ?><div class="dtf-alert-sql-error"><?php sprintf(__('The mysql user does not have enough permissions to manage this plugin. Missing: <b>%s</b>', implode(", ", $permission_list)),'database_tables'); ?></div> <?php 
-                                } else {
-                                    ?><div class="dtf-alert-info"><?php _e('The permissions of the mysql user are correct','database_tables'); ?></div> <?php 
+                                if (is_array($permission_list)) {
+                                    if (count($permission_list) > 0) {
+                                        ?><div class="dtf-alert-sql-error"><?php echo  sprintf(__('The mysql user does not have enough permissions to manage this plugin. Missing: <b>%s</b>', 'database_tables'), implode(", ", $permission_list)); ?></div> <?php 
+                                    } else {
+                                        ?><div class="dtf-alert-info"><?php _e('The permissions of the mysql user are correct','database_tables'); ?></div> <?php 
+                                    }
                                 }
                                 $max_input_vars = Dbt_fn::get_max_input_vars();
                                 if ($max_input_vars  < 3000) {
@@ -87,7 +89,7 @@ if (!defined('WPINC')) die;
                                 if ($is_writable_dir) {
                                     ?><div class="dtf-alert-info"><?php _e('Log dir is writable','database_tables'); ?></div> <?php 
                                 } else {
-                                    ?><div class="tf-alert-sql-error"><?php sprintf(__('Log dir (%s) is NOT writable','database_tables'), $dir); ?></div> <?php 
+                                    ?><div class="tf-alert-sql-error"><?php echo  sprintf(__('Log dir (%s) is NOT writable','database_tables'), $dir); ?></div> <?php 
                                 }
                             ?>
                             </div>

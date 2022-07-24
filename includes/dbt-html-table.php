@@ -229,6 +229,7 @@ class Dbt_html_table {
 				$between =  Dbt_fn::is_correct_between_value($f['value'], $f['op']);
 				if (strtolower($f['column']) == strtolower($original_field_name) && (($f['value'] != "" && strpos($f['op'], 'BETWEEN') === false) || $between !== false)) {
 					?><span class="dashicons dashicons-filter js-click-dashicons-filter" data-rif="<?php echo esc_attr($name_column); ?>"></span><?php
+					break;
 				}
 			}
 		}

@@ -296,13 +296,52 @@ Donec et accumsan nulla, at tempus metus
         <pre class="dbt-code">[^IMAGE class=my_gallery print=[%item.image] attr={"id":"myGallery"} ]:]]</pre>
     </div>
 
-
+    If you link to posts with custom post_type, remember to register the post_type on function.php of your template
     <h3>[^LINK]</h3>
     <div class="dbt-help-p">
         <p> Link as the name implies is used to generate a link to the site. <br>
-         For the choice of the page or the post the parameter is page_id. IF page_id is not inserted, the link is to the current page. Any other parameters entered are registered as a new element of the url </p>
+        For the choice of the pagethe parameter to be inserted is page_id. For a post it is post_id. If page_id or post_id are not inserted, the generated link will be to the current page. all other parameters that you enter are registered as a new url element </p>
         <pre class="dbt-code">&lt;a href=&quot;[^LINK page_id=xxx id=yyy action=zzz]&quot;&gt;link&lt;/a&gt;</pre>
+        <h3> Examples </h3>
+        <pre class="dbt-code"><a href="[^LINK post_id=[%data.ID]]">[%data.post_title]</a></pre>
+        <p>
+        If you link to posts with custom post_type, remember to register the post_type on function.php of your template</p>
+            <pre class="dbt-code">add_action( 'init', 'register_my_post_type' );
+function register_my_post_type() {
+    register_post_type(
+    'my_post_type',
+    array (
+        'public'             => true,
+        'rewrite'            => array('slug' => 'my_post_type'),
+        'show_in_menu'      => false,
+        'show_in_nav_menus' => false,
+        'show_in_rest' 		=> false
+    )
+    );
+}</pre>
+
     </div>
+
+    <h3>[^ADMIN_URL]</h3>
+    <div class="dbt-help-p">
+    <p>Create a link to an administrative list. You can pass additional parameters to filter past data</p>
+        <h4 class="dbt-h4">Parameters</h4>
+        <ul>
+                <li><b>id</b><br>
+                (integer) L'id della lista</li>
+                <li><b>some_other_params</b><br>
+                (string) Puoi aggiungere altri parametri che verranno passati nell'url</li>
+        </ul>
+        <p>Example: In a list it shows the data of another filtered list and the button to go to edit the data. <br>
+                1. Create a list linked to posts with a post_id column. <br>
+                2. Add some records linked to posts. <br>
+                3. Create a second list where you extract wordpress posts <br>
+                4. On the new list open List view formatting and click add row at the bottom<br>
+        </p>
+        <pre class="dbt-code">[^DBT_LIST ID=xx post_id=[%data.ID]]
+<a href="[^ADMIN_URL id=xx post_id=[%data.ID]]">Edit</a></pre>
+    </div>
+
 
     <h3>[^SET]</h3>
     <div class="dbt-help-p">
@@ -354,6 +393,12 @@ Donec et accumsan nulla, at tempus metus
     <div class="dbt-help-p">
         <p> Return 1 if the user is logged in otherwise 0 </p>
     </div>
+
+    <h3>[^IS_ADMIN]</h3>
+    <div class="dbt-help-p">
+        <p>Return 1 if is admin page</p>
+    </div>
+
   <h3>is_*</h3>
     <div class="dbt-help-p">
         <p>[^IS_PAGE_AUTHOR], [^IS_PAGE_ARCHIVE], [^IS_PAGE_TAG], [^IS_PAGE_DATE], [^IS_PAGE_TAX]</p>

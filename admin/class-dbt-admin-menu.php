@@ -34,9 +34,11 @@ class DBT_admin_list_menu
 
 		$file = plugin_dir_path( __FILE__  );
 		$dbt_css_ver = date("ymdGi", filemtime( plugin_dir_path($file) . 'frontend/database-table.css' ));
-	
-		wp_register_style( 'dbt_frontend_css',  plugins_url( 'frontend/database-table.css',  $file), false,   $dbt_css_ver );
+		//wp_register_style( 'dbt_frontend_css',  plugins_url( 'frontend/database-table.css',  $file), false,   $dbt_css_ver );
+		//wp_enqueue_style( 'dbt_frontend_css' );
 
+		//wp_register_script( 'dbt_frontend_js',  plugins_url( 'frontend/database-table.js',  $file), false,   $dbt_js_ver, true );
+		wp_enqueue_script( 'dbt_frontend_js' );
 		$action = Dbt_fn::get_request('action_query', '', 'string');
 		Dbt_fn::require_init();
 	
@@ -68,7 +70,7 @@ class DBT_admin_list_menu
 					//  NON GESTISCO MULTIQUERY NELLE LISTE
 					$msg_error = __('No Multiquery permitted in list', 'database_tables');
 				} else if ($table_model->sql_type() == "select") {
-
+					Dbt_fn::set_open_form(); 
 					// cancello le righe selezionate!
 					if ($action == "delete_rows" && isset($_REQUEST["remove_ids"]) && is_array($_REQUEST["remove_ids"])) {
 						$result_delete = Dbt_fn::delete_rows($_REQUEST["remove_ids"], '', $id);
@@ -113,6 +115,7 @@ class DBT_admin_list_menu
 					//var_dump($table_model->items);
 					$html_content = $html_table->template_render($table_model); // lo uso nel template
 					//print (get_class($table_model) );	
+					Dbt_fn::set_close_form(); 
 				
 				} else {
 					$msg_error = __('Something is wrong, call the site administrator', 'database_tables');

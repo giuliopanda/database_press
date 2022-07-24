@@ -57,15 +57,18 @@ class Dbt_search_form {
      * @param String $btn_text Il testo 
      * @return Void
      */
-    public function classic_search_post($prefix_request, $label = 'Search', $color = 'blue') {
+    public function classic_search_post($prefix_request, $label = 'Search', $color = 'blue',  $btn = true) {
         $req_search =  @$_REQUEST[$prefix_request.'_search'];
         ?>
         <div class="dbt-search-row">
                 <input class="dbt-search-input js-dbt-search-input" type="text" name="<?php echo $prefix_request; ?>_search" value="<?php echo esc_attr($req_search); ?>">
             <?php // TODO il submit deve essere passato ad una funzione js che pulisce il campo page e order? ?>
-            <div class="dbt-search-button dbt-search-button-<?php echo $color; ?>" onclick="dbt_submit_simple_search(this)"><?php echo $label; ?></div>
-            <?php if ($req_search  != "") : ?>
-                <div class="dbt-search-button dbt-search-button-<?php echo $color; ?>" onclick="dbt_submit_clean_simple_search(this)"><?php _e('Clean', 'database_tables'); ?></div>
+            <?php if ($btn) : ?>
+                <div class="dbt-search-button dbt-search-button-<?php echo $color; ?>" onclick="dbt_submit_simple_search(this)"><?php echo $label; ?></div>
+            
+                <?php if ($req_search  != "") : ?>
+                    <div class="dbt-search-button dbt-search-button-<?php echo $color; ?>" onclick="dbt_submit_clean_simple_search(this)"><?php _e('Clean', 'database_tables'); ?></div>
+                <?php endif; ?>
             <?php endif; ?>
            
         </div>
@@ -83,6 +86,27 @@ class Dbt_search_form {
 
     /**
      *  Genera una form di ricerca di un solo campo.
+     * @param String $field_name prefix+'_field_name'
+     * @param String $btn_text Il testo 
+     * @param String $label 
+     * @return Void
+     */
+    public function field_one_input_form($field_name_request, $label) {
+        if ($label != "") : ?>
+            <label><span class="dbt-search-label"><?php echo $label; ?></span>	
+        <?php endif; ?>
+        <input class="dbt-search-input js-dbt-search-input" type="text" name="<?php echo esc_attr($field_name_request); ?>" value="<?php echo esc_attr(@$_REQUEST[$field_name_request]); ?>">
+        <?php if ($label != "") : ?>
+            </label>
+        <?php endif; 
+    }
+
+
+
+    
+    /**
+     *  Genera una form di ricerca di un solo campo.
+     * @deprecated sostituito da field_one_input_form
      * @param String $link Il link del form
      * @param String $method (get|post)
      * @param String $field_name prefix+'_field_name'
@@ -115,7 +139,7 @@ class Dbt_search_form {
         }
     }
 
-     /**
+     /*
      *  Genera una form di ricerca di un solo campo.
      * @param String $link Il link del form
      * @param String $method (get|post)
@@ -123,7 +147,7 @@ class Dbt_search_form {
      * @param String $btn_text Il testo 
      * @param String $div_row_attributes Gli attributi del div che contiene l'input e il bottone
      * @return Void
-     */
+  
     public function one_field_select_form($link, $method, $field_name, $options, $btn_text, $div_row_attributes, $label) {
         $form_open = $this->open_form($link, $method);
         ?>
@@ -186,9 +210,10 @@ class Dbt_search_form {
             self::$form_open = false;
             ?></form><?php 	
         }
-     }
+    }
+    */
 
-    /**
+    /*
      * Checkboxes
      * @param String $link Il link del form
      * @param String $method (get|post)
@@ -196,7 +221,6 @@ class Dbt_search_form {
      * @param String $btn_text Il testo 
      * @param String $div_row_attributes Gli attributi del div che contiene l'input e il bottone
      * @return Void
-     */
     public function one_field_checkbox_form($link, $method, $field_name, $values, $btn_text, $div_row_attributes, $label) {
         $form_open = $this->open_form($link, $method);
         ?>
@@ -240,6 +264,7 @@ class Dbt_search_form {
             ?></form><?php 	
         }
     }
+    */
 
 
      /**
@@ -254,6 +279,10 @@ class Dbt_search_form {
         self::$pagination_unique_id = ''; 
         $link_a = explode("?", $link);
 		$link = array_shift($link_a);
+        if ($method == "link") {
+            $method = "get";
+        }
+        Dbt_fn::set_open_form();
         ?>
         <form method="<?php echo $method; ?>" action="<?php echo $link; ?>"  class="js-dbt-send-<?php echo strtolower($method); ?>">
         <?php
@@ -285,6 +314,7 @@ class Dbt_search_form {
         echo '</form>';
         self::$pagination_hidden_field = false; 
         self::$form_open = false;
+        Dbt_fn::set_close_form();
     }
 
     /**
@@ -347,11 +377,12 @@ class Dbt_search_form {
 
     /**
 	 * Disegna la paginazione
+     * @deprecated sostituita da dbt-render-list
 	 * @return Void
 	 */
 	function pagination($link, $total_items, $limit, $post_id, $method, $pagination_style, $color ) {
        
-        if ($method != "get") {
+        if ($method != "link") {
             $this->pagination_form($link, $total_items, $limit, $post_id, $pagination_style, $color, $method);
         } else {
             $this->pagination_link($link, $total_items, $limit, $post_id, $pagination_style, $color);
@@ -363,7 +394,7 @@ class Dbt_search_form {
     /**
      * Disegna la paginazione come link
      */
-    private function pagination_link($link, $total_items, $limit, $post_id, $pagination_style, $color) {
+    public function pagination_link($link, $total_items, $limit, $post_id, $pagination_style, $color) {
 		$pages = ceil($total_items / $limit);
 		$prefix = 'dbt'.$post_id;
 		$link = $this->filter_order_pagination_add_query_args($link, $prefix, 'page');
@@ -453,15 +484,13 @@ class Dbt_search_form {
     /**
      * Disegna la paginazione come form
      */
-    private function pagination_form($link, $total_items, $limit, $post_id, $pagination_style, $color, $method) {
+    public function pagination_form($prefix, $total_items, $limit, $post_id, $pagination_style, $color, $method) {
 
-        $form_open = $this->open_form($link, $method);
+        $form_open = $this->open_form(get_permalink(), $method);
 		$uniqid = 'dbt_' . Dbt_fn::get_uniqid();
         
         $pages = ceil($total_items / $limit);
-		$prefix = 'dbt'.$post_id;
-		$link = $this->filter_order_pagination_add_query_args($link, $prefix, 'page');
-		$conc = (strpos($link, "?") !== false) ? "&amp;" : "?";
+		//$prefix = 'dbt'.$post_id;
 		if (isset($_REQUEST[$prefix."_page"])) {
 			$curr_page =$_REQUEST[$prefix."_page"];
 		}
@@ -476,7 +505,7 @@ class Dbt_search_form {
       
 		<div class="dbt-pagination dbt-pagination-<?php echo $color; ?>">
             <?php if (!self::$pagination_hidden_field) {
-                ?><input type="hidden" name="dbt<?php echo $post_id; ?>_page" id="<?php echo $uniqid; ?>" value="" class="js-dbt-page"><?php 
+               
                 self::$pagination_hidden_field = true;
                 self::$pagination_unique_id = $uniqid;
             } else {
@@ -487,15 +516,14 @@ class Dbt_search_form {
             <?php if ($pages > 1) : ?>
                 <?php if ( $pagination_style == 'numeric') : ?>
                     <div class="dbt-pagination-btns">
-                    self::$form_id 
                         <?php if ($prev_page > 0) : ?>
-                            <span class="pagination_click" onclick="dbt_submit_pagination('<?php echo $uniqid ; ?>', '1')">&laquo;</span>
+                            <span class="pagination_click" onclick="dbt_submit_pagination(gp_parents(this, 'form'), '1')">&laquo;</span>
                         <?php else : ?>
                             <span >&laquo;</span>
                         <?php endif; ?>
                         <?php if ($prev_page > 0) : ?>
                         
-                            <span class="pagination_click" onclick="dbt_submit_pagination('<?php echo $uniqid ; ?>', '<?php echo $prev_page; ?>')">&lsaquo;</span>
+                            <span class="pagination_click" onclick="dbt_submit_pagination(gp_parents(this, 'form'), '<?php echo $prev_page; ?>')">&lsaquo;</span>
                         <?php else : ?>
                             <span >&laquo;</span>
                         <?php endif; ?>
@@ -509,18 +537,18 @@ class Dbt_search_form {
                         if ($draw_page < 1 ) $draw_page = 1;
                         while ($draw < $num_btn && $draw_page <= $pages) {
                             $draw++;
-                            ?><span class="pagination_click<?php echo ($draw_page == $curr_page) ? ' active' : ''; ?>" onclick="dbt_submit_pagination('<?php echo $uniqid ; ?>', '<?php echo $draw_page; ?>')"><?php echo $draw_page; ?></span><?php
+                            ?><span class="pagination_click<?php echo ($draw_page == $curr_page) ? ' active' : ''; ?>" onclick="dbt_submit_pagination(gp_parents(this, 'form'), '<?php echo $draw_page; ?>')"><?php echo $draw_page; ?></span><?php
                             $draw_page++;
                             
                         }	
                         ?>
                         <?php if ($next_page <= $pages) : ?>
-                            <span class="pagination_click" onclick="dbt_submit_pagination('<?php echo $uniqid ; ?>', '<?php echo $next_page; ?>')">&rsaquo;</span>
+                            <span class="pagination_click" onclick="dbt_submit_pagination(gp_parents(this, 'form'), '<?php echo $next_page; ?>')">&rsaquo;</span>
                         <?php else : ?>
                             <span>&rsaquo;</span>
                         <?php endif; ?>
                         <?php if ($curr_page < $pages) : ?>
-                            <span class="pagination_click" onclick="dbt_submit_pagination('<?php echo $uniqid ; ?>', '<?php echo $pages; ?>')">&raquo;</span>
+                            <span class="pagination_click" onclick="dbt_submit_pagination(gp_parents(this, 'form'), '<?php echo $pages; ?>')">&raquo;</span>
                         <?php else : ?>
                             <span>&raquo;</span>
                         <?php endif; ?>
@@ -529,7 +557,7 @@ class Dbt_search_form {
                 <?php else : ?>
                     <div class="dbt-pagination-btns">
                         <?php if ($prev_page > 0) : ?>
-                            <span class="pagination_click" onclick="dbt_submit_pagination('<?php echo $uniqid ; ?>', '<?php echo $prev_page; ?>')">&laquo;</span>
+                            <span class="pagination_click" onclick="dbt_submit_pagination(gp_parents(this, 'form'), '<?php echo $prev_page; ?>')">&laquo;</span>
                         <?php else : ?>
                             <span >&laquo;</span>
                         <?php endif; ?> 
@@ -542,7 +570,7 @@ class Dbt_search_form {
                         </select>
                     <div class="dbt-pagination-btns">
                         <?php if ($next_page <= $pages) : ?>
-                            <span class="pagination_click"  onclick="dbt_submit_pagination('<?php echo $uniqid ; ?>', '<?php echo $next_page; ?>')">&raquo;</span>
+                            <span class="pagination_click"  onclick="dbt_submit_pagination(gp_parents(this, 'form'), '<?php echo $next_page; ?>')">&raquo;</span>
                         <?php else : ?>
                             <span>&raquo;</span>
                         <?php endif; ?>
@@ -557,6 +585,4 @@ class Dbt_search_form {
             ?></form><?php 	
         }
 	}
-
-
 }

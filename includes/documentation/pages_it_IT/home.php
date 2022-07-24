@@ -9,6 +9,13 @@ if (!defined('WPINC')) die;
     <br>
     A partire da una query, una lista permette di gestire la modifica e la visualizzazione dei dati in modo più avanzato.<br>
     Da una lista viene generato uno shortcode per la visualizzazione del frontend.</div>
+    <h3>Shortcodes</h3>
+    <p>Per stampare la grafica di una lista puoi usare lo shortcode:</p>
+    <p><b>[dbt_list id=list_id]</b> dove id è l'id della lista. Se vuoi visualizzare più liste all'interno della stessa pagina che derivano dalla stessa lista puoi impostare l'attributo prefix con un codice breve univoco tipo prefix="abc". 
+    Se nel tab setting hai impostato dei filtri [%params.xxx] puoi passarli all'interno della lista per filtrare ulteriormente i risultati. Esempio:<br>
+    [dbt_list id=list_id xxx=23]
+    </p>
+    <p><b>[dbt_tmpl_engine]</b> Per eseguire il template engine personalizzato</p>
     
     <h3>Template Engine</h3>
         <div class="dbt-help-p">Puoi modificare i dati che visualizzi attraverso un template engine integrato<br>

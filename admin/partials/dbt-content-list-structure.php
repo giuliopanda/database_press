@@ -1,21 +1,21 @@
 <?php
 /**
  * La grafica del tab list view formatting
- * http://localhost/projects/database-table/wp-admin/admin.php?page=dbt_list&section=list-structure&dbt_id=6
+ * /admin.php?page=dbt_list&section=list-structure&dbt_id=xxx
  * Tutte le configurazioni di una lista
  * 
- * 
- *  (come deve essere gestito un campo? Ad esempio: se lo voglio lavorare come numero e quindi fare il cast se è un testo, oppure come un link, o come un serializzato, o ancora come un'immagine.)
  * @var $items Lo schema della tabella
  */
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+$append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __('Save', 'database_tables') . '</span>';
+
 ?>
 <div class="dbt-content-header">
     <?php require(dirname(__FILE__).'/dbt-partial-tabs.php'); ?>
 </div>
 <div class="dbt-content-table js-id-dbt-content">
-    <?php if ($dtf::echo_html_title_box('list', $list_title, '', $msg, $msg_error)) : ?>
+    <?php if ($dtf::echo_html_title_box('list', $list_title, '', $msg, $msg_error, $append)) : ?>
         <form id="list_structure" method="POST" action="<?php echo admin_url("admin.php?page=dbt_list&section=list-structure&dbt_id=".$id); ?>">
             <input type="hidden" name="action" value="list-structure-save" />
             <input type="hidden" name="table" value="<?php echo @$import_table; ?>" />

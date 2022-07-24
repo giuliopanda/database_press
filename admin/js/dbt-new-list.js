@@ -56,7 +56,6 @@ function dbt_create_list_show_form( from_sql ) {
         $content_radio.append('<div class="dbt-dropdown-line-flex"><span style="margin-right:.5rem"><input name="table_choose" type="radio" class="js-radio-table-choose"  value="choose_table_from_db"></span><div class="dbt-xmp">Choose an existing table</div></div>');
         $form.append($content_radio);
       
-        $form.append('<div class="dbt-form-row" id="dbt_sql_new_table_name"><label><span class="dbt-form-label">New Table Name</span></label><input name="new_table_name"></div>');
         $select_tables = jQuery('<select name="mysql_table_name"></select>');
         dtf_tables.sort();
         for (x in dtf_tables ) {
@@ -82,10 +81,8 @@ function dbt_create_list_show_form( from_sql ) {
         jQuery(".js-radio-table-choose:radio").change(function() {
             selected_value = jQuery(".js-radio-table-choose:checked").val();
             if (selected_value == 'create_new_table') {
-                jQuery('#dbt_sql_new_table_name').css('display','block');
                 jQuery('#dbt_sql_select_tables').css('display','none');
             } else {
-                jQuery('#dbt_sql_new_table_name').css('display','none');
                 jQuery('#dbt_sql_select_tables').css('display','block');
             }
         });

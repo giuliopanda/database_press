@@ -9,97 +9,150 @@ class Dbt
 {
 
     static $frontend_template_engine_data = [];
-
     /**
      * Carica una lista da un id e ne ritorna l'html. Praticamente la stessa cosa che fa lo shortcode!
-     * @param nteger $post_id
-     * @param Boolena $ajax Se stampare i filtri e la form che la raggruppa oppure no (true)
+     * @param Int $post_id
+     * @param Boolean $only_table Se stampare i filtri e la form che la raggruppa oppure no (true)
+     * @param Array $params I parametri aggiuntivi che verranno salvati in [%params
+     * @param String $prefix Il prefisso delle variabili che verranno passate
      */
-    static function get_list($post_id, $ajax = false) {
-        $post        = Dbt_functions_list::get_post_dbt($post_id);
-        $table_model = Dbt_functions_list::get_model_from_list_params($post->post_content);
-        $extra_params =  Dbt_functions_list::get_extra_params_from_list_params(@$post->post_content['sql_filter']);
-        if ($table_model) {
-            PinaCode::set_var('global.dbt_filter_path', "dbt".$post_id);
-            PinaCode::set_var('global.dbt_id', $post_id);
-            Dbt_functions_list::add_frontend_request_filter_to_model($table_model, $post->post_content , $post_id);
-            $table_model->get_list();
-            $primaries = $table_model->get_pirmaries();
-            //var_dump($table_model->items);
-            PinaCode::set_var('global.limit', $table_model->limit);
-            PinaCode::set_var('global.limit_start', $table_model->limit_start);
-            $total_row = $table_model->get_count();
-            //var_dump ($post->post_content["frontend_view"]);
-            $frontend_setting = @$post->post_content["frontend_view"];
-            if (is_array($frontend_setting) && @$frontend_setting['if_textarea'] != "" && @$frontend_setting['checkif'] == 1 ) {
-                $ris = PinaCode::math_and_logic($frontend_setting['if_textarea']);
-                if(!$ris)   {
-                    return PinaCode::execute_shortcode($frontend_setting["content_else"]);
-                }
-            }
-            $type = "TABLE_BASE";
-            if (is_array($frontend_setting) && isset($frontend_setting['type'])) {
-                $type = $frontend_setting['type'];
-            } 
-            $table_model->update_items_with_setting($post->post_content);
-            if (is_array($table_model->items)) {
-                $table_header = reset($table_model->items);
-            } else {
-                $table_header = [];
-            }
-            $table_model->check_for_filter();
-            if ($type == "TABLE_BASE") {
-                // TODO verificare se remove_hide_columns deve essere sostituita da  Dbt_fn::remove_hide_columns_in_row
-                Dbt_fn::remove_hide_columns($table_model);
-                if (isset($post->post_content['frontend_view']['detail_type']) && $post->post_content['frontend_view']['detail_type'] != "no") {
-                    Dbt_fn::items_prepare_frontend_link($table_model, $post_id,$post->post_content);
-                }
-                $html_table   = new Dbt_html_table_frontend();
-                $html_table->add_extra_params($extra_params);
-                $html_table->add_list_id($post_id);
-                if (isset($post->post_content['frontend_view'])) {
-                    $html_table->add_frontend_view_setting($post->post_content['frontend_view']);
-                }
-                $html_table->add_no_result($frontend_setting['no_result_custom_text']);
-              //  add_filter('dbt_frontend_table_cell', 'prepare_link',10, 5);
-                return $html_table->template_render($table_model, $ajax); 
-            } else {
-                // EDITOR
-                $result = [];
-                $text = @$frontend_setting["content"];
-                $items = $table_model->items;
-                if (is_array($items)) {
-                    $first_row = array_shift($items);
-                    $first_row = array_map(function($el) {return $el->name;}, $first_row);
-                    PinaCode::set_var('total_row', $total_row);
-                    PinaCode::set_var('key',0);
-                    $first_row = Dbt_fn::remove_hide_columns_in_row($table_header, $first_row);
-                    PinaCode::set_var('data',  $first_row);
-                } else {
-                    PinaCode::set_var('total_row', 0);
-                    PinaCode::set_var('key',0);
-                    PinaCode::set_var('data',  []);
-                }
-                if (isset($frontend_setting["content_header"])) {
-                    $result[] = PinaCode::execute_shortcode($frontend_setting["content_header"]);
-                }
-                //var_dump ($first_row);
-                if (is_array($items) && $text != "") {
-                    foreach ($items as $key=> $item) {
-                        PinaCode::set_var('primaries', Dbt_fn::data_primaries_values( $primaries, $table_header, $item));
-                        PinaCode::set_var('key', ($key+1));
-                        $item = Dbt_fn::remove_hide_columns_in_row($table_header, $item);
-                        PinaCode::set_var('data', $item);
-                        $result[] = PinaCode::execute_shortcode($text);
-                    }
-                }
-                PinaCode::set_var('data', []);
-                if (isset($frontend_setting["content_footer"])) {
-                    $result[] = PinaCode::execute_shortcode($frontend_setting["content_footer"]);
-                }
-                return implode("",$result);
+    static function get_list($post_id, $only_table = false, $params = [], $prefix="") {
+        Dbt_fn::require_init();
+
+        $custom_data = apply_filters('dbt_frontend_get_list', '', $post_id);
+        if ($custom_data != "") {
+            return $custom_data;
+        }
+        $ori_params =  PinaCode::get_var('params');
+        // se esiste un div_id allora verifico se esistono i params specifici per quella lista
+        //if (isset($_REQUEST['dbt_div_id'])) {   
+        //    $spec_params =  PinaCode::has_var('params.'.$_REQUEST['dbt_div_id']);
+        //    $params = PinaCode::get_var('params.'.$_REQUEST['dbt_div_id']);
+        //    PinaCode::set_var('params', $params);
+        //}
+        PinaCode::set_var('params', $params);
+        $show_trappings = true;
+        if (Dbt_fn::is_form_open()) {
+            // la form che uso di solito per gestire le tabelle è stata già aperta e non chiusa
+            // da un'altra quindi si sta renderizzando una lista dentro un'altra lista
+            // per cui disabilito ordinamento, paginazione e ricerca!!
+            $show_trappings = false;
+        }
+        Dbt_fn::set_open_form();
+        $list =  new Dbt_render_list($post_id, null, $prefix);
+        //print ("REQUEST['dbt_div_id'] ");
+        //var_dump($_REQUEST);
+        if ($only_table || !$show_trappings) {
+            //print " OK ";   
+            $list->hide_div_container();
+            // setto il div
+            if (isset($_REQUEST['dbt_div_id'])) {
+                $list->set_uniqid($_REQUEST['dbt_div_id']);
             }
         }
+		//print ("RIS : ".$list->uniqid_div."| ");
+        if (!$show_trappings) {
+            // Faccio finta che la form è stata già create
+            $list->block_opened = true;
+            $list->frontend_view_setting['table_sort'] = false;
+        }
+        if ( $list->get_frontend_view('type', 'TABLE_BASE') == "TABLE_BASE") {
+            ob_start();
+            if ($list->get_frontend_view('table_search') == 'simple' && $show_trappings) {
+                $list->search();
+            }
+            if (in_array($list->get_frontend_view('table_pagination_position'), ["up",'both']) && $show_trappings) {
+                $list->pagination();
+            }
+            if (($list->no_result == '' || empty($list->no_result)) || count($list->table_model->items) > 1) {
+                $list->table();
+            } else {
+                echo $list->no_result; 
+            }
+            if (in_array($list->get_frontend_view('table_pagination_position'), ["down",'both']) && $show_trappings) {
+                $list->pagination();
+            }
+            if ($show_trappings) {
+                $list->end();
+            } 
+            return ob_get_clean();
+        } else {
+            // EDITOR
+            $result = [];
+            $items = $list->table_model->items;
+            $text = $list->get_frontend_view('content');
+            
+            if ($list->get_frontend_view('table_update') != "none") {
+                ob_start() ;
+                $list->open_block(false);
+                $result[] = ob_get_clean();
+                ob_start();
+                $list->search();
+                $search = ob_get_clean();
+                PinaCode::set_var('html.search',  $search);
+            } else {
+                PinaCode::set_var('html.search',  '');
+            }
+            if (is_array($items)) {
+                $table_header = reset($list->table_model->items);  
+                $first_row = array_shift($items);
+                $first_row = array_map(function($el) {return $el->name;}, $first_row);
+                PinaCode::set_var('total_row', $list->table_model->get_count());
+                PinaCode::set_var('key',0);
+                $first_row = Dbt_fn::remove_hide_columns_in_row($table_header, $first_row);
+                PinaCode::set_var('data',  $first_row);
+                if ($list->get_frontend_view('table_update') != "none") {
+                    ob_start();
+                    $list->pagination();
+                    $pagination = ob_get_clean();
+                    PinaCode::set_var('html.pagination',  $pagination);
+                } else {
+                    PinaCode::set_var('html.pagination',  '');
+                }
+            } 
+            if (!is_array($items) || !$show_trappings) {
+                PinaCode::set_var('total_row', 0);
+                PinaCode::set_var('key',0);
+                PinaCode::set_var('data',  []);
+                PinaCode::set_var('html.pagination',    '');
+                PinaCode::set_var('html.search',    '');
+            }
+           
+            $result[] = PinaCode::execute_shortcode($list->get_frontend_view('content_header'));
+            
+            //var_dump ($first_row);
+            if (is_array($items) && $text != "") {
+                foreach ($items as $key=> $item) {
+                    //PinaCode::set_var('primaries', Dbt_fn::data_primaries_values( $primaries, $table_header, $item));
+                    PinaCode::set_var('key', ($key+1));
+                    //$item = Dbt_fn::remove_hide_columns_in_row($table_header, $item);
+                    PinaCode::set_var('data', $item);
+                    $result[] = PinaCode::execute_shortcode($text);
+                }
+            }
+            PinaCode::set_var('data', []);
+            $result[] = PinaCode::execute_shortcode($list->get_frontend_view('content_footer'));
+           
+            if ($list->get_frontend_view('table_update') != "none") {
+                ob_start() ;
+                $list->end();
+                $result[] = ob_get_clean();
+            }
+            return implode("",$result);
+        }
+        if ($show_trappings) {
+            Dbt_fn::set_close_form();
+        }
+        PinaCode::set_var('params', $ori_params);
+    }
+
+    /**
+     * Ritorna la classe che genera la tabella
+     * return \Dbt_render_list;
+     */
+    static function render($dbt_id, $mode = null) {
+        Dbt_fn::require_init();
+        return new Dbt_render_list($dbt_id, $mode);
     }
 
     /**
@@ -235,18 +288,27 @@ class Dbt
 
     /**
      * Ritorna l'elenco delle chiavi primarie di una lista. I campi estratti sono gli alias!
-     *
+     * TODO NON funziona, vorrei che fosse salvato nella lista comunque sto lavorando su model->add_primary_ids
      * @param int $dbt_id
      * @return array [table=>primary_name, ]
      */
-    static function get_primaries_id($dbt_id) {
+    static function get_primaries_id($dbt_id, $name_request = true) {
         $post  = Dbt_functions_list::get_post_dbt($dbt_id);
         $sql =  @$post->post_content['sql'];
         $primaries = [];
         if ( $sql != "") {
             $table_model = new Dbt_model();
             $table_model->prepare($sql);
-           $primaries = $table_model->get_pirmaries(true);
+            $primaries = $table_model->get_pirmaries(true);
+            if ($name_request) {
+                $list_settings = $post->post_content["list_setting"];
+                foreach ($primaries as &$n) {
+                    if (isset($list_settings[$n])) {
+                        $n = $list_settings[$n]->name_request;
+                    }
+                }
+                
+            }
         }
         return $primaries;
     }
@@ -284,7 +346,8 @@ class Dbt
             }
             $table_model->add_primary_ids();
             $table_model->get_list();
-            $table_model->update_items_with_setting($post->post_content);
+            // prevengo l'htmlentities e il substr del testo.
+            $table_model->update_items_with_setting($post->post_content, false, -1);
             $items = $table_model->items;
             if (is_countable($items) && $table_model->last_error == "") {
                 //items|schema|model|schema+items
@@ -319,8 +382,9 @@ class Dbt
             Dbt_fn::require_init();
         }
         $dbt_post = Dbt_functions_list::get_post_dbt($dbt_id);
-      
+        // qui ci devono essere tutte le chiavi primarie!
         $name_requests = self::get_primaries_id($dbt_id);
+        //var_dump ($name_requests);
         $where = [];
         $columns = Dbt::get_ur_list_columns($dbt_id);
         if (is_array($dbt_ids)) {
@@ -337,6 +401,8 @@ class Dbt
             $field_setting = $dbt_post->post_content["list_setting"][$columns[$name_request]];
             $where[] = ['op' => '=', 'column' => $field_setting->mysql_name, 'value' => esc_sql($dbt_ids) ];
         }
+        //print "where: ";
+        //var_dump ($where);
         $results = Dbt::get_data($dbt_id, 'items', $where, 1);
         self::$frontend_template_engine_data[$dbt_id] = $results;
         if (is_array($results) && count($results) == 1) {

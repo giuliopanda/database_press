@@ -61,8 +61,9 @@ if (!defined('WPINC')) die;
                         <input type="number" name="filter[limit]" id="Element_per_page" class="dtf-pagination-input" value="<?php echo absint($table_model->limit); ?>" style="width:3.4rem; padding-right:0;" min="1" max="500">
                         <div name="change_limit_start" class="button action dtf-pagination-input"  onclick="dtf_submit_table_filter('change_limit')" >Apply</div>
                         <?php Dbt_fn::get_pagination($table_model->total_items, $table_model->limit_start, $table_model->limit); ?>
-                        <div id="dbt-bnt-clear-filter-query" class="button"  onclick="dbt_clear_filter()"><?php _e('Clear Filter','database_tables'); ?></div>
-                    
+                        <?php if (Dbt_fn::is_query_filtered())  : ?>
+                            <div id="dbt-bnt-clear-filter-query" class="button"  onclick="dbt_clear_filter()"><?php _e('Clear Filter','database_tables'); ?></div>
+                        <?php endif; ?>
                         <br class="clear">
                     </div>
                 <?php endif; ?>

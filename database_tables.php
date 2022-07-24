@@ -9,7 +9,7 @@
  * Plugin Name:       Easy Database tables
  * Plugin URI:        https://github.com/giuliopanda/database-tables
  * Description:       Database Tables is a tool designed to manage the administration and publication of new MySQL tables.
- * Version:           0.6.0
+ * Version:           0.7.0
  * Requires at least: 5.9
  * Requires PHP:      7.2
  * Author:            Giulio Pandolfelli
@@ -21,12 +21,12 @@
 namespace DatabaseTables;
 
 if (!defined('WPINC')) die;
-define('database_tables_VERSION', '0.6.0');
-/*
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-*/
+define('database_tables_VERSION', '0.7.0');
+
+//ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
+//error_reporting(E_ALL);
+
 define('DBT_DIR',   __DIR__ ."/");
 
 require_once(DBT_DIR . "includes/dbt-loader.php");
@@ -41,7 +41,7 @@ require_once(DBT_DIR . "includes/pinacode/pinacode-init.php");
 
 
 // frontend
-require_once(DBT_DIR . "includes/dbt-html-table-frontend.php");
+//require_once(DBT_DIR . "includes/dbt-html-table-frontend.php");
 require_once(DBT_DIR . "includes/dbt-html-search-frontend.php");
 
 

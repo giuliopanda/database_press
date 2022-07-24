@@ -3,8 +3,8 @@
  * header-type:rif
  * header-order: 04
  * header-title: List of tables
- * header-tags:table-sql
- * header-description: Pagina di consultazione con l'elenco delle colonne di tutte le tabelle
+ * header-tags:table-sql list of tables mysql column
+ * header-description: Consultation page with the list of columns of all tables
  * header-package-title: Manage DB
  * header-package-link: manage-db.php
  */
