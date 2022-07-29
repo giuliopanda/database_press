@@ -19,13 +19,17 @@ Use the database tables plug-in to create new mysql tables, manage their content
 
 The plugin is not yet published in the wordpress repository
 
+
+= 0.8.1 - 2022-07-29 =
+- fixbug: The codeMirror did not appear on all wordpress configurations.
+
 = 0.8.0 - 2022-07-29 =
 - Improvement: Changed the page titles of the "list view formatting" and added the column types User, Post and Link popup detail.
 - Improvement: Removed ids added secretly in browse table queries
 - Fixbug: In the table Structure page when you changed the column to primary key, you could select multiple primary keys and sometimes the select disappeared.
 - Fixbug: Form: I create a form with a required field. I open the modification of the contents and save leaving the mandatory field not filled in. The form disappears, but does not reappear with the error message.
 - Improvement: Management of the decimal field.
-- Fixbug: Test import creation of temporary table with correct ids
+- Fixbug: Test import creation of temporary table with correct ids.
 - Fixbug: List view formatting in showing titles and field types.
 
 

@@ -5,6 +5,9 @@ Database Tables is a wordpress plugin designed to manage the administration and 
 
 The plugin is not yet published in the wordpress repository
 
+= 0.8.1 - 2022-07-29 =
+- fixbug: The codeMirror did not appear on all wordpress configurations.
+
 = 0.8.0 - 2022-07-29 =
 - Improvement: Changed the page titles of the "list view formatting" and added the column types User, Post and Link popup detail.
 - Improvement: Removed ids added secretly in browse table queries

@@ -123,19 +123,25 @@ class Dbt_loader {
 	/**
 	 * Gli script per far funzionare l'editor
 	 */
-	public function codemirror_enqueue_scripts($hook) {
-		$cm_settings['codeEditor'] = wp_enqueue_code_editor(array('type' => 'text/css'));
-		wp_localize_script('jquery', 'cm_settings', $cm_settings);
-	    //wp_enqueue_script('wp-theme-plugin-editor');
-		//wp_enqueue_style('wp-codemirror');
-		wp_enqueue_editor();
-		/*
+	public function codemirror_enqueue_scripts() {
 		if ( ! class_exists( '_WP_Editors', false ) ) {
-			require ABSPATH . WPINC . '/class-wp-editor.php';
+			require( ABSPATH . WPINC . '/class-wp-editor.php' );
 		}
-		\_WP_Editors::enqueue_scripts();
-		\_WP_Editors::editor_js();
-		*/
+		$settings = wp_get_code_editor_settings( $args );
+		// copio wp_enqueue_code_editor per escludere 'false' === wp_get_current_user()->syntax_highlighting
+		if ( empty( $settings ) || empty( $settings['codemirror'] ) ) {
+			return false;
+		}
+
+		wp_enqueue_script( 'code-editor' );
+		wp_enqueue_style( 'code-editor' );
+
+		wp_enqueue_script( 'csslint' );
+		wp_enqueue_script( 'htmlhint' );
+		wp_enqueue_script( 'jshint' );
+		wp_add_inline_script( 'code-editor', sprintf( 'jQuery.extend( wp.codeEditor.defaultSettings, %s );', wp_json_encode( $settings ) ) );
+		wp_enqueue_editor();
+
 	}
 
 	/**
