@@ -614,6 +614,10 @@ if (!function_exists('pinacode_fn_wp_link')) {
 			$id = PinaCode::get_registry()->short_code($attributes['post_id']);
 			$link = get_permalink($id);
 			unset($attributes['post_id']);
+		} elseif (@array_key_exists('id', $attributes)) {
+			$id = PinaCode::get_registry()->short_code($attributes['id']);
+			$link = get_permalink($id);
+			unset($attributes['id']);
 		} else {
 			$link = get_permalink();
 		}

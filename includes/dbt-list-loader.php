@@ -93,13 +93,12 @@ class Dbt_list_loader {
                     if ($limit > 0) {
                         $post->post_content['sql_limit'] = $limit;
                     }
-                    // TODO separo anche l'ORDER
-                    //	$post->post_content['sql_order'] = ['field'=>sanitize_text_field($_REQUEST['sql_order']['field']),'sort'=>sanitize_text_field($_REQUEST['sql_order']['sort'])] ;
-                    $post->post_content['sql'] = $table_model->get_current_query();
-
+                    
+                  
                     // Questo pezzo di codice è copiato pari pari da class-database-list-admin.php > list_sql_save()
                     // Rigenero list_structure perché risalvando la query potrebbero essere cambiati i parametri!
                     $table_model->list_add_limit(0, 1);
+                    $table_model->add_primary_ids();
                     $items = $table_model->get_list();
                     if (isset($post->post_content['list_setting'])) {
                         $list_setting = $post->post_content['list_setting'];
@@ -107,17 +106,16 @@ class Dbt_list_loader {
                         $list_setting = [];
                     }
                     $setting_custom_list =  Dbt_functions_list::get_list_structure_config($items, $list_setting);
-            
+                    $table_model->remove_limit();
+                    $table_model->remove_order();
+                    $post->post_content['sql'] = $table_model->get_current_query();
+
+                    
                     $post->post_content['list_setting'] = [];
                     foreach ($setting_custom_list as $column_key => $list) {
                         $post->post_content['list_setting'][$column_key] =  $list->get_for_saving_in_the_db();
                     }
 
-                    // TODO FORM options
-
-                    // TODO DELETE options
-
-                    // TODO MENU options
                     $dbt_admin_show  = ['page_title'=>sanitize_text_field($title), 'menu_title'=>sanitize_text_field($title), 'menu_icon'=>'dashicons-database', 'menu_position' => 120, 'capability'=>'dbt_manage_'.$id, 'slug'=> 'dbt_'.$id, 'show' => 1];
                     add_post_meta($id,'_dbt_admin_show', $dbt_admin_show, false);
                 

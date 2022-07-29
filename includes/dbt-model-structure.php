@@ -197,7 +197,8 @@ class Dbt_model_structure
         return $return;
     }
     /**
-     * Passa la colonna del db e i dati del form e ne crea la query per modificarla
+     * Passa la colonna del db e i dati del form e ne crea la query per modificarla.
+     * Prima però verifica se è da modificare oppure no!
     * column: OBJECT:	["field_name"]=> string(2) "ID" ["field_type"]=> string(6) "BIGINT" ["field_length"]=> string(2) "20" ["attributes"]=> string(8) "UNSIGNED" ["null"]=> string(1) "f" ["default"]=> NULL ["primary"]=> string(1) "t" 
      * @param Array $column è l'elenco delle colonne originali
      * @param String $key_column l'id della colonna
@@ -212,8 +213,8 @@ class Dbt_model_structure
         if ($req_update['field_name'][$key_req] != $column->field_name ) {
             $change = true;
         }
-        if (($req_update['field_type'][$key_req] != $column->field_type || ($req_update['field_length'][$key_req] != $column->field_length AND $req_update['field_length'][$key_req] > 0) || $req_update['attributes'][$key_req] != $column->attributes) || ($req_update['default'][$key_req] != $column->default ) || ($req_update['null'][$key_req] != $column->null ) ) {
-          
+        if (($req_update['field_type'][$key_req] != $column->field_type || ($req_update['field_length'][$key_req] != $column->field_length AND ($req_update['field_length'][$key_req] > 0 && !in_array(strtoupper($column->field_type),['INT','TINYINT','BIGINT','SMALLINT','MEDIUMINT'] ))) || $req_update['attributes'][$key_req] != $column->attributes) || ($req_update['default'][$key_req] != $column->default ) || ($req_update['null'][$key_req] != $column->null ) ) {
+           // print (" CHANGE > ".$req_update['field_type'][$key_req]." != ".$column->field_type." || (".$req_update['field_length'][$key_req]." != ".$column->field_length." AND ".$req_update['field_length'][$key_req]." > 0) || ".$req_update['attributes'][$key_req]." != ".$column->attributes.") || ( ".$req_update['default'][$key_req]." != ".$column->default." ) || ( ".$req_update['null'][$key_req]." !=  ".$column->null .") ");
             $change = true;
         }
         if ($req_update['default'][$key_req] != $column->default  || $change) {
@@ -434,7 +435,7 @@ class Dbt_model_structure
             $this->last_error = __("Primary key is missing", 'database_tables');
         }
         if (!$this->check_table_name()) {
-            $this->last_error = __(sprintf("Table %s already exists!",  $this->get_table_name()), 'database_tables');
+            $this->last_error = sprintf(__("Table %s already exists!", 'database_tables'),  $this->get_table_name());
             return false;
         }
         $table_name = $this->get_table_name();

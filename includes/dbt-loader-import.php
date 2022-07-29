@@ -129,7 +129,7 @@ class Dbt_loader_import {
 		$csv_delimiter = $_REQUEST['csv_delimiter'];
 		$csv_first_row_as_headers = Dbt_fn::get_request('csv_first_row_as_headers', false, 'boolean');
 		$table_insert  = Dbt_fn_import::convert_csv_data_request_to_vars($import_tables, $_REQUEST['import_field'], $_REQUEST['import_csv_column']);
-		$csv_items = $temporaly_files->read_csv($csv_filename, $csv_delimiter, $csv_first_row_as_headers, 100);
+		$csv_items = $temporaly_files->read_csv($csv_filename, $csv_delimiter, $csv_first_row_as_headers, 200);
 		array_shift($csv_items);
 		$wpdb->query("SET sql_mode = '';");
 		// importo i csv

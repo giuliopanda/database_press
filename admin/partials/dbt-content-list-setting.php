@@ -99,7 +99,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_setting()">' . __('
                         </div>
                         <div class="dbt-form-row">
                             <label>
-                                <span class="dbt-form-label"><?php _e('Table update', 'database_tables'); ?></span>
+                                <span class="dbt-form-label"><?php _e('Table update', 'database_tables');  Dbt_fn::echo_html_icon_help('dbt_list-list-setting','update'); ?></span>
                                 <?php echo Dbt_fn::html_select(['get' => 'Get', 'post' => 'Post', 'ajax' => 'Ajax'], true, 'name="frontend_view[table_update]"', @$few['table_update']); ?>
                             </label>
                         </div>

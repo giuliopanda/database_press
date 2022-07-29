@@ -44,9 +44,12 @@ class Dbt_fn_import {
         if (array_key_exists($primary_key,$fields )) {
             $csv_pri = $fields[$primary_key];
             foreach ($csv_items as $item) {
-                if (array_key_exists($csv_pri, $item)) {
-                    $ids[] = "'".esc_sql($item[$csv_pri])."'";
+                PinaCode::set_var('item', $item) ;
+                $val = PinaCode::execute_shortcode(stripslashes($csv_pri));
+                if ($val > 0) {
+                    $ids[] = "'".esc_sql($val)."'";
                 }
+                
             }
         }
         $ids = array_unique($ids);
@@ -65,6 +68,7 @@ class Dbt_fn_import {
         $r = $wpdb->query('CREATE TEMPORARY TABLE IF NOT EXISTS `'.esc_sql($table_temp).'` LIKE `'.esc_sql($ti->table).'`;');       
         $ids = Dbt_fn_import::get_ids($csv_items, $primary_key, $ti->fields);
         $ids[] = $wpdb->get_var('SELECT `'.esc_sql($primary_key).'` FROM `'.esc_sql($ti->table).'` ORDER BY `'.esc_sql($primary_key).'` DESC LIMIT 1');
+
         if ($r) {
             if (count ($ids) > 0) {     
                 $wpdb->query('INSERT INTO `'.esc_sql($table_temp).'` SELECT * FROM `'.esc_sql($ti->table).'` WHERE `'.esc_sql($primary_key).'` IN ('.implode(",", $ids).');');
@@ -103,6 +107,7 @@ class Dbt_fn_import {
                 $update[$field] = $value;
             }
         }       
+        $ris = $wpdb->get_results('SELECT * FROM `'.esc_sql($table).'`');
         if ($sql_where != "") {
             $exist_record = $wpdb->get_results('SELECT * FROM `'.esc_sql($table).'` WHERE '.$sql_where." LIMIT 10");
         }

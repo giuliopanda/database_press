@@ -185,6 +185,10 @@ function gp_form_field(label, field_name, val, type, param, count_block) {
         } else if (type=="NUMERIC") {
             $field_label.append('<span class="dbt-form-label"><span class="dashicons dbt-label-icon dashicons-editor-ol" title="Number"></span> '+label+'</span>');
             $field = jQuery('<input class="form-input-edit" type="number" step="any" name="'+field_name+'">');
+        }  else if (type=="DECIMAL") {
+            //Decimal
+            $field_label.append('<span class="dbt-form-label"><span class="dashicons dbt-label-icon dashicons-editor-ol" title="Number"></span> '+label+'</span>');
+            $field = jQuery('<input class="form-input-edit" type="number" step="0.01" name="'+field_name+'">');
         } else if (type=="SELECT") {
             $field_label.append('<span class="dbt-form-label"><span class="dashicons dbt-label-icon dashicons-editor-ol" title="Number"></span> '+label+'</span>');
             $field = jQuery('<select class="form-input-edit" name="'+field_name+'"></select>');
@@ -353,7 +357,7 @@ function gp_form_field(label, field_name, val, type, param, count_block) {
             }
             $grid_field_col1.append($att_cust_img_cont);
             $field_label.append($grid_field);
-        } else {
+        }  else {
             //l'input classico
             $field_label.append('<span class="dbt-form-label"><span class="dashicons dbt-label-icon dashicons-editor-quote"></span> '+label+'</span>');
             if (typeof(param) == 'object') {

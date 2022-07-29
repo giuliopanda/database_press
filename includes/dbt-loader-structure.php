@@ -178,7 +178,7 @@ class Dbt_loader_structure {
 			$model_structure= new Dbt_model_structure($table);
 			$req_update = $_REQUEST['table_update'];
 			$position = "FIRST!"; // questo servirà per l'ordinamento delle colonne. Ancora non è usato!.
-			// Aggiorno tutte le colonne sulla tabella temporanea
+			// Aggiorno tutte le colonne sulla tabella
 			foreach ($req_update['field_original_name'] as $key=>$field_update) {
 				if (($field_update != "" && array_key_exists($field_update, $column)) || $req_update['field_action'][$key] == "add") {
 					if ( $req_update['field_action'][$key] == "add") {
@@ -205,7 +205,7 @@ class Dbt_loader_structure {
 						}
 					}
 					$row_table[$field_update]->new_field =  $req_update['field_name'][$key];
-					// testo la query sulla tabella temporanea
+					// Eseguo la query sulla tabella temporanea
 					if (count ($row_table[$field_update]->sql) > 0) {
 						$row_table[$field_update]->query_error = "";
 						$row_table[$field_update]->query_result = true;
@@ -244,7 +244,6 @@ class Dbt_loader_structure {
 				}
 				$row_table[] = $row_table_temp;
 			}
-			
 		}	
 		// FINE table_options['status'] == DRAFT
 		// aggiorno le opzioni

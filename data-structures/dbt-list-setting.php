@@ -30,7 +30,7 @@ class DbtDs_list_setting
     protected  $charsetnr; 
     /** @var string $flags */
     protected  $flags;
-    /** @var string $type  FIELD|CUSTOM */
+    /** @var string $type è il tipo di campo del database */
     protected  $type;
     /** @var string $decimals */
     protected  $decimals;
@@ -42,13 +42,13 @@ class DbtDs_list_setting
     protected  $title;
     /** @var string $toggle */
     protected  $toggle;
-    /** @var string $view  Il tipo di campo (nella form il label è print il value è custom_view */
+    /** @var string $view è il tipo di campo che verrà visualizzato e scelto quindi dal select columns type */
     protected  $view;
     /** @var string $custom_code */
     protected  $custom_code; 
     /** @var string $order */
     protected  $order;
-    /** @var string $origin */
+    /** @var string $origin FIELD|CUSTOM  */
     protected  $origin;
     /** @var string $searchable; */
     protected  $searchable;

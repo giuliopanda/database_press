@@ -138,6 +138,7 @@ function  check_null_primary() {
  function dbt_unique_primary(el) {
     let value = jQuery(el).val();
     jQuery('.js-unique-primary').val('f');
+    
     jQuery(el).val(value);
     let $tr =jQuery(el).parents('tr');
     $tr.find('.js-create-table-type').val('INT');
@@ -152,10 +153,27 @@ function  check_null_primary() {
 function dbt_check_primary() {
     var count_primary = 0;
     jQuery('.js-unique-primary').each(function() {
+        jQuery(this).parent().parent().find('.js-dashicons').remove();
         if (jQuery(this).val() == "t") {
             count_primary ++;
+            jQuery(this).parent().css('display','none');
+            jQuery(this).parent().parent().append('<span class="js-dashicons dashicons dashicons-admin-network" style="color:#e2c447;display: block; margin: 0 auto;" title="Primary"></span>');
+            $tr = jQuery(this).parents('tr');
+            jQuery('.js-field-preselect').each(function() {
+                if (jQuery(this).val() == "pri") {
+                    jQuery(this).val('int_signed');
+                }
+            })
+            $tr.find('.js-field-preselect').val('pri');
+
+
+        } else {
+            //console.log (jQuery(this).parent());
+            jQuery(this).parent().css('display','block');
+            jQuery(this).parent().css('visibility','initial');
         }
     });
+    
     if (count_primary == 1) {
         jQuery('#dbt_content_button_create_form_msg_no_primary').css('display','none');
         jQuery('#dbt_content_button_create_form').css('display','block');
@@ -181,8 +199,8 @@ function dbt_preselect(el) {
             $tr.find('.js-create-table-length').val('');
             $tr.find('.js-create-table-attributes').val('');
         }else if (jQuery(el).val() == "decimal"|| jQuery(el).val() == 'double') {
-            $tr.find('.js-create-table-type').val('DOUBLE');
-            $tr.find('.js-create-table-length').val('11,2');
+            $tr.find('.js-create-table-type').val('DECIMAL');
+            $tr.find('.js-create-table-length').val('9,2');
             $tr.find('.js-create-table-attributes').val('');
         } else if (jQuery(el).val() == "varchar") {
             $tr.find('.js-create-table-type').val('VARCHAR');
@@ -201,6 +219,10 @@ function dbt_preselect(el) {
             $tr.find('.js-create-table-length').val('');
             $tr.find('.js-create-table-attributes').val('');
         } else if (jQuery(el).val() == "pri") {
+            jQuery('.js-unique-primary').each(function() {
+                jQuery(this).val('f');
+                jQuery(this).parent().parent().find('.js-dashicons').remove();
+            });
             $tr.find('.js-create-table-type').val('INT');
             $tr.find('.js-create-table-length').val('');
             $tr.find('.js-create-table-attributes').val('UNSIGNED');
@@ -244,7 +266,7 @@ function dbt_preselect(el) {
                $tr.find(".js-create-table-length").val('100');
            }
            if ($el.val() =="DECIMAL" || $el.val() =="DOUBLE") {
-               $tr.find(".js-create-table-length").val('11,2');
+               $tr.find(".js-create-table-length").val('9,2');
            }
        }
    }

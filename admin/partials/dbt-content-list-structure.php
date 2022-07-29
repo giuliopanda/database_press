@@ -74,7 +74,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                             </div>
                         </div>
                         <div class="dbt-form-row js-form-row-custom-field">
-                            <label><span class="dbt-form-label "><?php _e('Print','database_tables'); 
+                            <label><span class="dbt-form-label "><?php _e('Column type','database_tables'); 
                                 Dbt_fn::echo_html_icon_help('dbt_list-list-structure','print');
                                 ?></span>
                                 <div style="display:inline-block; min-width:80%">
@@ -110,7 +110,9 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                         
                     <?php $names = [];
                     foreach ($items as $key=>$item) : 
-                        //var_dump ($item); 
+                        //print "<pre>";
+                        //var_dump ($item);
+                        //print "</pre>"; 
                         ?>
                         <div class="js-dragable-tr dbt-structure-card js-dbt-structure-card">
                             <div class="dbt-structure-title" >
@@ -120,7 +122,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                                 <span class="dbt-lf-edit-icon">
                                 <span class="dashicons dashicons-edit js-structure-toggle" onclick="dbt_structure_toggle(this)"></span>
                                 </span>
-                                <b onclick="dbt_structure_toggle(this)"><?php echo ($item->mysql_name) ? $item->mysql_name : $item->title; ?></b>
+                                <span onclick="dbt_structure_toggle(this)"><?php echo ($item->mysql_name) ? '<b>'.$item->title.'</b> - <span title="mysql column">'. $item->mysql_name.'</span>' : '<b>'.$item->title.'</b>'; ?></span>
                                 
                                 <span class="dbt-structure-type" onclick="dbt_structure_toggle(this)">(<?php echo $item->type; ?>)</span>
                                 <?php if ($item->origin == "CUSTOM") : ?>
@@ -172,14 +174,14 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                                
                                     
                                     <div class="dbt-form-row-column js-form-row-custom-field">
-                                        <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('Print','database_tables'); 
+                                        <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('Column type','database_tables'); 
                                         Dbt_fn::echo_html_icon_help('dbt_list-list-structure','print');
                                         ?></span>
                                         </label>
                                         <div style="display:inline-block; min-width:50%">
                                             <?php
                                             if ($item->origin == "FIELD") {
-                                            echo Dbt_fn::html_select(['Standard field'=>[''=>'', 'VARCHAR'=>'Varchar', 'TEXT'=>'long Text', 'DATE'=>'Date', 'DATETIME'=>'Date Time', 'IMAGE'=>'Image','LINK'=>'Link', 'SERIALIZE'=>'Serialiaze', 'JSON_LABEL'=>'Checkboxes'],'Special Fields' =>['CUSTOM'=>'Custom','LOOKUP'=>'Lookup']] , true, 'name="fields_custom_view['. esc_attr($item->name).']" class="js-type-fields" onchange="dbt_change_custom_type(this)" style="display:'. (($item->view =='CUSTOM') ? 'none' :'inline-block').'"', $item->view); 
+                                            echo Dbt_fn::html_select(['Standard field'=>[ 'TEXT'=>'Text', 'HTML'=>'Html', 'DATE'=>'Date', 'DATETIME'=>'Date Time', 'IMAGE'=>'Image','LINK'=>'External link', 'DETAIL_LINK' => 'Detail Link', 'SERIALIZE'=>'Serialiaze', 'JSON_LABEL'=>'Checkboxes'],'Special Fields' =>['CUSTOM'=>'Custom','LOOKUP'=>'Lookup','USER' => 'User', 'POST' => 'Post']] , true, 'name="fields_custom_view['. esc_attr($item->name).']" class="js-type-fields" onchange="dbt_change_custom_type(this)" style="display:'. (($item->view =='CUSTOM') ? 'none' :'inline-block').'"', $item->view); 
                                             } else {
                                                 ?><input type="hidden" name="fields_custom_view[<?php echo esc_attr($item->name); ?>]" class="js-type-fields" onchange="dbt_change_custom_type(this)" value="CUSTOM"><?php
                                             }
@@ -191,12 +193,14 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                                             <?php endif; ?>
                                         </div>
                                     </div>
-
                                     <div class="dbt-form-row-column js-dbt-params-column">
                                         <label>
                                             <span class="dbt-form-label js-dbt-params-date"><?php _e('Date format','database_tables'); ?></span>
+                                            <span class="dbt-form-label js-dbt-params-link"><?php _e('Link text','database_tables'); ?></span>
+                                            <span class="dbt-form-label js-dbt-params-user"><?php _e('Show user attributes [%user.]','database_tables'); Dbt_fn::echo_html_icon_help('dbt_list-list-structure','user'); ?></span>
+                                            <span class="dbt-form-label js-dbt-params-post"><?php _e('Show post attributes [%post.]','database_tables'); Dbt_fn::echo_html_icon_help('dbt_list-list-structure','post'); ?></span>
                                             <span class="dbt-form-label js-dbt-params-text"><?php _e('Max text length','database_tables'); ?></span>
-                                            <input type="text" name="fields_custom_param[<?php echo esc_attr($item->name); ?>]" value="<?php echo esc_attr($item->custom_param); ?>" class="js-title dbt-input">
+                                            <input type="text" name="fields_custom_param[<?php echo esc_attr($item->name); ?>]" value="<?php echo esc_attr($item->custom_param); ?>" class="js-input-parasm-custom dbt-input">
                                         </label>
                                     </div>
                                 </div>

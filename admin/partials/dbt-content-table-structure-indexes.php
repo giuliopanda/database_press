@@ -10,7 +10,7 @@ if (!defined('WPINC')) die;
 </div>
 <div class="dbt-content-table js-id-dbt-content">
     <div class="dbt-content-margin">
-        <h2><?php _e(sprintf('Table %s INDEX', $table),'database_tables'); ?></h2>
+        <h2><?php printf(__('Table %s INDEX','database_tables'), $table); ?></h2>
         <?php if ($msg != "") : ?>
             <div class="dtf-alert-info"><?php echo $msg; ?></div>
         <?php endif; ?>

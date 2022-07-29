@@ -31,8 +31,15 @@ if (!defined('WPINC')) die;
         <h4>Loop the data</h4>
         <p>Enter the html to generate a customized view of the data. you can print the data using the instructions of the <a class="js-simple-link" href="<?php echo admin_url("admin.php?page=dbt_docs&section=pinacode") ?> "target =" _ blank "> template built-in engine </a> [% data.column_name]. Variables can be added to a number of attributes such as all caps or the date format. The block is repeated as many times as the query results set in the tab setting.</p>
     </div>
-    <div id="dbt_help_table_update" class="dbt_help_div">
+    <div id="dbt_help_update" class="dbt_help_div">
         <h4>Table Update</h4>
         <p>If pagination or search is entered, the method by which the data is updated is defined here. If you have no particular preferences you can select ajax.</p>
     </div>
+
+    <div id="dbt_help_detail" class="dbt_help_div">
+        <h4>Detailed view</h4>
+        <p> If you want to show the detail of a row, you can create a popup with the data of the single row. <br> You can draw the html below using <span onclick="show_pinacode_vars()" class="dbt-link-click"> [%data.column_name] </span> to retrieve the variables to be printed. <a href="<?php echo admin_url("admin.php?page=dbt_docs&section=pinacode") ?> "> You can find out more in the guide </a>. <br>
+         Once the detail page has been created, go to the "list view formatting" tab and assign the <b>Detail link</b> option within the select Column type to a column. </p>
+    </div>
+
 </div>

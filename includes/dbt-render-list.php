@@ -107,13 +107,11 @@ class Dbt_render_list {
 			
 			$total_row = $this->table_model->get_count();
 			$this->uniqid_div = 'dbt_' . Dbt_fn::get_uniqid();
-			$this->table_model->update_items_with_setting($post->post_content, false);
+			$this->table_model->update_items_with_setting($post, false);
 			$this->table_model->check_for_filter();
 			// TODO verificare se remove_hide_columns deve essere sostituita da  Dbt_fn::remove_hide_columns_in_row
 			Dbt_fn::remove_hide_columns($this->table_model);
-			if (isset($post->post_content['frontend_view']['detail_type']) && $post->post_content['frontend_view']['detail_type'] != "no" && $post->post_content['frontend_view']['type'] == "TABLE_BASE") {
-				Dbt_fn::items_prepare_frontend_link($this->table_model, $post_id,$post->post_content);
-			} else if (isset($post->post_content['frontend_view']['detail_type']) && $post->post_content['frontend_view']['detail_type'] != "no" && $post->post_content['frontend_view']['type'] != "TABLE_BASE") {
+			if (isset($post->post_content['frontend_view']['detail_type']) && $post->post_content['frontend_view']['detail_type'] != "no" && $post->post_content['frontend_view']['type'] != "TABLE_BASE") {
 				Dbt_fn::add_items_frontend_popup_link($this->table_model, $post_id);
 			}
 			$this->add_extra_params($extra_params);

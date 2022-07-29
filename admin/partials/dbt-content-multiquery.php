@@ -9,10 +9,7 @@
  * @var Array $info
  * @var $queries
  * 
- * @todo il tasto export non funziona
- * @todo Al momento visualizza i risultati delle select con solo 2 righe, ma non mi piace, preferirei mostrarne molte di più.
- *
- * @package    database-table
+ * @package    database-tables
  * @subpackage database_tables/admin
  */
 namespace DatabaseTables;
@@ -57,7 +54,7 @@ if (!defined('WPINC')) die;
         <?php 
         }
     } else {
-        ?><p><?php _e(sprintf('%s Queries executed', count($queries))); ?></p><?php
+        ?><p><?php echo (sprintf(__('%s Queries executed', 'database_tables'), count($queries))); ?></p><?php
         require (dirname(__FILE__)."/dbt-content-table-without-filter.php");
     } 
     ?>

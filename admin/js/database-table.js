@@ -849,6 +849,7 @@ function gp_submit_form() {
 
     
     if (!dbt_validate_form) {
+        dbt_close_sidebar_loading(true);
         return false;
     }
 

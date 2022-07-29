@@ -104,7 +104,7 @@ class DBT_admin_list_menu
 					//Dbt_functions_list::add_frontend_request_filter_to_model($table_model, $post->post_content , $id);
 					
 					$table_items = $table_model->get_list();
-					$table_model->update_items_with_setting($post->post_content);
+					$table_model->update_items_with_setting($post);
 					Dbt_fn::items_add_action($table_model, $post->post_content);
 					$table_model->check_for_filter();
 					Dbt_fn::remove_hide_columns($table_model);

@@ -25,11 +25,12 @@ class Dbt_items_list_setting {
     var $general_settings = false;
 
     /**
-     * @param Array $original_items L'elenco di righe da elaborare secondo i setting
+     * @param Array table_model 
 	 * @param DbtDs_list_setting[] $settings_fields
 	 * @return Array
 	 */
-	public function execute_list_settings($original_items, $settings_fields = false, $general_settings = []) {
+	public function execute_list_settings($table_model, $settings_fields = false, $general_settings = [], $dbt_id = 0) {
+		$original_items = $table_model->items;
         if (!is_array($original_items) || count ($original_items) == 0) return false;
 		
         $this->settings_fields = $settings_fields;
@@ -117,9 +118,8 @@ class Dbt_items_list_setting {
 					} 
 					$item->$key = $value;
 				} else {
-             		$item->$key = $this->edit_singe_cell($item, $key, $setting, $count);
+             		$item->$key = $this->edit_singe_cell($item, $key, $setting, $count, $table_model, $dbt_id);
 				}
-             
             } 
         }
         array_unshift($items, $first_row);
@@ -184,7 +184,7 @@ class Dbt_items_list_setting {
 	/**
 	 * Fa il rendering dei singoli valori
 	 */
-	private function edit_singe_cell($item, $key, $setting, $count) {
+	private function edit_singe_cell($item, $key, $setting, $count, $table_model, $dbt_id) {
 		/**
          * @var String $value
          */
@@ -206,7 +206,7 @@ class Dbt_items_list_setting {
 		
 		if (isset($setting['setting']) && is_object($setting['setting'])) {
 			if (@$setting['setting']->view == "DATE") {
-				if (isset($setting['custom_param']) && $setting['custom_param'] > 0) {
+				if (isset($setting['custom_param']) && $setting['custom_param'] != "") {
 					$date_format = $setting['custom_param'];
 				} else {
 					$date_format = get_option('date_format');
@@ -221,7 +221,7 @@ class Dbt_items_list_setting {
 				} 
 				$max_char_show = 2000;
 			} else if (@$setting['setting']->view == "DATETIME" || (@$setting['setting']->view == "" && $setting['schema']->type=="DATE")) {
-				if (isset($setting['custom_param']) && $setting['custom_param'] > 0) {
+				if (isset($setting['custom_param']) ) {
 					$date_format = $setting['custom_param'];
 				} else {
 					$date_format = get_option('date_format')." ".get_option('time_format');
@@ -278,18 +278,63 @@ class Dbt_items_list_setting {
 				if (isset($setting['custom_param']) && $setting['custom_param'] > 0) {
 					$max_char_show = $setting['custom_param'] ;
 				}
-			}  else if (@$setting['setting']->view == "LINK" ) {
+			}  else if (@$setting['setting']->view == "HTML") {
 				$max_char_show = 20000;
+			}  else if (@$setting['setting']->view == "LINK" ) {
+				$max_char_show = 2000;
+				if (isset($setting['custom_param']) && $setting['custom_param'] != "" ) {
+					$link_text = PinaCode::execute_shortcode($setting['custom_param']);
+				} else {
+					$link_text = $value ;
+				}
 				if (filter_var($value, FILTER_VALIDATE_URL) ) {
-					$value = '<a href="'.$value.'" target="_blank">'.$this->html_entities($value).'</a>';
+					$value = '<a href="'.esc_attr($value).'" target="_blank">'.$this->html_entities($link_text).'</a>';
 				} 
-			}  else if (@$setting['setting']->view == "IMAGE" ) {
+			}  else if(@$setting['setting']->view == "DETAIL_LINK" && $dbt_id > 0) {
+				$max_char_show = 2000;
+				$primary_values = [];
+				$primaries = $table_model->get_pirmaries();
+				
+				$primary_values['dbt_ids'] = Dbt_fn::data_primaries_values_from_schema($primaries, reset($table_model->items), $item);
+			
+				$primary_values['dbt_id'] = $dbt_id;
+				$primary_values['action'] = 'dbt_get_detail';
+				
+				$link = esc_url(add_query_arg($primary_values, admin_url('admin-ajax.php')));
+				$content_value = $value;
+				$value = '<a href="'.esc_url($link).'" class="js-dbt-popup">'
+                .strip_tags($value).'</a>';
+                $value =   apply_filters('dbt_frontend_build_custom_link',$value, $dbt_id, $primary_values, $content_value, $link) ;
+
+			} else if (@$setting['setting']->view == "IMAGE" ) {
 				$max_char_show = 2000;
 				$value = $this->html_entities($value);
 				if (filter_var($value, FILTER_VALIDATE_URL) ) {
 					$value = '<img src="'.esc_attr($value).'" class="dbt-table-image" />';
 				} else {
 					$value = '';
+				}
+			}  else if (@$setting['setting']->view == "POST" ) {
+				$max_char_show = 2000;
+				if ($value > 0) {
+					$post = get_post($value);
+				}
+				if (isset($setting['custom_param']) && $setting['custom_param'] != "" ) {
+					PinaCode::set_var('post', (array)$post) ;
+					$value = PinaCode::execute_shortcode($setting['custom_param']);
+				} else {
+					$value = $post->post_title ;
+				}
+			} else if (@$setting['setting']->view == "USER" ) {
+				$max_char_show = 2000;
+				if ($value > 0) {
+					$user = get_user_by('id', $value);
+				}
+				if (isset($setting['custom_param']) && $setting['custom_param'] != "" ) {
+					PinaCode::set_var('user', (array)$user) ;
+					$value = PinaCode::execute_shortcode($setting['custom_param']);
+				} else {
+					$value = $user->user_login ;
 				}
 			} else if (@$setting['setting']->view == "CUSTOM") {
 				$max_char_show = -1;

@@ -28,7 +28,7 @@
 [^MATH 2 <> 1 ] [// 1 //]
 [^MATH 2 in ["1","3","4"] ] [// 0 //]
 [^MATH 2 not in ["1","3","4"] ] [// 1 //]</pre>
-            In math è possibile usare anche gli operatori logici: AND && OR || Tornerà 1 se vero 0 se falso
+        In math you can also use the logical operators: AND && OR || It will return 1 if true 0 if false
             <pre class="dbt-code"> [^MATH 4 > 5 OR (3 == 3 AND 2 == 2) ] [// 1 //]</pre>
         </div>
      
@@ -298,12 +298,19 @@ Donec et accumsan nulla, at tempus metus
 
     If you link to posts with custom post_type, remember to register the post_type on function.php of your template
     <h3>[^LINK]</h3>
+    <h4 class="dbt-h4">Parameters</h4>
+        <ul>
+                <li><b>id</b><br>
+                (integer) the post id</li>
+                <li><b>some_other_params</b><br>
+                (string) You can add other parameters that will be passed in the url</li>
+        </ul>
     <div class="dbt-help-p">
         <p> Link as the name implies is used to generate a link to the site. <br>
         For the choice of the pagethe parameter to be inserted is page_id. For a post it is post_id. If page_id or post_id are not inserted, the generated link will be to the current page. all other parameters that you enter are registered as a new url element </p>
-        <pre class="dbt-code">&lt;a href=&quot;[^LINK page_id=xxx id=yyy action=zzz]&quot;&gt;link&lt;/a&gt;</pre>
         <h3> Examples </h3>
-        <pre class="dbt-code"><a href="[^LINK post_id=[%data.ID]]">[%data.post_title]</a></pre>
+        <pre class="dbt-code">&lt;a href=&quot;[^LINK id=xxx filter=yyy action=zzz]&quot;&gt;link&lt;/a&gt;
+&lt;a href=&quot;[^LINK id=[%post.ID]]&quot;&gt;[%post.post_title]&lt;/a&gt;</pre>
         <p>
         If you link to posts with custom post_type, remember to register the post_type on function.php of your template</p>
             <pre class="dbt-code">add_action( 'init', 'register_my_post_type' );
@@ -328,9 +335,9 @@ function register_my_post_type() {
         <h4 class="dbt-h4">Parameters</h4>
         <ul>
                 <li><b>id</b><br>
-                (integer) L'id della lista</li>
+                (integer) The id of the list</li>
                 <li><b>some_other_params</b><br>
-                (string) Puoi aggiungere altri parametri che verranno passati nell'url</li>
+                (string) You can add other parameters that will be passed in the url</li>
         </ul>
         <p>Example: In a list it shows the data of another filtered list and the button to go to edit the data. <br>
                 1. Create a list linked to posts with a post_id column. <br>
@@ -405,7 +412,6 @@ function register_my_post_type() {
         <p> Return 1 if it is the requested page, 0 otherwise </p>
     </div>
 
-
     <h1 style="border-bottom:1px solid #CCC">List specific functions</h1>
     <h3>[^LIST_URL]</h3>
     <div class="dbt-help-p">
@@ -423,7 +429,7 @@ function register_my_post_type() {
 [%myvar set={"a":"foo","b":"bar"}]</pre>
         <p> You can't put variables in place of attribute names </p>
         <pre class="dbt-code">[%myvar [%var]="foo"] [// NOT CORRECT //] </pre>
-        <p>Questo è permesso solo dentro la funzione [^SET ] purché non ci siano spazi</p>
+        <p>This is only allowed inside the [^ SET] function as long as there are no spaces</p>
         <pre class="dbt-code">[^SET [%var]="foo"] [// CORRECT //] 
 [^SET mypost.[%var]="foo"] [// CORRECT //] </pre>
 

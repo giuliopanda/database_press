@@ -75,6 +75,19 @@ class Dbt_model {
      */
     public $current_schema = false;
     
+    /**
+     * @var Array $primary_added chiavi primarie aggiunte alla tabella [['table_alias','field'], ...];
+     */
+    public $primary_added = [];
+
+    public $all_primaries = [];
+    public $query_before_primary_added = '';
+
+    /**
+     * @var Array $get_primaries Cache delle chiavi primarie
+     */
+    private $get_primaries = [];
+    private $get_primaries_alias = [];
 
 
     /**
@@ -650,7 +663,7 @@ class Dbt_model {
 
     /**
      * Conta il numero di risultati della query attiva e lo mette dentro $this->total_items
-     * @param Boolena $remove_limit
+     * @param Booleam $remove_limit
      * @return Integer -1 se non ha potuto contare il numero di righe
      */
     public function get_count($remove_limit = true) {
@@ -717,6 +730,36 @@ class Dbt_model {
             return 0;
         }
     }
+
+    /**
+     * rimuove l'order alla query
+     */
+    public function remove_order() {
+        if($this->sql_type() == "select") {
+            $this->current_query = Dbt_fn::all_trim($this->current_query);
+            if (substr($this->current_query, -1) == ";") {
+                $this->current_query = substr($this->current_query, 0, -1);
+            }
+            $limit_position = strripos($this->current_query, ' LIMIT '); // trovo l'ultima occorrenza
+            $order_position = strripos($this->current_query, ' ORDER '); // trovo l'ultima occorrenza
+           
+            if ($limit_position > 0) {
+                $sql = substr($this->current_query, 0, $limit_position);
+                $limit_sql = substr($this->current_query, $limit_position);
+            } else {
+                $sql = $this->current_query;
+                $limit_sql = '';
+            } 
+            if ($order_position > 0) {
+               $sql = substr($sql, 0, $order_position);
+            } 
+            $this->current_query =  Dbt_fn::all_trim($sql);
+            if ($limit_sql != "") {
+               $this->current_query = $this->current_query . " " . $limit_sql;
+            }
+        }
+    }
+
 
     /**
      * Ritorna lo schema di una query 
@@ -843,13 +886,40 @@ class Dbt_model {
     }
 
     /**
+     * Dopo get_list nasconde le chiavi primarie aggiungendo toggle hide ai campi aggiunti
+     */
+    public function remove_primary_added() {
+        $table_header = reset($this->items);
+        $key0 = key($this->items);
+        foreach ($this->primary_added as $pri) {
+            foreach ($table_header as $k=>$th) {
+                if ($th->table == $pri->table_alias && $th->name_column == $pri->name) {
+                    //print "<p>th: ".$th->table." == ".$pri->table_alias." && ".$th->name_column." == ".$pri->name."</p>";
+                    $this->items[$key0][$k]->toggle = "HIDE";
+                }
+            }
+        }
+        if ($this->query_before_primary_added != "") {
+            $this->current_query = $this->query_before_primary_added;
+            
+        }
+        //print "KEY: ".$key0 . "<br>";
+       // var_dump ($this->items[$key0 ]);
+    }
+
+    /**
      * Nelle liste vengono settati dei parametri di visualizzazione.
      * Questi vengono elaborati in questa fase. Vedi la classe Dbt_items_list_setting per maggiori dettagli
-     * @param Array $post_content
+     * @param Object $post
      * @param Boolean $htmlentities se è nel frontend (o nel menu esterno) non posso mostrare i tag html, ma devo fare lo striptag se taglio il testo, altrimenti li mostro 
      * @param int $text_length quando estraggo i dati di una lista se lascio text_length = 0 allora uso i parametri settati, se metto -1 allora lo mette per intero
      */
-    public function update_items_with_setting($post_content = false, $htmlentities = true, $text_length = 0) {
+    public function update_items_with_setting($post = false, $htmlentities = true, $text_length = 0) {
+        $dbt_id = 0;
+        if ($post != false) {
+            $post_content = $post->post_content;
+            $dbt_id = $post->ID;
+        }
         if (is_array($post_content) && isset($post_content['list_setting'])) {
             $setting_custom_list =  Dbt_functions_list::get_list_structure_config($this->items, $post_content['list_setting']);
         } else {
@@ -868,7 +938,7 @@ class Dbt_model {
             $list_general_setting['text_length'] = 80;
         }
         $setting = new Dbt_items_list_setting();
-        $this->items = $setting->execute_list_settings($this->items, $setting_custom_list, $list_general_setting);
+        $this->items = $setting->execute_list_settings($this, $setting_custom_list, $list_general_setting, $dbt_id);
        // var_dump (reset($this->items));
     }
 
@@ -1077,6 +1147,15 @@ class Dbt_model {
      */
     public function get_pirmaries($alias = false) {
         // Trovo tutte le chiavi primari autoincrement di tutte le tabelle.
+        if ($alias) {
+            if (count( $this->get_primaries_alias ) > 0) {
+                return  $this->get_primaries_alias;
+            }
+        } else {
+            if (count( $this->get_primaries ) > 0) {
+                return  $this->get_primaries;
+            }
+        }
         $primaries = [];
         $this->add_primary_ids();
         $tables = $this->get_partial_query_from(true);
@@ -1105,6 +1184,11 @@ class Dbt_model {
                 }
             }
         }
+        if ($alias) {
+            $this->get_primaries_alias = $primaries;
+        } else {
+            $this->get_primaries = $primaries;
+        }
         return $primaries;
     }
 
@@ -1131,13 +1215,19 @@ class Dbt_model {
 
     /**
      * Aggiunge ai select le chiavi primarie per ogni tabella inserita 
-     * così da poter gestire form di modifica ed inserimento.
+     * così da poter gestire form di modifica ed inserimento. Questa funzione viene richiamata più volte!
      * @todo mettere in qualche modo queste colonne come hidden di default.
      * @return Array all primaries
      */
     public function add_primary_ids() {
+
         $current_query_select = $this->get_partial_query_select();
-       
+        if (count($this->primary_added) > 0) {
+            return $this->all_primaries;
+        }
+        if ($this->query_before_primary_added == "") {
+            $this->query_before_primary_added = $this->current_query;
+        }
         $schema = $this->get_schema();
         // Preparo i dati:
         // Trovo tutte le chiavi primarie di ogni tabella interessata
@@ -1162,7 +1252,6 @@ class Dbt_model {
             }
         }
         $all_pri_ids = array_filter($all_pri_ids);
-  
         // verifico se c'è la chiave primaria, oppure segno che deve essere aggiunta
         $add_select_pri = [];
         $all_primaries = [];
@@ -1182,6 +1271,7 @@ class Dbt_model {
                 if (!$exist_pri) {
                     $alias = Dbt_fn::get_column_alias($group['alias_table']."_".$all_pri_ids[$group['table']], $current_query_select);
                     $add_select_pri[] =  '`'. $group['alias_table'].'`.`'.$all_pri_ids[$group['table']].'` AS `'.$alias.'`';
+                    $this->primary_added[] = (object)['table_alias'=>$group['alias_table'], 'orgname'=>$all_pri_ids[$group['table']], 'name' => $alias];
                     $current_query_select .= " ".$alias;
                     $all_primaries[$fields->table] = $all_pri_ids[$group['table']];
                 }
@@ -1192,7 +1282,9 @@ class Dbt_model {
         if (count($add_select_pri) > 0) {
             $this->list_add_select(implode(", ", $add_select_pri));
         }
+        $this->all_primaries = $all_primaries;
         return $all_primaries;
+        
     }
 
      /**
@@ -1543,7 +1635,7 @@ class Dbt_model {
         $temp_names = [];
         foreach ($list_last_get_col_info as $val ) {
             if (in_array($val->name, $temp_names)) {
-                $this->last_error = __(sprintf('The query has multiple columns (<b>%s</b>) with the same name.', $val->name));
+                $this->last_error = sprintf(__('The query has multiple columns (<b>%s</b>) with the same name.', 'database_tables'), $val->name);
                 $this->effected_row = 0;
                 $this->items = [];
                

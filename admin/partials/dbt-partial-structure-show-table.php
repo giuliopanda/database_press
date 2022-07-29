@@ -20,7 +20,7 @@ if (!defined('WPINC')) die;
     <?php
    
     array_shift($table_model->items);
-    $preset = ['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'double'=>'Double (123,12)', 'date'=>'Date', 'datetime'=>'Date Time', 'pri'=>'Primary Key','advanced'=>'Advanced'];
+    $preset = ['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'decimal'=>'Decimal (9,2)', 'date'=>'Date', 'datetime'=>'Date Time', 'pri'=>'Primary Key','advanced'=>'Advanced'];
     foreach ($table_model->items as $cs) {
         $column = Dbt_fn_structure::convert_show_column_mysql_row_to_form_data($cs);
         ?>

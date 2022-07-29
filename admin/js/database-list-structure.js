@@ -44,23 +44,10 @@ jQuery(document).ready(function ($) {
 function dbt_list_structure_delete_row(el) {
    jQuery(el).parents('.js-dbt-structure-card').remove();
 }
-/**
- * Mostra nasconde la riga
- * @param DOM el 
- */
+
+// Questa funzione deve rimanere anche se vuota
 function dbt_change_toggle(el) {
-   /*
-   let $tr = jQuery(el).parents('.js-dbt-structure-card');
-   if (jQuery(el).val() == "HIDE") {
-      $tr.find('.js-title').css('display','none');
-      $tr.find('.js-type-fields').css('display','none');
-      $tr.find('.js-type-custom-code').css('display','none');
-      $tr.find('.js-textarea-btn-cancel').css('display','none');
-     } else {
-      $tr.find('.js-title').css('display','inline-block');
-      $tr.find('.js-type-fields').change();
-   }
-   */
+
 }
 
 /**
@@ -68,8 +55,14 @@ function dbt_change_toggle(el) {
  * @param DOM el 
  */
 function dbt_change_custom_type(el) {
+   
    let $tr = jQuery(el).parents('.js-dbt-structure-card');
-   $tr.find('.js-dbt-params-column').val('').css('display','none');
+   $tr.find('.js-dbt-params-column').css('display','none');
+   $tr.find('.js-dbt-params-column .dbt-form-label').css('display','none');
+   if (el._first_change === 'no') {
+      $tr.find('.js-input-parasm-custom').val('');
+   }
+   el._first_change = 'no';
    $tr.find('.js-lookup-params').css('display','none');
    if (jQuery(el).val() == "CUSTOM") {
       jQuery(el).css('display', 'none');
@@ -81,12 +74,22 @@ function dbt_change_custom_type(el) {
       $tr.find('.js-textarea-btn-cancel').css('display', 'none');
       if (jQuery(el).val() == 'DATE' || jQuery(el).val() == 'DATETIME') {
          $tr.find('.js-dbt-params-column').css('display','block');
-         $tr.find('.js-dbt-params-column .dbt-form-label').css('display','none');
           $tr.find('.js-dbt-params-date').css('display','inline-block');
       }
-      if (jQuery(el).val() == 'TEXT' || jQuery(el).val() == 'VARCHAR') {
+      if ( jQuery(el).val() == 'LINK') {
+         $tr.find('.js-dbt-params-column').css('display','block');
+          $tr.find('.js-dbt-params-link').css('display','inline-block');
+      }
+      if ( jQuery(el).val() == 'USER') {
+         $tr.find('.js-dbt-params-column').css('display','block');
+          $tr.find('.js-dbt-params-user').css('display','inline-block');
+      }
+      if ( jQuery(el).val() == 'POST') {
+         $tr.find('.js-dbt-params-column').css('display','block');
+          $tr.find('.js-dbt-params-post').css('display','inline-block');
+      }
+      if (jQuery(el).val() == 'TEXT') {
           $tr.find('.js-dbt-params-column').css('display','block');
-          $tr.find('.js-dbt-params-column .dbt-form-label').css('display','none');
           $tr.find('.js-dbt-params-text').css('display','inline-block');
       }
       if (jQuery(el).val() == 'LOOKUP') {

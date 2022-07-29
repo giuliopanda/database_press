@@ -347,7 +347,7 @@ class Dbt
             $table_model->add_primary_ids();
             $table_model->get_list();
             // prevengo l'htmlentities e il substr del testo.
-            $table_model->update_items_with_setting($post->post_content, false, -1);
+            $table_model->update_items_with_setting($post, false, -1);
             $items = $table_model->items;
             if (is_countable($items) && $table_model->last_error == "") {
                 //items|schema|model|schema+items
@@ -374,7 +374,7 @@ class Dbt
      * Data la lista estrae uno o più record a partire dagli ID
      *
      * @param int $dbt_id
-     * @param array|int $dbt_ids [pri_key=>val, ...] per un singolo ID perché una query può avere più primary Id a causa di left join per cui li accetto tutti. Se un integer invece lo associo al primo pri_id che mi ritorna.
+     * @param array|int $dbt_ids [pri_key=>val, ...] per un singolo ID perché una query può avere più primary Id a causa di left join per cui li accetto tutti. Se un integer invece lo associo al primo pri_id che mi ritorna. pri_key accetta sia il nome della colonna che il name_request
      * @return \stdClass|false se torna false non bisogna esegure il template engine
      */
     static function get_data_by_id($dbt_id, $dbt_ids) {
@@ -384,7 +384,6 @@ class Dbt
         $dbt_post = Dbt_functions_list::get_post_dbt($dbt_id);
         // qui ci devono essere tutte le chiavi primarie!
         $name_requests = self::get_primaries_id($dbt_id);
-        //var_dump ($name_requests);
         $where = [];
         $columns = Dbt::get_ur_list_columns($dbt_id);
         if (is_array($dbt_ids)) {
@@ -392,7 +391,11 @@ class Dbt
                 $field_setting = $dbt_post->post_content["list_setting"][$columns[$name_request]];
                 $query_var = "";
                 if (array_key_exists($name_request, $dbt_ids))  {
+                    // name_request
                     $query_var = $dbt_ids[$name_request];
+                } else if (array_key_exists($columns[$name_request], $dbt_ids))  {
+                    // nome della colonna
+                    $query_var = $dbt_ids[$columns[$name_request]];
                 }
                 $where[] = ['op' => '=', 'column' => $field_setting->mysql_name, 'value' => esc_sql($query_var) ];
             }

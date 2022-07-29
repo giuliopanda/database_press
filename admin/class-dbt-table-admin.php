@@ -191,6 +191,7 @@ class database_tables_admin
 	 */
 	private function table_structure() {
 		$dtf = new Dbt_fn();
+		// da ricordarsi: il salvataggio è in post (dbt-loader-structure.php)
         $section =  $dtf::get_request('section', 'home');
        	$action = $dtf::get_request('action', '', 'string');
 		$msg =  $msg_error = $table = $table_new_name = '';	
@@ -276,11 +277,11 @@ class database_tables_admin
 					$msg_error .= __('<b>Copy and run the queries to correct the problem.</b>','database_tables');
 				}
 				if (count($old_primaries) == 1 &&  $is_old_primaries_type_numeric ) {
-					$msg_error .= __(sprintf('<p style="background:#F2F2F2; border:1px solid #EEE; padding:.5rem">ALTER TABLE `%s` MODIFY %s INT NOT NULL AUTO_INCREMENT;<br></p>', $table, implode(", ", $old_primaries)), 'database_tables');
+					$msg_error .= sprintf(__('<p style="background:#F2F2F2; border:1px solid #EEE; padding:.5rem">ALTER TABLE `%s` MODIFY %s INT NOT NULL AUTO_INCREMENT;<br></p>', 'database_tables'), $table, implode(", ", $old_primaries));
 				} else {
-					$msg_error .= __(sprintf('<p style="background:#F2F2F2; border:1px solid #EEE; padding:.5rem">ALTER TABLE `%s` drop primary key;<br>
+					$msg_error .= sprintf(__('<p style="background:#F2F2F2; border:1px solid #EEE; padding:.5rem">ALTER TABLE `%s` drop primary key;<br>
 					CREATE UNIQUE INDEX old_primary_key ON `%s` (%s);<br>
-					ALTER TABLE `%s` ADD dbt_id BIGINT AUTO_INCREMENT PRIMARY KEY;<br></p>', $table,$table, implode(", ", $old_primaries), $table),'database_tables');
+					ALTER TABLE `%s` ADD dbt_id BIGINT AUTO_INCREMENT PRIMARY KEY;<br></p>','database_tables'), $table, $table, implode(", ", $old_primaries), $table);
 				}
 			}
 
@@ -379,7 +380,7 @@ class database_tables_admin
 						$msg_error .= '<p>'.$el['error'].'</p>' ;
 					}
 				} else {
-					$msg = __(sprintf('The queries were performed successfully.', 'database_tables'));
+					$msg = __('The queries were performed successfully.', 'database_tables');
 				}
 			} 
 
@@ -409,9 +410,11 @@ class database_tables_admin
 			$dtf::add_request_filter_to_model($table_model, $this->max_show_items);
 			$table_model->add_primary_ids();
 			$table_items = $table_model->get_list();
+			
 			$table_model->update_items_with_setting();
 			$dtf::items_add_action($table_model);
 			$table_model->check_for_filter();
+			$table_model->remove_primary_added();
 			$dtf::remove_hide_columns($table_model);
 		
 			if ( count($table_model->get_pirmaries()) == 0 && count($table_model->get_query_tables()) > 0 && $msg_error == '' && $table_model->sql_type() == "select") {
@@ -471,7 +474,7 @@ class database_tables_admin
 						$this->last_error .= '<p>'.$el['error'].'</p>' ;
 					}
 				} else {
-					$this->msg = __(sprintf('%s queries executed successfully.', $count_query ));
+					$this->msg = sprintf(__('%s queries executed successfully.', 'database_tables', $count_query ));
 				}
 			} 
 
@@ -627,8 +630,8 @@ class database_tables_admin
 					case 'int':
 						$model_structure->insert_column($column_name, 'INT');
 						break;
-					case 'double':
-						$model_structure->insert_column($column_name, 'DOUBLE','11,2');
+					case 'decimal':
+						$model_structure->insert_column($column_name, 'DECIMAL','9,2');
 						break;
 					case 'date':
 						$model_structure->insert_column($column_name, 'DATE');

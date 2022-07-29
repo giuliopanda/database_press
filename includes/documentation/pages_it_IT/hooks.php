@@ -5,42 +5,6 @@ if (!defined('WPINC')) die;
 
 <div class="dbt-content-table dbt-docs-content  js-id-dbt-content" >
 
-    <h2 class="dbt-h2"> <a href="<?php echo admin_url("admin.php?page=dbt_docs") ?>">Doc</a><span class="dashicons dashicons-arrow-right-alt2"></span><?php _e('Hooks & filters','database_tables'); ?></h2>
-    <hr>
-    <h2 class="dbt-h2"> apply_filter('<b>dbt_frontend_link_columns_to_link_to</b>', $selected, $list_id, $columns);</h2>
-    Nelle tabelle del frontend permette di decidere le colonne a cui inserire il link per mostrare il dettaglio
-    <hr>
-    <h4 class="dbt-h4">Parameters</h4>
-    <div class="dbt-help-p">
-        <ul>
-            <li><b>$selected</b>
-                <br>(Array) i nomi delle colonne a cui inserire il link per il dettaglio.
-            </li>
-            <li><b>$list_id</b>
-                <br>(int) L'id della lista
-            </li>
-            <li><b>$columns</b>
-                <br>(Array) i nomi delle colonne della tabella
-            </li>
-        </ul>
-        </div>
-    <h4  class="dbt-h4">Source</h4>
-    <div class="dbt-help-p">./includes/dbt-functions.php</div>
-
-
-    <h4 class="dbt-h4">Example</h4>
-    <div class="dbt-help-p">
-        <pre class="dbt-code">
-        /**
-        * Nella tabella del frontend: modifica quali colonne hanno il link al dettaglio (in questo caso tutte)
-        */
-        add_filter('dbt_frontend_link_columns_to_link_to', 'all_cols', 10, 3);
-        function all_cols($selected, $list_id, $columns) {
-            return $columns;
-        }
-        </pre>
-    </div>
-
     <hr>
     <h2 class="dbt-h2"> apply_filters('<b>dbt_frontend_build_custom_link</b>', $custom_link, $list_id, $primary_values, $col_value, $col_key);</h2>
     Nel frontend nella creazione dei link personalizzati per aprire il dettaglio dei risultati.
@@ -66,7 +30,7 @@ if (!defined('WPINC')) die;
         </ul>
         </div>
     <h4  class="dbt-h4">Source</h4>
-    <div class="dbt-help-p">./includes/dbt-functions.php</div>
+    <div class="dbt-help-p">./includes/dbt-functions-items-setting.php</div>
 
     <h4 class="dbt-h4">Example</h4>
     <div class="dbt-help-p">
@@ -113,7 +77,7 @@ if (!defined('WPINC')) die;
         </ul>
         </div>
     <h4  class="dbt-h4">Source</h4>
-    <div class="dbt-help-p">./includes/dbt-html-table-frontend.php</div>
+    <div class="dbt-help-p">./includes/dbt-html-search-frontend.php</div>
 
     <h4 class="dbt-h4">Example</h4>
     <div class="dbt-help-p">

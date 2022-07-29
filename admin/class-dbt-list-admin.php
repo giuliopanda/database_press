@@ -288,7 +288,7 @@ class DBT_list_admin
 					if ($table_model->last_error == "") {
 						$post->post_content['sql'] = html_entity_decode($table_model->get_current_query());
 					} else {
-						return [__(sprintf("I didn't save the query because it was wrong!.<br><h3>Error:</h3>%s<h3>Query:</h3>%s", $table_model->last_error, $post->post_content['sql']), 'database_tables'), true];
+						return [sprintf(__("I didn't save the query because it was wrong!.<br><h3>Error:</h3>%s<h3>Query:</h3>%s",'database_tables'), $table_model->last_error, $post->post_content['sql']), true];
 					}
 				}
 			} else {
@@ -501,7 +501,7 @@ class DBT_list_admin
 				
 				Dbt_fn::add_request_filter_to_model($table_model, $this->max_show_items);
 				$table_items = $table_model->get_list();
-				$table_model->update_items_with_setting($post->post_content);
+				$table_model->update_items_with_setting($post);
 				Dbt_fn::items_add_action($table_model, $post->post_content);
 				$table_model->check_for_filter();
 				Dbt_fn::remove_hide_columns($table_model);
@@ -552,6 +552,7 @@ class DBT_list_admin
 				$sql = $post->post_content['sql'];
 				$table_model->prepare($sql);
 				$list = $table_model->get_list();
+			
 				$items = Dbt_functions_list::get_list_structure_config($table_model->items, $post->post_content['list_setting']);
 			} else {
 				$link = admin_url("admin.php?page=dbt_list&section=list-sql-edit&dbt_id=".$id);
@@ -860,7 +861,7 @@ class DBT_list_admin
 						'DATE'=>['DATE',''],
 						'DATETIME'=>['DATETIME',''],
 						'NUMERIC'=>['INT',''],
-						'FLOAT'=>['FLOAT','2'],
+						'DECIMAL'=>['DECIMAL','9,2'],
 						'SELECT'=>['VARCHAR',255],
 						'RADIO'=>['VARCHAR',255],
 						'CHECKBOX'=>['VARCHAR',255],

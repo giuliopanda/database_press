@@ -971,8 +971,7 @@ class Dbt_fn {
         }
         if ($input_used > 0) {
             if ($input_used > $max_input) {
-                return __(sprintf('The maximum number of input_var (max_input_vars) allowed by php.ini is %s 
-                But to manage this table I need at least %s',$max_input, $input_used), 'database_tables');
+                return sprintf(__('The maximum number of input_var (max_input_vars) allowed by php.ini is %s But to manage this table I need at least %s', 'database_tables'),$max_input, $input_used);
             } else {
                 return "";
             }
@@ -1121,7 +1120,9 @@ class Dbt_fn {
         $table_header = reset($table_model->items);
         $table_model->add_primary_ids();
         $primaries = $table_model->get_pirmaries();
+        
         $first_table_header = 0;
+        // trovo la colonna a cui aggiungere le azioni
         foreach ($table_header as $key=>$v) {
             if ($v->toggle != "HIDE") {
                 $first_table_header = $key;
@@ -1136,7 +1137,8 @@ class Dbt_fn {
         }
         reset($table_model->items);
         $keytmi = key($table_model->items);
-       // var_dump ($primaries);
+        //var_dump ($primaries);
+       //var_dump ($table_header);
         // Setto nello schema le colonne che sono primary ID
         $found_at_least_one_pri = false;
         foreach ($table_header as $k=>$th) {
@@ -1219,56 +1221,8 @@ class Dbt_fn {
         }
     }
 
-     /**
-     * sul primo elemento visibile dei risultati di una query (dentro $table_model) 
-     * aggiungo i link per le azioni tipo edit|view|delete.
-     * I risultati li ripassa dentro table_model->items
-     */
-    static function items_prepare_frontend_link(&$table_model, $dbt_id,  $post_content = []) {
-        if (!is_countable($table_model->items) || count($table_model->items) == 0 ){
-            return false;
-        }
-        $table_header = reset($table_model->items);
-        $table_model->add_primary_ids();
-        $primaries = $table_model->get_pirmaries();
-        
-        // var_dump ($primaries1);
-        // print "\n\n";
-        // var_dump ($primaries2);
-        // print "\n\n";
-        $first_table_header = 0;
-        foreach ($table_header as $key=>$v) {
-            if ($v->toggle != "HIDE") {
-                $first_table_header = $key;
-                break;
-            }
-        }
-        $columns_link = [$first_table_header];
-        /**
-         * Nelle tabelle del frontend permette di decidere le colonne a cui inserire il link per mostrare il dettaglio
-         */
-        $columns_link = apply_filters('dbt_frontend_link_columns_to_link_to', $columns_link, $dbt_id,  array_keys ($table_header));
-        if (!is_array($columns_link) || count($columns_link) == 0) {
-            return false;
-        }
-        foreach ($table_model->items as $key => $_) {
-            if ($key == 0) continue;
-            $primary_values = [];
-            $primary_values['dbt_ids'] = self::data_primaries_values($primaries, $table_header, $table_model->items[$key]);
-            $primary_values['dbt_id'] = $dbt_id;
-            $primary_values['action'] = 'dbt_get_detail';
-            $link = esc_url(add_query_arg($primary_values, admin_url('admin-ajax.php')));
-
-            foreach ($columns_link as $col_link) {
-                $custom_link = '<a href="'.esc_url($link).'" class="js-dbt-popup">'
-                .strip_tags($table_model->items[$key]->$col_link).'</a>';
-                $table_model->items[$key]->$col_link =  apply_filters('dbt_frontend_build_custom_link',$custom_link, $dbt_id, $primary_values, $table_model->items[$key]->$col_link, $col_link) ;
-            }
-        }
-    }
-
     /**
-     * aggiunge un parametro all'array dei dati:  popup_link
+     * Aggiunge un parametro all'array dei dati:  popup_link
      */
     static function add_items_frontend_popup_link(&$table_model, $dbt_id) {
         if (!is_countable($table_model->items) || count($table_model->items) == 0 ){
@@ -1305,6 +1259,7 @@ class Dbt_fn {
         //var_dump ($table_header);
         //die();
         foreach ($table_header as $k=>$th) {
+            //print ("<p>".$th->original_table." == ". $primaries[$th->original_table]." > ".$row->$k."</p>");
             if (isset($th->table) && $th->original_table != "" && isset($primaries[$th->original_table]) && $primaries[$th->original_table] == $th->original_name && $row->$k > 0) {
                 $primary_values[$th->$key_name] =  $row->$k;
             } 
@@ -1312,6 +1267,28 @@ class Dbt_fn {
         return $primary_values;
     }
 
+
+    /**
+     * Trova i valori delle colonne primarie di un record
+     * $row = $table_model->items[$key]
+     * @param [type] $table_model
+     * @param string $key_name il nome che si vuole estrarre. Se si vuole estrarre il nome del campo allora scrivo "name.
+     * @return void
+     */
+    static function data_primaries_values_from_schema($primaries, $table_header_schema, $row, $key_name ='name_request') {
+        $primary_values = [];
+        //var_dump ($row);
+        //var_dump ($table_header);
+        //die();
+        foreach ($table_header_schema as $k=>$th) {
+           // print ("<p>".$th['schema']->orgname." == ". $primaries[$th['schema']->orgtable]." > ".$row->$k."</p>");
+            if (isset($th['schema']->table) && $th['schema']->orgtable != "" && isset($primaries[$th['schema']->orgtable]) && $primaries[$th['schema']->orgtable] == $th['schema']->orgname && $row->$k > 0) {
+               
+                $primary_values[$th['schema']->$key_name] =  $row->$k;
+            } 
+        } 
+        return $primary_values;
+    }
 
     /**
      * Rimuove tutte le colonne che devono essere nascoste in un'estrazione di un model
@@ -1431,7 +1408,7 @@ class Dbt_fn {
                                     $checkboxes[] = esc_attr(json_encode([$column => $id]));
                                 }
                             } else {
-                                $errors[] = __(sprintf('Records in the "%s" table cannot be removed because they are in a closed state. If you want to be able to remove the data, change the status from the table structure to "published"', $table_option->orgtable), 'database_tables');
+                                $errors[] = sprintf(__('Records in the "%s" table cannot be removed because they are in a closed state. If you want to be able to remove the data, change the status from the table structure to "published"', 'database_tables'), $table_option->orgtable);
                             }
                         }
                     }

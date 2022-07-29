@@ -50,7 +50,7 @@ if (!defined('WPINC')) die;
             <input type="text" name="table_update[field_name][]" value="" class="js-dbt-validity" required>
         </td>
         <td>
-            <?php echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'double'=>'Double (123,12)', 'date'=>'Date', 'datetime'=>'Date Time', 'pri'=>'Primary Key','advanced'=>'Advanced'], true, 'class="js-field-preselect" onchange="dbt_preselect(this)"', false, 'varchar'); ?>  
+            <?php echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'decimal'=>'Decimal (9,2)', 'date'=>'Date', 'datetime'=>'Date Time', 'pri'=>'Primary Key','advanced'=>'Advanced'], true, 'class="js-field-preselect" onchange="dbt_preselect(this)"', false, 'varchar'); ?>  
         </td>
         <td>
             <div class="button" onClick="dbt_alter_table_delete_row(this);"><?php _e('Delete' , 'database_tables'); ?></div>
@@ -108,7 +108,7 @@ if (!defined('WPINC')) die;
                 <input type="text" name="table_update[field_name][]" value="<?php echo $column->field_name; ?>" class="js-dbt-validity" required>
             </td>
             <td>
-                <?php echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'double'=>'Double (xx,xx)', 'date'=>'Date', 'datetime'=>'Date Time', 'pri'=>'Primary Key','advanced'=>'Advanced'], true, 'class="js-field-preselect" onchange="dbt_preselect(this)"', false, $column->preset); ?>  
+                <?php echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'decimal'=>'Decimal (9,2)', 'date'=>'Date', 'datetime'=>'Date Time', 'pri'=>'Primary Key','advanced'=>'Advanced'], true, 'class="js-field-preselect" onchange="dbt_preselect(this)"', false, $column->preset); ?>  
             </td>
             <td>
                 <div class="button" onClick="dbt_alter_table_delete_row(this);"><?php _e('Delete' , 'database_tables'); ?></div>

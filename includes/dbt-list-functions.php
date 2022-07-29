@@ -93,7 +93,7 @@ class Dbt_functions_list {
             }
             $column_setting_array = $column_setting->get_array();
             foreach ($column_setting_array as $ks=>$vs) {
-                if ($vs != "") {
+                if ($vs != "" && !in_array($ks, ['type','name','orgname','table','orgtable','mysql_name','mysql_table'])) {
                     $items[$key]->$ks = $vs;
                 }
             }

@@ -228,7 +228,7 @@
 
 .dbt-open-sidebar .dbt-sidebar-content {
     transition: all .3s ease-in-out;
-    max-height:2000px;
+    max-height:9000px;
     margin-bottom:.5rem;
     overflow:initial;
 }

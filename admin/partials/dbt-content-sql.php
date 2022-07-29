@@ -8,7 +8,7 @@
  * @var Array $info
  * @var $queries
 
- * @package    database-table
+ * @package    database-tables
  * @subpackage database_tables/admin
  */
 namespace DatabaseTables;

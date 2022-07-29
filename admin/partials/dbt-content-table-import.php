@@ -120,7 +120,7 @@ if (!defined('WPINC')) die;
                                 <td class="js-dragable-handle"><span class="dashicons dashicons-sort"></span></td>
                                 <td><input type="text" name="form_create[field_name][]" value=""></td>
                                 <td>
-                                    <?php echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'double'=>'Number double (123.12)', 'date'=>'Date', 'datetime'=>'Date Time'], true, 'class="js-field-preselect" name="form_create[field_type][]"', 'varchar'); ?>  
+                                    <?php echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'decimal'=>'Decimal (123.12)', 'date'=>'Date', 'datetime'=>'Date Time'], true, 'class="js-field-preselect" name="form_create[field_type][]"', 'varchar'); ?>  
                                 </td>
                                 <td>
                                     <?php echo $dtf::html_select($select_fields_name, false, 'name="form_create[csv_name][]" class="js-create-table-type"', 'VARCHAR'); ?>
@@ -145,7 +145,7 @@ if (!defined('WPINC')) die;
                                             PRIMARY KEY
                                             <?php
                                         } else {
-                                            echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int'=>'Number', 'double'=>'Number double (123.12)', 'date'=>'Date', 'datetime'=>'Date Time'], true, 'class="js-field-preselect" name="form_create[field_type][]"',  @$cs->preset);
+                                            echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int'=>'Number', 'decimal'=>'decimal (123.12)', 'date'=>'Date', 'datetime'=>'Date Time'], true, 'class="js-field-preselect" name="form_create[field_type][]"',  @$cs->preset);
                                             }
                                          ?>  
                                     </td>
@@ -305,7 +305,7 @@ if (!defined('WPINC')) die;
             $max = $dtf::get_max_upload_file();
             if ($max > 0) {
                 ?>  <hr> <br><?php 
-                _e(sprintf("max upload files <b>%s</b>", $max), 'database_tables'); 
+                printf(__("max upload files <b>%s</b>", 'database_tables'), $max); 
              
             }
              ?>

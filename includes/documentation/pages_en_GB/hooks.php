@@ -7,39 +7,6 @@ if (!defined('WPINC')) die;
 
     <h2 class="dbt-h2"> <a href="<?php echo admin_url("admin.php?page=dbt_docs") ?>">Doc</a><span class="dashicons dashicons-arrow-right-alt2"></span><?php _e('Hooks & filters','database_tables'); ?></h2>
     <hr>
-    <h2 class="dbt-h2"> apply_filter('<b>dbt_frontend_link_columns_to_link_to</b>', $selected, $list_id, $columns);</h2>
-    In the frontend tables it allows you to decide which columns to link to to show the detail
-    <hr>
-    <h4 class="dbt-h4">Parameters</h4>
-    <div class="dbt-help-p">
-        <ul>
-            <li><b>$selected</b>
-                <br>(Array) The names of the columns to which to insert the link for the detail.
-            </li>
-            <li><b>$list_id</b>
-                <br>(int) The id of the list
-            </li>
-            <li><b>$columns</b>
-                <br>(Array) The names of the columns in the table
-            </li>
-        </ul>
-        </div>
-    <h4  class="dbt-h4">Source</h4>
-    <div class="dbt-help-p">./includes/dbt-functions.php</div>
-
-
-    <h4 class="dbt-h4">Example</h4>
-    <div class="dbt-help-p">
-        <pre class="dbt-code">
-        /**
-        * In the frontend table: change which columns have the link to the detail (in this case all)
-        */
-        add_filter('dbt_frontend_link_columns_to_link_to', 'all_cols', 10, 3);
-        function all_cols($selected, $dbt_id, $columns) {
-            return $columns;
-        }
-        </pre>
-    </div>
 
     <hr>
     <h2 class="dbt-h2"> apply_filters('<b>dbt_frontend_build_custom_link</b>', $custom_link, $dbt_id, $primary_values, $col_value, $col_key);</h2>
@@ -66,7 +33,7 @@ if (!defined('WPINC')) die;
         </ul>
         </div>
     <h4  class="dbt-h4">Source</h4>
-    <div class="dbt-help-p">./includes/dbt-functions.php</div>
+    <div class="dbt-help-p">./includes/dbt-functions-items-setting.php</div>
 
     <h4 class="dbt-h4">Example</h4>
     <div class="dbt-help-p">
@@ -113,7 +80,7 @@ if (!defined('WPINC')) die;
         </ul>
         </div>
     <h4  class="dbt-h4">Source</h4>
-    <div class="dbt-help-p">./includes/dbt-html-table-frontend.php</div>
+    <div class="dbt-help-p">./includes/dbt-html-search-frontend.php</div>
 
     <h4 class="dbt-h4">Example</h4>
     <div class="dbt-help-p">

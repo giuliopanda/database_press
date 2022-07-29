@@ -1,10 +1,9 @@
 <?php
 /**
  * header-type:doc
- * header-title: Modificare i dati estratti
-* header-tags:
-* header-description: Una volta salvata una query è possibile modificare la visualizzazione dei dati dal tab List view formatting
-* header-lang:ITA
+ * header-title: Edit the extracted data
+ * header-tags: edit columns, column
+ * header-description: Once you have saved a query, you can change the view of the data from the List view formatting tab
 */
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
@@ -22,15 +21,23 @@ if (!defined('WPINC')) die;
         <p> When you use the search field it will search all columns for who a search type has been chosen. LIKE means that it searches within the text while = will only search for columns that match the searched text. </p>
     </div>
     <div id="dbt_help_print" class="dbt_help_div">
-        <h4>Print</h4>
+        <h4>Column type</h4>
         <p> Changes the displayed text according to the chosen format. Custom allows you to use shortcodes to display the contents of the column. From the Help you can click vars to see the list of variables to use </p>
+    </div>
+    <div id="dbt_help_user" class="dbt_help_div">
+        <p>The <b> User </b> type displays the username starting with the ID. If you want to show other user fields you can use the template engine shortcodes in 'Show user attributes'. </p>
+        <pre class="dbt-code">[%user.user_login], [%user.user_email]</pre>
+    </div>
+    <div id="dbt_help_post" class="dbt_help_div">
+        <p>The <b> Post </b> type displays the title of a post starting with the ID. If you want to show other post fields you can use the template engine shortcodes in 'Show post attributes'.</p>
+        <pre class="dbt-code">&lt;a href=&quot;[^LINK id=[%post.ID]]&quot;&gt;[%post.post_title]&lt;/a&gt;</pre>
     </div>
     <div id="dbt_help_format" class="dbt_help_div">
         <h3>column formatting</h3>
         <h4>change values</h4>
         <p> Change the content value according to the entered csv </p>
          <p> The csv values must be separated by commas. The first value is that of the column, the second is how it should be transformed </p>
-         <p> You can use the special scripts <b> <x,> x, o = x-y </b> for a range, where x and y are numbers. </p>
+         <p> You can use the special scripts <b> &lt;x, &gt;x, OR =x-y </b> for a range, where x and y are numbers. </p>
          example:
         <pre class="dbt-code">
     0, NO
@@ -41,7 +48,7 @@ if (!defined('WPINC')) die;
     <div id="dbt_help_styles" class="dbt_help_div">
         <h4>change styles</h4>
         <p> Adds a conditional class depending on the value of the csv inserted </p>
-         <p> You can use the special writes <b> <x,> x, o = x-y </b> for a range, where x and y are numbers. <br>
+         <p> You can use the special writes <b> &lt;x, &gt;x, OR =x-y </b> for a range, where x and y are numbers. <br>
          here is the list of classes already configured:
             <ul>
                 <li>dbt-cell-red</li>

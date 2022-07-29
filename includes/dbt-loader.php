@@ -640,23 +640,7 @@ class Dbt_loader {
 					if ($exists == 1) {
 						if (count($sql) > 0) {
 							$query_to_execute[] = ['action'=>'update', 'table'=>$table, 'sql_to_save'=>$sql, 'id'=> [$primary_key=>$primary_value], 'table_alias'=>$alias_table, 'pri_val'=>$primary_value, 'pri_name'=>$primary_key, 'setting' => $setting];
-							/*
-							$ris_update = $wpdb->update($table, $sql, [$primary_key=>$primary_value]);
-
-							if ($ris_update !== false) {
-								$queries_executed[] =  $wpdb->last_query;
-							} else {
-								$json_result['result'] = 'nook';
-								$json_result['error'] = $wpdb->last_error;
-								Dbt_fn::set_cookie('error', $json_result['error']);
-								if (is_countable($queries_executed) && count($queries_executed) > 0) {
-									$json_result['msg'] = __(sprintf('%s queries were executed successfully:', count($queries_executed)),'database_tables')."<br>".implode("<br>", $queries_executed);
-									Dbt_fn::set_cookie('msg', $json_result['msg']);
-								}
-								wp_send_json($json_result);
-								die();
-							}
-							*/
+							
 						}
 					} else if ($exists == 0) {
 						$json_result['reload'] = 1;
@@ -701,7 +685,7 @@ class Dbt_loader {
 				$json_result['error'] = ($r['error'] != "") ? $r['error'] : 'the data could not be saved';
 				Dbt_fn::set_cookie('error', $json_result['error']);
 				if (is_countable($queries_executed) && count($queries_executed) > 0) {
-					$json_result['msg'] = __(sprintf('%s queries were executed successfully:', count($queries_executed)),'database_tables')."<br>".implode("<br>", $queries_executed);
+					$json_result['msg'] =sprintf( __('%s queries were executed successfully:','database_tables'), count($queries_executed))."<br>".implode("<br>", $queries_executed);
 					Dbt_fn::set_cookie('msg', $json_result['msg']);
 				}
 				wp_send_json($json_result);
@@ -712,7 +696,7 @@ class Dbt_loader {
 		}
 
 		if (is_countable($queries_executed) && count($queries_executed) > 0) {
-			$json_result['msg'] = __(sprintf('%s queries were executed successfully:', count($queries_executed)),'database_tables')."<br>".implode("<br>", $queries_executed);
+			$json_result['msg'] = sprintf(__('%s queries were executed successfully:','database_tables'), count($queries_executed))."<br>".implode("<br>", $queries_executed);
 			Dbt_fn::set_cookie('msg', $json_result['msg']);
 		}
 		// preparo i dati da inviare per aggiornare la tabella nel frontend!
@@ -723,7 +707,7 @@ class Dbt_loader {
 			if (isset($_REQUEST['dbt_global_list_id'])) {
 				$post = Dbt_functions_list::get_post_dbt(absint($_REQUEST['dbt_global_list_id']));
 				if (isset($post->post_content)) {
-					$table_model->update_items_with_setting($post->post_content);
+					$table_model->update_items_with_setting($post);
 				}
 			}
 			Dbt_fn::remove_hide_columns($table_model);
@@ -805,7 +789,7 @@ class Dbt_loader {
 							if ($option['status'] != "CLOSE") {
 								$temp_groups[$th['schema']->table] = 'DELETE FROM `'.$th['schema']->orgtable.'` WHERE `'.esc_sql($id).'` IN ('.$new_query.')';
 							} else {
-								$errors[] = __(sprintf('Records in the "%s" table cannot be removed because they are in a closed state. If you want to be able to remove the data, change the status from the table structure to "published"', $th['schema']->orgtable), 'database_tables');
+								$errors[] = sprintf(__('Records in the "%s" table cannot be removed because they are in a closed state. If you want to be able to remove the data, change the status from the table structure to "published"','database_tables'), $th['schema']->orgtable);
 							}
 						}
 					}
@@ -848,9 +832,12 @@ class Dbt_loader {
 			$table_items = $table_model->get_list();
 			$count = $table_model->get_count();
 			if ($dbt_id > 0) {
-				$table_model->update_items_with_setting($post->post_content);
+				$table_model->update_items_with_setting($post);
 				Dbt_fn::remove_hide_columns($table_model);
 				$table_items = [];
+				/*
+				// TODO come lo gestisco?
+				// se modifichi una tabella e non risalvi list_setting questa non sarà allineata con i risultati!!
 				foreach ($table_model->items as $key => $column) {
 					$temp_item = [];
 					// rimuovo i campi delle chiavi primarie aggiunte di nascosto nelle query e cambio il nome delle colonne
@@ -858,8 +845,9 @@ class Dbt_loader {
 						$temp_item[$header_col->title] = $column->$name_key;
 					}
 					$table_items[] = $temp_item;
-					
 				}
+				*/
+				$table_items = $table_model->items;
 			}
 			// verifico che la query non abbia dato errore
 			if ($table_model->last_error ) {

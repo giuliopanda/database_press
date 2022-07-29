@@ -125,8 +125,8 @@ class Dbt_fn_structure {
         if ($new_column->field_type == "INT" && $new_column->field_length == "11" && $new_column->attributes == "" && $new_column->null == "f") {
             return "int_signed";
         }
-        if ($new_column->field_type == "DOUBLE" && $new_column->field_length == "11,2" && $new_column->attributes == "" && $new_column->null == "f"  && $new_column->default == "") {
-            return "double";
+        if ($new_column->field_type == "DECIMAL" && $new_column->field_length == "9,2" && $new_column->attributes == "" && $new_column->null == "f" && $new_column->default == "") {
+            return "decimal";
         }
         if ($new_column->field_type == "DATE" && $new_column->field_length == "" && $new_column->attributes == "" && $new_column->null == "f"  && $new_column->default == "") {
             return "date";

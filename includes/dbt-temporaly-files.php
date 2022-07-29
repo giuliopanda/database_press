@@ -38,7 +38,7 @@ class Dbt_temporaly_files
         if (is_dir($dir) && is_writable($dir)) {
             return $dir;
         } 
-        $this->last_error = vsprintf(__("I cannot access a temporaly folder: %s", 'database-table'), [$dir]);
+        $this->last_error = sprintf(__("I cannot access a temporaly folder: %s", 'database-table'), $dir);
         return false;
     }
 
@@ -106,7 +106,7 @@ class Dbt_temporaly_files
         } else {
             unlink ($dir.$filename);
             if (is_file($dir.$filename)) {
-                $this->last_error = __(vsprintf("I can't delete the file: %", [$dir.$filename]), 'database-table');
+                $this->last_error = sprintf(__("I can't delete the file: %", 'database_tables'), $dir.$filename);
                 return false;
             }
             return true;

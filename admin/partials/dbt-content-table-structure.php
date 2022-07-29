@@ -11,7 +11,7 @@ if (!defined('WPINC')) die;
 </div>
 <div class="dbt-content-table js-id-dbt-content" >
     <div class="dbt-content-margin">
-        <h2 class="dbt-h2-inline dbt-content-margin"><?php _e(sprintf('Table %s', $table),'database_tables'); ?></h2>
+        <h2 class="dbt-h2-inline dbt-content-margin"><?php printf(__('Table %s','database_tables'), $table); ?></h2>
 
         <?php if ($table != "") : ?>
             <ul class="dbt-submenu" style="display: inline-block;">

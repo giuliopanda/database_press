@@ -22,8 +22,20 @@ if (!defined('WPINC')) die;
         <p>Quando usi il campo di ricerca  questo cercherà in tutte le colonne in chi è è stato scelto un tipo di ricerca. LIKE vuol dire che cerca all'interno del testo mentre = cercherà solo le colonne uguali al testo cercato.</p>
     </div>
     <div id="dbt_help_print" class="dbt_help_div">
-        <h4>Print</h4>
+        <h4>Column type</h4>
         <p>Modifica il testo visualizzato a seconda del formato scelto. Custom permette di usare gli shortcode per visualizzare il contenuto della colonna. Dall'Help puoi cliccare vars per vedere la lista delle variabili da usare</p>
+    </div>
+    <div id="dbt_help_user" class="dbt_help_div">
+        <p>Il tipo <b>User</b> mostra il nome utente a partire dall'ID. Se vuoi mostrare altri campi dell'utente puoi usare gli shortcode del template engine dentro 'Show user attributes'. </p>
+        <pre class="dbt-code">
+            [%user.user_login], [%user.user_email]
+        </pre>
+    </div>
+    <div id="dbt_help_post" class="dbt_help_div">
+        <p>Il tipo <b>Post</b> mostra il titolo di un post a partire dall'ID. Se vuoi mostrare altri campi del post puoi usare gli shortcode del template engine dentro 'Show post attributes'. </p>
+        <pre class="dbt-code">
+            &lt;a href=&quot;[^LINK id=[%post.ID]]&quot;&gt;[%post.post_title]&lt;/a&gt;
+        </pre>
     </div>
     <div id="dbt_help_format" class="dbt_help_div">
         <h3>column formatting</h3>
