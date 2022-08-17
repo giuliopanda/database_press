@@ -9,11 +9,11 @@ if (!defined('WPINC')) die;
     <?php require(dirname(__FILE__).'/dbt-partial-tabs.php'); ?>
 </div>
 <div class="dbt-content-table js-id-dbt-content" id="dbt_content_table" >
-    <?php if (@$this->last_error != "" && $dtf::get_request('action', '', 'string') != 'create-table-csv-data') : ?>
+    <?php if (@$this->last_error != "" && Dbt_fn::get_request('action', '', 'string') != 'create-table-csv-data') : ?>
         <div class="dtf-alert-sql-error"><?php echo $this->last_error; ?></div>
     <?php endif; ?>
 
-    <?php if (@$this->msg != "" && $dtf::get_request('action', '', 'string') != 'create-table-csv-data') : ?>
+    <?php if (@$this->msg != "" && Dbt_fn::get_request('action', '', 'string') != 'create-table-csv-data') : ?>
         <div class="dtf-alert-info"><?php echo $this->msg; ?></div>
     <?php endif; ?>
 
@@ -44,7 +44,7 @@ if (!defined('WPINC')) die;
                         <input type="hidden" name="csv_name_of_file" value="<?php echo esc_attr($name_of_file); ?>" />
                         <input type="hidden" name="csv_temporaly_filename" value="<?php echo esc_attr($csv_filename); ?>" />
                         <input type="hidden" name="action" value="execute-csv-data" />
-                        Delimiter <input type="text" name="csv_delimiter" value="<?php echo $dtf::convert_char_to_special($csv_delimiter); ?>" />
+                        Delimiter <input type="text" name="csv_delimiter" value="<?php echo Dbt_fn::convert_char_to_special($csv_delimiter); ?>" />
                         <?php if ((isset($allow_use_first_row) && $allow_use_first_row == true) || !isset($allow_use_first_row)) : ?>
                             <label><input type="checkbox" name="csv_first_row_as_headers" value="1" <?php echo ($csv_first_row_as_headers) ? ' checked="checked"' : '';?>> <?php _e('Use first row as Headers', 'database_tables'); ?></label>
                         <?php else : ?>
@@ -75,7 +75,7 @@ if (!defined('WPINC')) die;
                 </select>
                 <?php Dbt_fn::echo_html_icon_help('database_tables-table-import','choose_action'); ?>
             </div>
-            <?php if ($dtf::get_request('action', '', 'string') == 'create-table-csv-data') : ?>
+            <?php if (Dbt_fn::get_request('action', '', 'string') == 'create-table-csv-data') : ?>
                 <?php if ($this->last_error != "" ) : ?>
                     <div class="dtf-alert-sql-error"><?php echo $this->last_error; ?></div>
                 <?php endif; ?>
@@ -97,13 +97,13 @@ if (!defined('WPINC')) die;
                     <input type="hidden" name="table" value="<?php echo @$import_table; ?>" />
                     <input type="hidden" name="csv_temporaly_filename" value="<?php echo esc_attr($csv_filename); ?>" />
                     <input type="hidden" name="action" value="create-table-csv-data" />
-                    <input type="hidden" name="csv_delimiter" value="<?php echo $dtf::convert_char_to_special($csv_delimiter); ?>" />
+                    <input type="hidden" name="csv_delimiter" value="<?php echo Dbt_fn::convert_char_to_special($csv_delimiter); ?>" />
                     <input type="hidden" name="csv_first_row_as_headers" value="<?php echo ($csv_first_row_as_headers) ? '1' : '0';?>">
 
-                    <div id="dbt_create_table" class="dbt-import-content-create-table" style="<?php echo ($dtf::get_request('action', '', 'string') == 'create-table-csv-data') ? '' : '' ; ?>">
+                    <div id="dbt_create_table" class="dbt-import-content-create-table" style="<?php echo (Dbt_fn::get_request('action', '', 'string') == 'create-table-csv-data') ? '' : '' ; ?>">
                         <div class="dbt-import-table-name">
                             <label><?php _e('Table name', 'database-table'); ?></label>
-                            <label id="dbt_wp_prefix" class="dbt-wp-prefix"><?php echo $dtf->get_prefix(); ?></label><input type="text" name="csv_name_of_file" value="<?php echo esc_attr($name_of_file); ?>">
+                            <label id="dbt_wp_prefix" class="dbt-wp-prefix"><?php echo Dbt_fn::get_prefix(); ?></label><input type="text" name="csv_name_of_file" value="<?php echo esc_attr($name_of_file); ?>">
                             <label><input type="checkbox" name="use_prefix" value="1" checked="checked" onchange="dbt_use_prefix(this, 'dbt_wp_prefix')"><?php _e('Use wp prefix', 'database-table'); ?> </label>
                         </div>
                         <table class="wp-list-table widefat striped dbt-table-view-list js-dragable-table">
@@ -120,10 +120,10 @@ if (!defined('WPINC')) die;
                                 <td class="js-dragable-handle"><span class="dashicons dashicons-sort"></span></td>
                                 <td><input type="text" name="form_create[field_name][]" value=""></td>
                                 <td>
-                                    <?php echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'decimal'=>'Decimal (123.12)', 'date'=>'Date', 'datetime'=>'Date Time'], true, 'class="js-field-preselect" name="form_create[field_type][]"', 'varchar'); ?>  
+                                    <?php echo Dbt_fn::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'decimal'=>'Decimal (123.12)', 'date'=>'Date', 'datetime'=>'Date Time'], true, 'class="js-field-preselect" name="form_create[field_type][]"', 'varchar'); ?>  
                                 </td>
                                 <td>
-                                    <?php echo $dtf::html_select($select_fields_name, false, 'name="form_create[csv_name][]" class="js-create-table-type"', 'VARCHAR'); ?>
+                                    <?php echo Dbt_fn::html_select($select_fields_name, false, 'name="form_create[csv_name][]" class="js-create-table-type"', 'VARCHAR'); ?>
                                 </td>
 
                                 <td>
@@ -131,36 +131,37 @@ if (!defined('WPINC')) die;
                                 </td>
                             </tr>
                             <?php
-                            
-                            foreach ($csv_structure as $cs) {
-                                ?>
-                                <tr class="js-dragable-tr">
-                                    <td class="js-dragable-handle"><span class="dashicons dashicons-sort"></span></td>
-                                    <td><input type="text" name="form_create[field_name][]" value="<?php echo $dtf::convert_to_mysql_column_name($cs->field_name); ?>"></td>
-                                    <td>
-                                        <?php 
-                                        if ($cs->preset == "pri") {
-                                            ?>
-                                            <input type="hidden" name="form_create[field_type][]" value="pri">
-                                            PRIMARY KEY
-                                            <?php
-                                        } else {
-                                            echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int'=>'Number', 'decimal'=>'decimal (123.12)', 'date'=>'Date', 'datetime'=>'Date Time'], true, 'class="js-field-preselect" name="form_create[field_type][]"',  @$cs->preset);
-                                            }
-                                         ?>  
-                                    </td>
-                                    <td>
-                                        <?php echo $dtf::html_select($select_fields_name, false, 'name="form_create[csv_name][]" class="js-create-table-type"', @$cs->name); ?>
-                                    </td>
-                                    <td>
-                                        <?php if ($cs->preset != "pri") : ?>
-                                        <div class="button" onClick="dbt_import_csv_create_table_delete_row(this);"><?php _e('Delete Row' , 'database_tables'); ?></div>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                                <?php 
-                                $row++;
-                                if ($row > $max_row_allowed && $max_row_allowed > 0)   break;
+                            if (isset($csv_structure) && is_array($csv_structure)) {
+                                foreach ($csv_structure as $cs) {
+                                    ?>
+                                    <tr class="js-dragable-tr">
+                                        <td class="js-dragable-handle"><span class="dashicons dashicons-sort"></span></td>
+                                        <td><input type="text" name="form_create[field_name][]" value="<?php echo Dbt_fn::convert_to_mysql_column_name($cs->field_name); ?>"></td>
+                                        <td>
+                                            <?php 
+                                            if ($cs->preset == "pri") {
+                                                ?>
+                                                <input type="hidden" name="form_create[field_type][]" value="pri">
+                                                PRIMARY KEY
+                                                <?php
+                                            } else {
+                                                echo Dbt_fn::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int'=>'Number', 'decimal'=>'decimal (123.12)', 'date'=>'Date', 'datetime'=>'Date Time'], true, 'class="js-field-preselect" name="form_create[field_type][]"',  @$cs->preset);
+                                                }
+                                            ?>  
+                                        </td>
+                                        <td>
+                                            <?php echo Dbt_fn::html_select($select_fields_name, false, 'name="form_create[csv_name][]" class="js-create-table-type"', @$cs->name); ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($cs->preset != "pri") : ?>
+                                            <div class="button" onClick="dbt_import_csv_create_table_delete_row(this);"><?php _e('Delete Row' , 'database_tables'); ?></div>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                    <?php 
+                                    $row++;
+                                    if ($row > $max_row_allowed && $max_row_allowed > 0)   break;
+                                }
                             }
                             ?>
                             <tr>
@@ -186,7 +187,7 @@ if (!defined('WPINC')) die;
                 <input type="hidden" name="section" value="table-import" />
                 <input type="hidden" id="csv_import_original_table" name="table" value="<?php echo @$import_table; ?>" />
                 <input type="hidden" id="csv_temporaly_filename" name="csv_temporaly_filename" value="<?php echo esc_attr($csv_filename); ?>" />
-                <input type="hidden" id="csv_delimiter" name="csv_delimiter" value="<?php echo $dtf::convert_char_to_special($csv_delimiter); ?>" />
+                <input type="hidden" id="csv_delimiter" name="csv_delimiter" value="<?php echo Dbt_fn::convert_char_to_special($csv_delimiter); ?>" />
                 <input type="hidden" id="csv_first_row_as_headers" name="csv_first_row_as_headers" value="<?php echo ($csv_first_row_as_headers) ? '1' : '0';?>">
                 <?php /** Qui vengono disegnate le tabelle in js con la configurazione per importare i dati di un csv */ ?>
                 <div class="dbt-msg-unique-table-id-explane"><?php _e('Select one or more tables in which to insert data.<br>On each field choose which column of the csv to insert.<br>If you want to insert data on multiple tables, for example post and postmeta: First select the post table and associate the fields of your csv. At the bottom of the table you will find a string. This refers to the id of the records that will be created or updated.<br>Add the postmeta table and on the post_id field select the code in square brackets.<br>','database_tables'); ?></div>
@@ -197,7 +198,7 @@ if (!defined('WPINC')) die;
                 <div class="dbt-import-content-clone-block">
                     <div class="js-insert-fields-content-clone dbt-insert-fields-content">
                         <div class="dbt-import-params-csv">
-                            <?php $dtf::html_select(array_merge([''=>__('Select table', 'database_tables')],  $this->table_list['tables']), true, 'class="js-select-tables-import jsonchange-select-tables-import-clone"', @$current_table); ?>
+                            <?php Dbt_fn::html_select(array_merge([''=>__('Select table', 'database_tables')],  $this->table_list['tables']), true, 'class="js-select-tables-import jsonchange-select-tables-import-clone"', @$current_table); ?>
                             <?php if (@$select_action == "insert_records" && isset($csv_structure_table_created) && is_countable($csv_structure_table_created) ) : ?>
                                 <script>
                                     var csv_structure_table_created = <?php echo json_encode($csv_structure_table_created); ?>;
@@ -302,7 +303,7 @@ if (!defined('WPINC')) die;
             </form>
            
             <?php 
-            $max = $dtf::get_max_upload_file();
+            $max = Dbt_fn::get_max_upload_file();
             if ($max > 0) {
                 ?>  <hr> <br><?php 
                 printf(__("max upload files <b>%s</b>", 'database_tables'), $max); 

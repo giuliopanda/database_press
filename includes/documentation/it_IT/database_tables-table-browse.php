@@ -8,8 +8,10 @@
  * header-package-title: Manage DB
  * header-package-link: manage-db.php
  */
+
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 Dbt_fn::require_init();
 $all_columns = Dbt_fn::get_all_columns();
 ?>

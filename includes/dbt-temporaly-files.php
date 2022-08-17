@@ -1,6 +1,6 @@
 <?php
 /**
- * Classe che gestisce i file temporanei di database-table
+ * Classe che gestisce i file temporanei di database_tables
  * 
  */
 namespace DatabaseTables;
@@ -23,7 +23,7 @@ class Dbt_temporaly_files
     public function get_dir() {
         $dir = get_temp_dir();
         if (is_dir($dir) && is_writable($dir)) {
-            $dir = $dir."database-table/";
+            $dir = $dir."database_tables/";
             if (!is_dir($dir)) {
                 mkdir($dir);
             } 
@@ -38,7 +38,7 @@ class Dbt_temporaly_files
         if (is_dir($dir) && is_writable($dir)) {
             return $dir;
         } 
-        $this->last_error = sprintf(__("I cannot access a temporaly folder: %s", 'database-table'), $dir);
+        $this->last_error = sprintf(__("I cannot access a temporaly folder: %s", 'database_tables'), $dir);
         return false;
     }
 
@@ -85,7 +85,7 @@ class Dbt_temporaly_files
         $dir = $this->get_dir();
         if ($dir == false) return false;
         if (!is_file($dir.$filename)) {
-            $this->last_error = __("Temporary file cannot be read", 'database-table');
+            $this->last_error = __("Temporary file cannot be read", 'database_tables');
             return false;
         }
         $data = file_get_contents($dir.$filename);
@@ -159,7 +159,7 @@ class Dbt_temporaly_files
      */
     public function move_uploaded_file($post_file_name) {
         if (!isset($_FILES[$post_file_name]['tmp_name']) || $_FILES[$post_file_name]['tmp_name'] == "") {
-            $this->last_error = __('No file uploaded', 'database-table');
+            $this->last_error = __('No file uploaded', 'database_tables');
             return false;
         }
         $file = $_FILES[$post_file_name]['tmp_name'];
@@ -168,7 +168,7 @@ class Dbt_temporaly_files
         // questa è una funzione php
         $ris = move_uploaded_file($file, $filename);
         if ($ris == false) {
-            $this->last_error = __('Move uploaded file error', 'database-table');
+            $this->last_error = __('Move uploaded file error', 'database_tables');
             return '';
         }
         return basename($filename);
@@ -194,11 +194,11 @@ class Dbt_temporaly_files
         $count_row = 0;
         $keys_column = [];
         if (!is_file($dir.$filename)) {
-            $this->last_error = __('The file you are trying to upload does not exist', 'database-table');
+            $this->last_error = __('The file you are trying to upload does not exist', 'database_tables');
             return false;
         }
         if (($handle = fopen($dir.$filename, "r")) !== FALSE) {
-            while (($data = fgetcsv($handle, 8192, $delimiter)) !== FALSE) {
+            while (($data = fgetcsv($handle, 262144, $delimiter)) !== FALSE) {
                 if ($row_read > 0 && $count_row >= $row_read) {
                     break;
                 } 
@@ -324,23 +324,24 @@ class Dbt_temporaly_files
 
     /**
      * Trova il delimitatore di un csv.
+     * @todo DA RISCRIVERE!!!!
      * @param String $filename
      * @return String
      */
-    public function find_csv_delimiter($filename) {
+    public function find_csv_delimiter($filename) {   
         $dir = $this->get_dir();
         if ($dir == false) return false;
         if (!is_file($dir.$filename)) {
-            $this->last_error = __("Temporary file cannot be read", 'database-table');
+            $this->last_error = __("Temporary file cannot be read", 'database_tables');
             return false;
         }
         $csv_list = [];
         if (($handle = fopen($dir.$filename, "r")) !== FALSE) {
-            for ($x = 0; $x < 256; $x++) {
-                $delimiters[] = chr($x);
-            }
+            
+            $delimiters = [';',',',"\t"];
+            
             $row = 0;
-            while (($buffer = fgets($handle, 8192)) !== false) {
+            while (($buffer = fgets($handle, 131072)) !== false && $row < 50) {
                 $row++;
                 if ($row == 1) {
                     foreach ($delimiters as $key=>$del) {

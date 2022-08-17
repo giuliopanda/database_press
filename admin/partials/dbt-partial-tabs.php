@@ -62,6 +62,10 @@ function dbt_partial_tabs() {
                 </a>
             <?php endif; ?>
         <?php endforeach; ?>
+        <div class="dbt-tab" id="dbt_collapse_btn" style="margin-left: auto; cursor:pointer" onclick="dbt_click_toggle_sidebar()">
+        <span class="dashicons dashicons-arrow-right" style="background: #1d2327; border-radius: 50%; color: #FFF;" ></span> Collapse sidebar
+        </div>
+       
     </div>
 <?php 
 }

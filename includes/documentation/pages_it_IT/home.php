@@ -31,12 +31,17 @@ if (!defined('WPINC')) die;
     </div>
 
     <h3>Hooks & filters</h3>
-        <div class="dbt-help-p">Modifica il comportamento del plugin direttamente da codice.<br><br>
+    <div class="dbt-help-p">Modifica il comportamento del plugin direttamente da codice.<br><br>
         <a href="<?php echo admin_url("admin.php?page=dbt_docs&section=hooks") ?>">Approfondisci</a>
     </div>
 
     <h3>PHP</h3>
-        <div class="dbt-help-p">Sviluppa usando direttamente le funzioni del programma. <br><br>
+    <div class="dbt-help-p">Sviluppa usando direttamente le funzioni del programma. <br><br>
         <a href="<?php echo admin_url("admin.php?page=dbt_docs&section=code-php") ?>">Approfondisci</a>
+    </div>
+
+    <h3>Tutorials</h3>
+    <div class="dbt-help-p">
+    <a href="<?php echo admin_url("admin.php?page=dbt_docs&section=tutorial_01") ?>">Related post</a>
     </div>
 </div>

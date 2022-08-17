@@ -26,8 +26,8 @@ if (!defined('WPINC')) die;
     <form id="table_filter" method="post" action="<?php echo admin_url("admin.php"); ?>">
         <input type="hidden" name="page"  value="database_tables">
         <input type="hidden" name="action_query" id="dtf_action_query"  value="">
-        <input type="hidden" id="dtf_table_sort_field" name="filter[sort][field]" value="<?php echo $dtf::esc_request('filter.sort.field'); ?>">
-        <input type="hidden" id="dtf_table_sort_order"  name="filter[sort][order]" value="<?php echo $dtf::esc_request('filter.sort.order'); ?>">
+        <input type="hidden" id="dtf_table_sort_field" name="filter[sort][field]" value="<?php echo Dbt_fn::esc_request('filter.sort.field'); ?>">
+        <input type="hidden" id="dtf_table_sort_order"  name="filter[sort][order]" value="<?php echo Dbt_fn::esc_request('filter.sort.order'); ?>">
         <?php $html_table->render($table_model->items, false); ?>
     </form>
     

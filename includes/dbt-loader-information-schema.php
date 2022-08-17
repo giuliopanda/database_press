@@ -118,10 +118,10 @@ class Dbt_loader_information_schema {
         } else {
             $filename = $_REQUEST['filename'];
         }
-        $sql = 'SELECT count(*) as tot FROM  `'.esc_sql($table).'`';
+        $sql = 'SELECT count(*) as tot FROM  `'.addslashes($table).'`';
         $tot = $wpdb->get_var($sql);
 
-        $sql = 'SELECT * FROM  `'.esc_sql($table).'` LIMIT '.absint($limit_start).', 5000';
+        $sql = 'SELECT * FROM  `'.addslashes($table).'` LIMIT '.absint($limit_start).', 5000';
         $rows = $wpdb->get_results($sql);
         $insert_rows = [];
         if (is_countable($rows)) {
@@ -129,9 +129,9 @@ class Dbt_loader_information_schema {
                 $insert_values_key = $insert_values_val = [];
                 foreach ($row as $key=>$value) {
                     $insert_values_key[] = '`'.$key.'`'; 
-                    $insert_values_val[] = "'".esc_sql($value)."'";
+                    $insert_values_val[] = "'".addslashes($value)."'";
                 }
-                $insert_rows[] = 'INSERT INTO `'.esc_sql($table).'` ('.
+                $insert_rows[] = 'INSERT INTO `'.addslashes($table).'` ('.
                 implode(", ", $insert_values_key).
                 ') VALUES ('.implode(",",$insert_values_val).');' ;
             }

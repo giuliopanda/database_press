@@ -12,7 +12,6 @@ if (!defined('WPINC')) die;
 <div class="dbt-content-table js-id-dbt-content" >
     <div class="dbt-content-margin">
         <h2 class="dbt-h2-inline dbt-content-margin"><?php printf(__('Table %s','database_tables'), $table); ?></h2>
-
         <?php if ($table != "") : ?>
             <ul class="dbt-submenu" style="display: inline-block;">
                 <?php if (isset($_REQUEST['action']) && $_REQUEST['action'] == "show_create_structure" || $table == "") : ?>
@@ -44,7 +43,7 @@ if (!defined('WPINC')) die;
             <div class="dtf-alert-sql-error"><?php echo $msg_error; ?></div>
         <?php endif ; ?>
 
-        <?php if ($this->last_error != "" && $dtf::get_request('action', '', 'string') != 'create-table-csv-data') : ?>
+        <?php if ($this->last_error != "" && Dbt_fn::get_request('action', '', 'string') != 'create-table-csv-data') : ?>
             <div class="dtf-alert-sql-error"><?php echo $this->last_error; ?></div>
         <?php endif; ?>
         <?php if ($action == 'show_create_structure') : ?>
@@ -70,7 +69,7 @@ if (!defined('WPINC')) die;
                         <hr>
                         <?php if ($table != "") : ?>
                         <div class="dbt-form-row">
-                            <label><span class="dbt-form-label"><?php  _e('Status', 'database_tables'); ?></span><?php $dtf::html_select(['DRAFT'=>'Draft','PUBLISH'=>'Publish','CLOSE'=>'Close'], true, 'name="options[status]"', $table_options['status']); ?></label>
+                            <label><span class="dbt-form-label"><?php  _e('Status', 'database_tables'); ?></span><?php Dbt_fn::html_select(['DRAFT'=>'Draft','PUBLISH'=>'Publish','CLOSE'=>'Close'], true, 'name="options[status]"', $table_options['status']); ?></label>
                         </div>
                         <?php else: ?>
                             <input type="hidden" name="options[status]" value="DRAFT">
@@ -140,7 +139,7 @@ if (!defined('WPINC')) die;
                     <input type="hidden" name="table" value="<?php echo $table; ?>" />
                     <input type="hidden" name="action" value="save_metadata" />
                     <div class="dbt-form-row">
-                        <label><span class="dbt-form-label"><?php  _e('Status', 'database_tables'); ?></span><?php $dtf::html_select(['DRAFT'=>'Draft','PUBLISH'=>'Publish','CLOSE'=>'Close'], true, 'name="options[status]"', $table_options['status']); ?></label>
+                        <label><span class="dbt-form-label"><?php  _e('Status', 'database_tables'); ?></span><?php Dbt_fn::html_select(['DRAFT'=>'Draft','PUBLISH'=>'Publish','CLOSE'=>'Close'], true, 'name="options[status]"', $table_options['status']); ?></label>
                     </div>
                     <div class="dbt-form-row">
                         <label class="dbt-form-label-top"><?php _e('Description', 'database_tables'); ?></label><textarea class="dbt-form-textarea" name="options[description]"> <?php echo (esc_textarea(stripslashes(@$table_options['description']))); ?></textarea>

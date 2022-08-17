@@ -57,14 +57,22 @@ class PinaActions
 						return $ris;
 					} else {
 						PcErrors::set(sprintf('%s function not found (shortcode: %s)',$function_name, $short_code_transformed['shortcode']), '', -1, 'debug');
-						return '';
+						if (isset($short_code_transformed['string_shortcode'])) {
+							return $short_code_transformed['string_shortcode'];
+						} else {
+							return '';
+						}
 					}
 				}
 			}
 		} else {
 			PcErrors::set('You have to pass an array with the following structures ["shortcode":string,"attributes":Array]', '', -1, 'notice');
 		}
-		return '';
+		if (isset($short_code_transformed['string_shortcode'])) {
+			return $short_code_transformed['string_shortcode'];
+		} else {
+			return '';
+		}
 	}
 }
 
@@ -343,7 +351,7 @@ if (!function_exists('pinacode_fn_wp_post')) {
 					}
 					$temp_post['read_more_link'] = '<a href="'.$permalink.'" class="pina_link pina_link_title">' . $read_more . '</a>';
 				
-					$author = get_user_by('ID', $post['post_author']);
+					$author = \get_user_by('ID', $post['post_author']);
 					if (@is_object($author)) {
 						$temp_post['author_id']		= $author->data->ID;
 						$temp_post['author_email']	= $author->data->user_email;
@@ -425,18 +433,18 @@ if (!function_exists('pinacode_fn_wp_user')) {
 		$get_var = null;
 		if (@array_key_exists('id', $attributes)) {
 			$id = PinaCode::get_registry()->short_code($attributes['id']);
-			$get_var = get_user_by('ID', $id);
+			$get_var = \get_user_by('ID', $id);
 		} else if (@array_key_exists('slug', $attributes)) {
 			$slug = PinaCode::get_registry()->short_code($attributes['slug']);
-			$get_var = get_user_by('slug', $slug); 
+			$get_var = \get_user_by('slug', $slug); 
 		} else if (@array_key_exists('email', $attributes)) {
 			$email = PinaCode::get_registry()->short_code($attributes['email']);
-			$get_var = get_user_by('email', $email); 
+			$get_var = \get_user_by('email', $email); 
 		} else if (@array_key_exists('login', $attributes)) {
 			$login = PinaCode::get_registry()->short_code($attributes['login']);
-			$get_var = get_user_by('login', $login);
+			$get_var = \get_user_by('login', $login);
 		} else {
-			$get_var = get_user_by('ID', get_current_user_id());
+			$get_var = \get_user_by('ID', get_current_user_id());
 		}
 		if (@is_object($get_var)) {
 			$get_var2 = [];
@@ -446,7 +454,7 @@ if (!function_exists('pinacode_fn_wp_user')) {
 			$get_var2['email']		= $get_var->user_email;
 			$get_var2['roles'] 		= $get_var->roles;
 			$get_var2['registered']	= $get_var->user_registered;
-			$meta = get_user_meta($get_var->ID);
+			$meta = \get_user_meta($get_var->ID);
 			$array_names = ['login','email','roles','registered'];
 			foreach ($meta as $key=>$m) {
 				if (in_array($key, $shift_array)) continue;
@@ -456,7 +464,7 @@ if (!function_exists('pinacode_fn_wp_user')) {
 				if (is_array($m) && count($m) == 1) {
 					$m = array_shift($m);
 					if ($m !== "") {
-						$get_var2[$key] = maybe_unserialize($m);
+						$get_var2[$key] = \maybe_unserialize($m);
 					}
 				} else {
 					$get_var2[$key] = $m;
@@ -479,6 +487,240 @@ if (!function_exists('pinacode_fn_wp_user')) {
 	}
 }
 pinacode_set_functions('user', 'pinacode_fn_wp_user');
+
+
+/**
+ * [^get_tag id|slug|name|term_id]
+ * @since 0.9
+ */
+if (!function_exists('pinacode_fn_wp_get_tag')) {
+	function pinacode_fn_wp_get_tag($short_code_name, $attributes) { 
+		$get_var = null;
+		if (@array_key_exists('id', $attributes)) {
+			$id = PinaCode::get_registry()->short_code($attributes['id']);
+			$get_var = \get_term_by('ID', $id);
+		} else if (@array_key_exists('slug', $attributes)) {
+			$slug = PinaCode::get_registry()->short_code($attributes['slug']);
+			$get_var = \get_term_by('slug', $slug, 'post_tag'); 
+		} else if (@array_key_exists('name', $attributes)) {
+			$name = PinaCode::get_registry()->short_code($attributes['name']);
+			$get_var = \get_term_by('name', $name, 'post_tag'); 
+		} else if (@array_key_exists('term_id', $attributes)) {
+			$term_id = PinaCode::get_registry()->short_code($attributes['term_id']);
+			$get_var = \get_term_by('term_id', $term_id, 'post_tag');
+		} else {
+			return '';
+		}
+		if (@is_object($get_var)) {
+			$get_var2 = [];
+			$get_var2['id'] 			= $get_var->term_id;
+			$get_var2['term_id'] 		= $get_var->term_id;
+			$get_var2['name'] 			= $get_var->name;
+			$get_var2['slug'] 			= $get_var->slug;
+			$get_var2['term_group']		= $get_var->term_group;
+			$get_var2['taxonomy'] 		= $get_var->taxonomy;
+			$get_var2['parent']			= $get_var->parent;
+			$get_var2['link'] = get_term_link($get_var);
+			$get_var2['html'] ='<a href="'.$get_var2['link'].'" class="dbt-post-category">'. $get_var2['name'].'</a>';
+			$get_var = $get_var2;
+		} else {
+			PcErrors::set('<b>[^'.$short_code_name.'</b> I haven\'t found any tags.', '', -1, 'warning');
+			return '';
+		}
+		PinaCode::set_var("get_tag", $get_var);
+		if (substr($short_code_name, 0, 8) == "get_tag.") {	
+			if (!PinaCode::has_var($short_code_name)) {
+				PcErrors::set('The variable <b>'.$short_code_name.'</b> does not exist', '', -1, 'error');
+				$get_var = '';
+			} else {
+				$get_var = PinaCode::get_var($short_code_name);
+			}
+		}
+		return $get_var;
+	}
+}
+pinacode_set_functions('get_tag', 'pinacode_fn_wp_get_tag');
+
+
+/**
+ * [^get_tag id|slug|name|term_id]
+ * @since 0.9
+ */
+if (!function_exists('pinacode_fn_wp_get_cat')) {
+	function pinacode_fn_wp_get_cat($short_code_name, $attributes) { 
+		$get_var = null;
+		if (@array_key_exists('id', $attributes)) {
+			$id = PinaCode::get_registry()->short_code($attributes['id']);
+			$get_var = \get_term_by('ID', $id);
+		} else if (@array_key_exists('slug', $attributes)) {
+			$slug = PinaCode::get_registry()->short_code($attributes['slug']);
+			$get_var = \get_term_by('slug', $slug, 'category'); 
+		} else if (@array_key_exists('name', $attributes)) {
+			$name = PinaCode::get_registry()->short_code($attributes['name']);
+			$get_var = \get_term_by('name', $name, 'category'); 
+		} else if (@array_key_exists('term_id', $attributes)) {
+			$term_id = PinaCode::get_registry()->short_code($attributes['term_id']);
+			$get_var = \get_term_by('term_id', $term_id, 'category');
+		} else {
+			return '';
+		}
+		if (@is_object($get_var)) {
+			$get_var2 = [];
+			$get_var2['id'] 			= $get_var->term_id;
+			$get_var2['term_id'] 		= $get_var->term_id;
+			$get_var2['name'] 			= $get_var->name;
+			$get_var2['slug'] 			= $get_var->slug;
+			$get_var2['term_group']		= $get_var->term_group;
+			$get_var2['taxonomy'] 		= $get_var->taxonomy;
+			$get_var2['parent']			= $get_var->parent;
+			$get_var2['link'] = get_term_link($get_var);
+			$get_var2['html'] ='<a href="'.$get_var2['link'].'" class="dbt-post-category">'. $get_var2['name'].'</a>';
+			$get_var = $get_var2;
+		} else {
+			PcErrors::set('<b>[^'.$short_code_name.'</b> I haven\'t found any tags.', '', -1, 'warning');
+			return '';
+		}
+		PinaCode::set_var("get_cat", $get_var);
+		if (substr($short_code_name, 0, 8) == "get_cat.") {	
+			if (!PinaCode::has_var($short_code_name)) {
+				PcErrors::set('The variable <b>'.$short_code_name.'</b> does not exist', '', -1, 'error');
+				$get_var = '';
+			} else {
+				$get_var = PinaCode::get_var($short_code_name);
+			}
+		}
+		return $get_var;
+	}
+}
+pinacode_set_functions('get_cat', 'pinacode_fn_wp_get_cat');
+
+
+/**
+ * [^get_post_tags post_id]
+ * @since 0.9
+ */
+if (!function_exists('pinacode_fn_wp_get_post_tags')) {
+	function pinacode_fn_wp_get_post_tags($short_code_name, $attributes) { 
+		$get_var = null;
+		if (@array_key_exists('post_id', $attributes)) {
+			$id = PinaCode::get_registry()->short_code($attributes['post_id']);
+			$get_var = \wp_get_post_tags($id);
+		}  else {
+			return '';
+		}
+		if (!is_array($get_var)) {
+			PcErrors::set('<b>[^'.$short_code_name.'</b> I haven\'t found any tags', '', -1, 'warning');
+			return '';
+		}  else {
+			$get_var2 = [];
+			foreach ($get_var as $g) {
+				$temp = [];
+				$temp['id'] 			= $g->term_id;
+				$temp['term_id'] 		= $g->term_id;
+				$temp['name'] 			= $g->name;
+				$temp['slug'] 			= $g->slug;
+				$temp['term_group']		= $g->term_group;
+				$temp['taxonomy'] 		= $g->taxonomy;
+				$temp['parent']			= $g->parent;
+				$temp['link'] = get_term_link($g);
+				$temp['html'] ='<a href="'.$g->link.'" class="dbt-post-category">'. $g->name.'</a>';
+				$get_var2[] = $temp;
+			}
+			$get_var = $get_var2;
+			
+		}
+		PinaCode::set_var("get_post_tags", $get_var);
+		//var_dump (PinaCode::get_var("get_post_tags"));
+		if (substr($short_code_name, 0, 14) == "get_post_tags.") {	
+			if (!PinaCode::has_var($short_code_name) && PinaCode::get_var($short_code_name) == "") {
+				PcErrors::set('The variable <b>'.$short_code_name.'</b> does not exist', '', -1, 'error');
+				$get_var = '';
+			} else {
+				//$get_var = PinaCode::get_var($short_code_name);
+				$get_var = PinaCode::get_var($short_code_name);
+			}
+		}
+		return $get_var;
+	}
+}
+pinacode_set_functions('get_post_tags', 'pinacode_fn_wp_get_post_tags');
+
+
+/**
+ * [^get_post_cats post_id]
+ * @since 0.9
+ */
+if (!function_exists('pinacode_fn_wp_get_post_cats')) {
+	function pinacode_fn_wp_get_post_cats($short_code_name, $attributes) { 
+		$get_var = null;
+		if (@array_key_exists('post_id', $attributes)) {
+			$id = PinaCode::get_registry()->short_code($attributes['post_id']);
+			$get_var = \wp_get_post_categories($id);
+		}  else {
+			return '';
+		}
+		if (!is_array($get_var)) {
+			PcErrors::set('<b>[^'.$short_code_name.'</b> I haven\'t found any categories.', '', -1, 'warning');
+			return '';
+		} else {
+			$get_var2 = [];
+			foreach ($get_var as $g) {
+				$g = get_category(absint($g));
+				$temp = [];
+				$temp['id'] 			= $g->term_id;
+				$temp['term_id'] 		= $g->term_id;
+				$temp['name'] 			= $g->name;
+				$temp['slug'] 			= $g->slug;
+				$temp['term_group']		= $g->term_group;
+				$temp['taxonomy'] 		= $g->taxonomy;
+				$temp['parent']			= $g->parent;
+				$temp['link'] = get_term_link($g);
+				$temp['html'] ='<a href="'.$g->link.'" class="dbt-post-category">'. $g->name.'</a>';
+				$get_var2[] = $temp;
+			}
+			$get_var = $get_var2;
+		}
+		PinaCode::set_var("get_post_cats", $get_var);
+		if (substr($short_code_name, 0, 14) == "get_post_cats.") {	
+			if (!PinaCode::has_var($short_code_name) && PinaCode::get_var($short_code_name) == "") {
+				PcErrors::set('The variable <b>'.$short_code_name.'</b> does not exist', '', -1, 'error');
+				$get_var = '';
+			} else {
+				$get_var = PinaCode::get_var($short_code_name);
+			}
+		}
+		return $get_var;
+	}
+}
+pinacode_set_functions('get_post_cats', 'pinacode_fn_wp_get_post_cats');
+
+
+
+/**
+ * [^current_post]
+ * @since 0.9
+ */
+if (!function_exists('pinacode_fn_wp_get_current_post')) {
+	function pinacode_fn_wp_get_current_post($short_code_name, $attributes) { 
+		$get_var = get_post();
+	
+		if ( empty( $get_var )) {
+			return '';
+		}
+		$get_var->id = $get_var->ID;
+		PinaCode::set_var("current_post", $get_var);
+		if (substr($short_code_name, 0, 13) == "current_post.") {	
+			if (!PinaCode::has_var($short_code_name) ) {
+				PcErrors::set('The variable <b>'.$short_code_name.'</b> does not exist', '', -1, 'error');
+				$get_var = '';
+			} else {
+				$get_var = PinaCode::get_var($short_code_name);
+			}
+		}
+		return $get_var;
+	}
+}
+pinacode_set_functions('current_post', 'pinacode_fn_wp_get_current_post');
 
 /**
  * [^AUTHOR id]
@@ -601,25 +843,25 @@ pinacode_set_functions('link', 'pinacode_fn_wp_link');
 */
 
 /**
- * [^LINK id=PAGEID]
+ * [^LINK id=post_id]
  */
 if (!function_exists('pinacode_fn_wp_link')) {
 	function pinacode_fn_wp_link($short_code_name, $attributes) { 
 
 		if (@array_key_exists('page_id', $attributes)) {
 			$id = PinaCode::get_registry()->short_code($attributes['page_id']);
-			$link = get_permalink($id);
+			$link = \get_permalink($id);
 			unset($attributes['page_id']);
 		} elseif (@array_key_exists('post_id', $attributes)) {
 			$id = PinaCode::get_registry()->short_code($attributes['post_id']);
-			$link = get_permalink($id);
+			$link = \get_permalink($id);
 			unset($attributes['post_id']);
 		} elseif (@array_key_exists('id', $attributes)) {
 			$id = PinaCode::get_registry()->short_code($attributes['id']);
-			$link = get_permalink($id);
+			$link = \get_permalink($id);
 			unset($attributes['id']);
 		} else {
-			$link = get_permalink();
+			$link = \get_permalink();
 		}
 		
 		if (count ($attributes) > 0) {
@@ -743,6 +985,29 @@ if (!function_exists('pinacode_fn_is_page_tax')) {
 	}
 }
 pinacode_set_functions('is_page_tax', 'pinacode_fn_is_page_tax');
+
+
+
+
+/**
+ * [^is_page]
+ */
+if (!function_exists('pinacode_fn_is_page')) {
+	function pinacode_fn_is_page($short_code_name, $attributes) { 
+		return (is_page()) ? 1 : 0;
+	}
+}
+pinacode_set_functions('is_page', 'pinacode_fn_is_page');
+
+/**
+ * [^is_single]
+ */
+if (!function_exists('pinacode_fn_is_single')) {
+	function pinacode_fn_is_single($short_code_name, $attributes) { 
+		return (is_single()) ? 1 : 0;
+	}
+}
+pinacode_set_functions('is_single', 'pinacode_fn_is_single');
 
 /**
  * [^is_user_logged_in]

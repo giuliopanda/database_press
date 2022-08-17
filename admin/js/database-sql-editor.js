@@ -322,6 +322,9 @@ jQuery(document).ready(function ($) {
     dbt_open_sidebar_popup('columns_sql');
     jQuery('#dbt_dbp_title > .dbt-edit-btns').remove();
     jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>ORGANIZE COLUMNS</h3></div>');
+    if (jQuery('#dbt_cookie_msg').length > 0) {
+        jQuery('#dbt_cookie_msg').empty().css('display','none');
+    }
     sql = dbt_get_sql_string();
     if ( sql != "") {
         jQuery.ajax({
@@ -377,7 +380,7 @@ jQuery(document).ready(function ($) {
  }
 
 
-  /**
+/**
   * Apre la sidebar per creare un merge con un'altra tabella
   */
 function dbt_merge_sql_query_edit() {
@@ -385,6 +388,9 @@ function dbt_merge_sql_query_edit() {
     dbt_open_sidebar_popup('merge_sql');
     jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>MERGE QUERY</h3></div>');
     sql = dbt_get_sql_string();
+    if (jQuery('#dbt_cookie_msg').length > 0) {
+        jQuery('#dbt_cookie_msg').empty().css('display','none');
+    }
     if (sql != "") {
         jQuery.ajax({
             type : "post",
@@ -439,6 +445,7 @@ function dbt_merge_sql_query_edit() {
                     $form.append('<div class="dbt-dropdown-line-flex dbt-form-row"><label class="dbt-form-label">Columns</label><select id="dbt_merge_columns"  name="dbt_merge_column"></select></div>');
                     jQuery('#dbt_dbp_content').append($form);
                     jQuery('#dbt_merge_join').change();
+                    $field2_select.change();
                 } else {
                     jQuery('#dbt_dbp_content').append('<p class="dtf-alert-sql-error" style="margin-bottom:1rem">'+response.msg+'</p>');
                 }
@@ -509,6 +516,9 @@ function merge_sql_query_apply() {
                 if (response.html != "") {
                     jQuery('#dbt-query-box').empty().append(response.html);
                     dbt_close_sidebar_popup();
+                    if (jQuery('#dbt_cookie_msg').length > 0) {
+                        jQuery('#dbt_cookie_msg').empty().append('The query has been updated press the "go" button to execute it.').css('display','block');
+                    }
                 } else {
                     dbt_close_sidebar_loading();
                 }
@@ -529,7 +539,7 @@ function columns_sql_query_apply() {
     data.push({name: 'action', value: 'dbt_edit_sql_query_select'});
     data.push({name: 'section', value: 'table-browse'});
     dbt_open_sidebar_loading();
-    // TODO NON VA BENE PERCHé se ritorna un errore ho il box con le textarea e l'editor vuoto!
+    // TODO: se ritorna un errore ho il box con le textarea e l'editor vuoto!
     jQuery('#dbt-query-box').empty().append('<div class="dbt-sidebar-loading"><div  class="dbt-spin-loader"></div></div>');
     jQuery.ajax({
         type : "post",
@@ -545,7 +555,14 @@ function columns_sql_query_apply() {
             }
             dbt_close_sidebar_popup();
             jQuery('#result_query').html(query_color(jQuery('#result_query').text()));
-
+            console.log ('evento inviato');
+            // i trigger qui non sono riuscito a farli funzionare !?!?!
+            if (typeof dbt_list_structure_query_apply === "function") {
+                dbt_list_structure_query_apply();
+            } 
+            if (jQuery('#dbt_cookie_msg').length > 0) {
+                jQuery('#dbt_cookie_msg').empty().append('The query has been updated press the "go" button to execute it.').css('display','block');
+            }
             check_toggle_sql_query_edit();
         }
     });
@@ -565,6 +582,9 @@ function columns_sql_query_apply() {
 function dbt_metadata_sql_query_edit() {
     if (jQuery('#dbt-bnt-metadata-query').hasClass('js-btn-disabled')) return;
     sql = dbt_get_sql_string();
+    if (jQuery('#dbt_cookie_msg').length > 0) {
+        jQuery('#dbt_cookie_msg').empty().css('display','none');
+    }
     if ( sql != "") {
         dbt_open_sidebar_popup('add_metadata');
         jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>ADD META DATA</h3></div>');
@@ -585,8 +605,8 @@ function dbt_metadata_sql_query_edit() {
                     $field_row = jQuery('<div class="dbt-dropdown-line-flex dbt-form-row"></div>');
                     $field_label = jQuery('<label class="dbt-form-label">Metadata table</label>');
                     $field_select = jQuery('<select name="dbt_meta_table" id="dbt_meta_table" onchange="dbt_metadata_sql_query_edit_step2()"></select>');
-                    $field_checkbox = jQuery('<span> Add primary_key for edit <input type="checkbox" value="1" name="dbt_add_field_pri"></span>');
-                    $field_row.append($field_label).append($field_select).append($field_checkbox);
+                    
+                    $field_row.append($field_label).append($field_select);
                     $form.append($field_row);
                     for (x in response.all_tables) {
                         $option = jQuery('<option></option>');
@@ -629,6 +649,7 @@ function dbt_metadata_sql_query_edit_step2() {
                 $container = jQuery('<div id="container_metadata"></div>');
                 //console.log (response.selected);
                 for (x in response.distinct) {
+                    if (response.distinct[x] == "") continue;
                     checked = "";
                     if (response.selected.indexOf(response.distinct[x]) > -1) {
                         checked = ' checked="checked"';
@@ -680,6 +701,9 @@ function dbt_addmeta_sql_query_apply() {
                     dbt_close_sidebar_popup();
                     jQuery('#result_query').html(query_color(jQuery('#result_query').text()));
                     check_toggle_sql_query_edit();
+                    if (jQuery('#dbt_cookie_msg').length > 0) {
+                        jQuery('#dbt_cookie_msg').empty().append('The query has been updated press the "go" button to execute it.').css('display','block');
+                    }
                 }
             }
         });
@@ -748,4 +772,79 @@ function dbt_get_sql_string() {
         return '';
     }
     return sql;
+}
+
+
+
+
+/**
+  * Apre la sidebar per la ricerca
+  */
+ function dbt_search_sql() {
+    if (jQuery('#dbt-bnt-merge-query').hasClass('js-btn-disabled')) return;
+    dbt_open_sidebar_popup('search_sql');
+    dbt_close_sidebar_loading();
+    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>SEARCH IN QUERY</h3></div>');
+    
+    $search_form = jQuery('<div class="dbt-form-columns-query dbt-dropdown-line-flex" id="dbt_form_search"></div>');
+    $search_input = jQuery('<input type="search" name="search" id="dbt_search_input">');
+    $search_input.val(jQuery('#dtf_original_search').val());
+    $search_submit = jQuery('<div class="button" onclick="dbt_submit_search()" style="margin-left:.2rem;">Search</div>');
+    $search_form.append('<label class="dbt-form-label"><span style="width:150px;display:inline-block; margin:.2rem .5rem; vertical-align:middle">Search</span></label>').append($search_input).append($search_submit);
+    
+    $replace_form =  jQuery('<div class="dbt-form-columns-query dbt-dropdown-line-flex"><label class="dbt-form-label"><span style="width:150px; display:inline-block; margin:.2rem .5rem; vertical-align:middle">Replace</span></label> <textarea name="replace" id="dbt_replace_textarea" style="width:240px;"></textarea></div>');
+    $replace_btn = jQuery('<div class="dbt-dropdown-line-flex js-dragable-item dbt-line-choose-columns"><div style="width:168px"></div><div class="button" style="margin-right:.2rem" onclick="dbt_submit_test_replace()">Test Replace</div> <div class="button" onclick="dbt_submit_search_and_replace(0,0,0)">Replace</div></div>');
+     
+
+    jQuery('#dbt_dbp_content').append($search_form).append('<hr>').append($replace_form).append($replace_btn);
+
+    jQuery('#dbt_dbp_content').append('<div id="dbt_sql_replace_test_result" style="zoom: .8; margin: 1rem;"></div>');
+}
+
+function dbt_submit_search() {
+   jQuery('#dtf_original_search').val(jQuery('#dbt_search_input').val());
+   dtf_submit_table_filter('search');
+}
+
+function dbt_submit_test_replace() {
+    sql = dbt_get_sql_string();
+    if ( sql != "") {
+        //dbt_open_sidebar_loading();
+        jQuery.ajax({
+            type : "post",
+            dataType : "json",
+            url : ajaxurl,
+            cache: false,
+            data : {action:'dbt_sql_test_replace',sql:sql,search:jQuery('#dbt_search_input').val(), replace:jQuery('#dbt_replace_textarea').val() },
+            success: function(response) {
+               // console.log ("RESPONSE: ".response);
+                jQuery('#dbt_sql_replace_test_result').empty().append(response.html);
+                
+            }
+        });
+    }
+}
+
+function dbt_submit_search_and_replace(limit_start, row_replaced, total) {
+    sql = dbt_get_sql_string();
+    if ( sql != "") {
+        //dbt_open_sidebar_loading();
+        jQuery.ajax({
+            type : "post",
+            dataType : "json",
+            url : ajaxurl,
+            cache: false,
+            data : {action:'dbt_sql_search_replace',sql:sql,search:jQuery('#dbt_search_input').val(), replace:jQuery('#dbt_replace_textarea').val(),limit_start:limit_start, row_replaced:row_replaced, total:total},
+            success: function(response) {
+                // console.log ("RESPONSE: ".response);
+                if (response.executed < response.total) {
+                    jQuery('#dbt_sql_replace_test_result').empty().append("<p>Executed: " + response.executed+" / "+response.total+" Replaced occurrences: "+response.replaced+"</p>");
+                    dbt_submit_search_and_replace( response.executed, response.replaced,  response.total);
+                } else {
+                    jQuery('#dbt_sql_replace_test_result').empty().append("<p>Executed: " + response.total + " / " + response.total + " Replaced occurrences: " + response.replaced + "</p>");
+                    jQuery('#dbt_sql_replace_test_result').append('<br><br><div id="dbt-bnt-go-query" class="dbt-submit" onclick="dtf_submit_table_filter(\'custom_query\')">Show updated data</div>');
+                }     
+            }
+        });
+    }
 }

@@ -6,8 +6,10 @@
 * header-description: Una volta salvata una query è possibile modificare la visualizzazione dei dati dal tab List view formatting
 * header-lang:ITA
 */
+
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
     <p>la lista presenta tutte le colonne che vengono estratte dalla tabella. Puoi cambiare l'ordine di visualizzazione,  scegliere di nascondere una colonna o modificare come i dati vengono visualizzati.</p>

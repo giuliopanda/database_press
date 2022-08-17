@@ -56,10 +56,10 @@ class DbtDs_list_setting
     protected  $mysql_name;
     /** @var string $mysql_table; table */
     protected  $mysql_table;
-    /** 
-     * @var bool $width 
-     */
-    protected  $width; 
+    /** @var string $width  // la classe che definisce la larghezza della colonna small|regular|large|extra-large */
+    protected  $width = 'small'; 
+    /** @var string $align  // L'allineamento delle celle */
+    protected  $align = 'center-left'; 
     /** @var string $custom_param */
     protected  $custom_param; 
     /** @var string $format_values */

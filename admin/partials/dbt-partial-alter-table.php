@@ -11,15 +11,15 @@ if (!defined('WPINC')) die;
 <div class="dbt-import-table-name">
     <span style="vertical-align: middle;"><?php _e('Table name:', 'database-table'); ?></span>
    
-    <label id="dbt_wp_prefix" class="dbt-wp-prefix" <?php echo ($print_table == "" || substr($print_table,0, strlen($dtf->get_prefix())) == $dtf->get_prefix()) ? '' : ' style="visibility:hidden"'; ?>><?php echo $dtf->get_prefix(); ?></label>
+    <label id="dbt_wp_prefix" class="dbt-wp-prefix" <?php echo ($print_table == "" || substr($print_table,0, strlen(Dbt_fn::get_prefix())) == Dbt_fn::get_prefix()) ? '' : ' style="visibility:hidden"'; ?>><?php echo Dbt_fn::get_prefix(); ?></label>
     <input type="text" class="js-dbt-validity" id="dbt_partial_name_table" value="<?php 
-    if (substr($print_table,0, strlen($dtf->get_prefix())) == $dtf->get_prefix()) {
-        echo esc_attr(substr($print_table, strlen($dtf->get_prefix())));
+    if (substr($print_table,0, strlen(Dbt_fn::get_prefix())) == Dbt_fn::get_prefix()) {
+        echo esc_attr(substr($print_table, strlen(Dbt_fn::get_prefix())));
     } else {
         echo esc_attr($print_table); 
     }
     ?>" required>
-    <label><input type="checkbox" id="dbt_table_use_prefix" value="<?php echo $dtf->get_prefix(); ?>"<?php echo ($table == "" ||  substr($table,0, strlen($dtf->get_prefix())) == $dtf->get_prefix()) ? ' checked="checked"' : ''; ?>><?php _e('Use WP prefix', 'database-table'); ?> </label>
+    <label><input type="checkbox" id="dbt_table_use_prefix" value="<?php echo Dbt_fn::get_prefix(); ?>"<?php echo ($table == "" ||  substr($table,0, strlen(Dbt_fn::get_prefix())) == Dbt_fn::get_prefix()) ? ' checked="checked"' : ''; ?>><?php _e('Use WP prefix', 'database-table'); ?> </label>
 </div>
 
 <table class="wp-list-table widefat striped dbt-table-view-list js-dragable-table">
@@ -50,14 +50,14 @@ if (!defined('WPINC')) die;
             <input type="text" name="table_update[field_name][]" value="" class="js-dbt-validity" required>
         </td>
         <td>
-            <?php echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'decimal'=>'Decimal (9,2)', 'date'=>'Date', 'datetime'=>'Date Time', 'pri'=>'Primary Key','advanced'=>'Advanced'], true, 'class="js-field-preselect" onchange="dbt_preselect(this)"', false, 'varchar'); ?>  
+            <?php echo Dbt_fn::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'decimal'=>'Decimal (9,2)', 'date'=>'Date', 'datetime'=>'Date Time', 'pri'=>'Primary Key','advanced'=>'Advanced'], true, 'class="js-field-preselect" onchange="dbt_preselect(this)"', false, 'varchar'); ?>  
         </td>
         <td>
-            <div class="button" onClick="dbt_alter_table_delete_row(this);"><?php _e('Delete' , 'database_tables'); ?></div>
+            <div class="button"  onClick="dbt_alter_table_delete_row(this);"><?php _e('Delete' , 'database_tables'); ?></div>
         </td>
         <td>
             <div class="js-td-advanced">
-                <?php echo $dtf::html_select(Dbt_model_structure::column_list_type(), false, 'name="table_update[field_type][]" class="js-create-table-type"', 'VARCHAR(255)'); ?>
+                <?php echo Dbt_fn::html_select(Dbt_model_structure::column_list_type(), false, 'name="table_update[field_type][]" class="js-create-table-type"', 'VARCHAR(255)'); ?>
             </div>
         </td>
       
@@ -68,7 +68,7 @@ if (!defined('WPINC')) die;
         </td>
         <td>
             <div class="js-td-advanced">
-                <?php echo $dtf::html_select([''=>'', 'UNSIGNED'=>'UNSIGNED', 'UNSIGNED ZEROFILL'=>'UNSIGNED ZEROFILL', 'on update CURRENT_TIMESTAMP'=>'on update CURRENT_TIMESTAMP'], true,'name="table_update[attributes][]" class="js-create-table-attributes"',false); ?>
+                <?php echo Dbt_fn::html_select([''=>'', 'UNSIGNED'=>'UNSIGNED', 'UNSIGNED ZEROFILL'=>'UNSIGNED ZEROFILL', 'on update CURRENT_TIMESTAMP'=>'on update CURRENT_TIMESTAMP'], true,'name="table_update[attributes][]" class="js-create-table-attributes"',false); ?>
             </div>
         </td>
         <td>
@@ -85,7 +85,7 @@ if (!defined('WPINC')) die;
         
         <td>
             <div class="js-td-advanced" style="text-align:center">
-                <?php echo $dtf::html_select(['f'=>'NO','t'=>'YES'], true,'name="table_update[primary][]" class="js-unique-primary"'); ?>
+                <?php echo Dbt_fn::html_select(['f'=>'NO','t'=>'YES'], true,'name="table_update[primary][]" class="js-unique-primary"'); ?>
             </div>
         </td>
 
@@ -97,6 +97,7 @@ if (!defined('WPINC')) die;
     $old_column_field_name = "FIRST!";
     foreach ($table_model->items as $cs) {
         $column = Dbt_fn_structure::convert_show_column_mysql_row_to_form_data($cs);
+        //var_dump ($column);
         // object(stdClass)#994 (6) { ["field_name"]=> string(2) "id" ["Type"]=> string(7) "int(10)" ["Null"]=> string(2) "NO" ["Key"]=> string(3) "PRI" ["Default"]=> NULL ["Extra"]=> string(14) "auto_increment" }
         ?>
         <tr class="js-dragable-tr">
@@ -108,14 +109,16 @@ if (!defined('WPINC')) die;
                 <input type="text" name="table_update[field_name][]" value="<?php echo $column->field_name; ?>" class="js-dbt-validity" required>
             </td>
             <td>
-                <?php echo $dtf::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'decimal'=>'Decimal (9,2)', 'date'=>'Date', 'datetime'=>'Date Time', 'pri'=>'Primary Key','advanced'=>'Advanced'], true, 'class="js-field-preselect" onchange="dbt_preselect(this)"', false, $column->preset); ?>  
+                <?php echo Dbt_fn::html_select(['varchar'=>'String (1 line)', 'text'=>'Text (Multiline)','int_signed'=>'Number', 'decimal'=>'Decimal (9,2)', 'date'=>'Date', 'datetime'=>'Date Time', 'pri'=>'Primary Key','advanced'=>'Advanced'], true, 'class="js-field-preselect" onchange="dbt_preselect(this)"', false, $column->preset); ?>  
             </td>
             <td>
+                <?php if ($column->primary == "f") : ?>
                 <div class="button" onClick="dbt_alter_table_delete_row(this);"><?php _e('Delete' , 'database_tables'); ?></div>
+                <?php endif; ?>
             </td>
             <td>
                 <div class="js-td-advanced">
-                    <?php echo $dtf::html_select(Dbt_model_structure::column_list_type(), false, 'name="table_update[field_type][]" class="js-create-table-type"', false, $column->field_type); ?>
+                    <?php echo Dbt_fn::html_select(Dbt_model_structure::column_list_type(), false, 'name="table_update[field_type][]" class="js-create-table-type"', false, $column->field_type); ?>
                 </div>
             </td>
             <td>
@@ -125,7 +128,7 @@ if (!defined('WPINC')) die;
             </td>
             <td>
                 <div class="js-td-advanced">
-                    <?php echo $dtf::html_select([''=>'','UNSIGNED'=>'UNSIGNED', 'UNSIGNED ZEROFILL'=>'UNSIGNED ZEROFILL', 'on update CURRENT_TIMESTAMP'=>'on update CURRENT_TIMESTAMP'], true,'name="table_update[attributes][]" class="js-create-table-attributes"',false, $column->attributes); ?>
+                    <?php echo Dbt_fn::html_select([''=>'','UNSIGNED'=>'UNSIGNED', 'UNSIGNED ZEROFILL'=>'UNSIGNED ZEROFILL', 'on update CURRENT_TIMESTAMP'=>'on update CURRENT_TIMESTAMP'], true,'name="table_update[attributes][]" class="js-create-table-attributes"',false, $column->attributes); ?>
                 </div>
             </td>
             <td >
@@ -141,10 +144,9 @@ if (!defined('WPINC')) die;
             </td>
             <td >
                 <div class="js-td-advanced" style="text-align:center" >
-                    <?php echo $dtf::html_select(['f'=>'NO','t'=>'YES'], true,'name="table_update[primary][]" class="js-unique-primary"',false, $column->dbt_primary); ?>
+                    <?php echo Dbt_fn::html_select(['f'=>'NO','t'=>'YES'], true,'name="table_update[primary][]" class="js-unique-primary"',false, $column->dbt_primary); ?>
                 </div>
             </td>
-         
         </tr>
         <?php 
         $row++;

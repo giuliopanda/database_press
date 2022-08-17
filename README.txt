@@ -7,7 +7,7 @@ Tested up to: 6.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Stable tag: 0.7.0
+Stable tag: 0.9.0
 
 Manage the administration and publication of new MySQL tables.
 
@@ -15,10 +15,51 @@ Manage the administration and publication of new MySQL tables.
 
 Use the database tables plug-in to create new mysql tables, manage their contents and publish them on your site.
 
+Il plugin permette di interrogare direttamente il database e mostrare i dati nel sito attraverso tabelle, un sistema di template engine integrato o caricando i dati da shortcode o php.
+
+In amministrazione puoi scrivere query con dati correlati, creare nuovi record, modificarli o eliminarli in bulk. 
+
+Puoi salvare le tue query in liste così da permettere una gestione avanzata nella quale:
+puoi creare una form di modifica scegliendo il tipo di campo
+puoi modificare la visualizzazione dell'elenco
+puoi mostrare il risultato nel frontend attraverso shortcode o codice php.
+puoi filtrare i dati nel frontend a seconda del contenuto che si vuole mostrare.
+Puoi creare nuovi template per visualizzare i dati come vuoi tu.
+
+Questo plugin è utile se vuoi gestire tabelle personalizzate nel tuo sito internet.
+Se vuoi visualizzare i risultati di query personalizzate nel tuo sito.
+
+
+
+
 == Installation ==
 
 The plugin is not yet published in the wordpress repository
 
+# Versions
+
+= 0.9.0 - 2022-08-17 =
+- Note: the pinacode logic has changed so I cannot guarantee compatibility with previous versions.
+first pinacode if it did not find a shortcode it deleted it. This created a problem with strings where there is a regular expression like \ [^ / \] that the template engine recognized as tags and deleted them. Now pinacode if it doesn't find the shortcode it prints it as is.
+The verification test is in pina-test.php.
+- Improvement: The css of the column sizes have been changed. This can lead to incompatibility with version v0.8. To correct the problem just go to the list and save list view formatting again.
+- Feature: Search & replace. Added search on all fields in lists and the ability to search & replace in queries (not in lists!).
+- Improvement: improved search filters.
+- Improvement: Added option to align fields in frontend tables.
+- Fixbug: clean warning & notice
+- Improvement: improved the
+sidebar navigation and added collapse option
+- Improvement: In 'List view formatting' added the 'Choose column to show' button. This button gives the possibility to change the query select and add or remove columns.
+- Fixbug: Tips for tables that have no primary key.
+- Fixbug: Restored the primary key icon in the query results view.
+- Improvement: Added an alert after you modify queries with Organize columns, Merge
+- Improvement: On list browse, if the content editing window is open, it does not allow you to open the column search filters!
+- Removed: Deleted the checkbox to display the primary key in the Add meta data
+- Fixbug: Instead of showing the query of an update it shows the select of a '_transient'
+- Note: The default editor is disabled in the form if the user has selected in his profile: Disable the visual editor when writing
+- Rebuild: the delete system from sql.
+- Improvement: Removed the choice of query type when creating a list from query
+- Fixbug:frontend view Show if no longer worked.
 
 = 0.8.1 - 2022-07-29 =
 - fixbug: The codeMirror did not appear on all wordpress configurations.

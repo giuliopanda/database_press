@@ -15,10 +15,14 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
     <?php require(dirname(__FILE__).'/dbt-partial-tabs.php'); ?>
 </div>
 <div class="dbt-content-table js-id-dbt-content">
-    <?php if ($dtf::echo_html_title_box('list', $list_title, '', $msg, $msg_error, $append)) : ?>
+    <div style="float:right; margin:1rem">
+            <?php _e('Shortcode: ', 'database_tables'); ?>
+            <b>[dbt_list id=<?php echo $post->ID; ?>]</b> <?php echo ($post->shortcode_param!= "") ? __('Attributes', 'database_tables').":<b>".$post->shortcode_param.'</b>' : ''; ?>
+    </div>
+    <?php if (Dbt_fn::echo_html_title_box('list', $list_title, '', $msg, $msg_error, $append)) : ?>
         <form id="list_structure" method="POST" action="<?php echo admin_url("admin.php?page=dbt_list&section=list-structure&dbt_id=".$id); ?>">
             <input type="hidden" name="action" value="list-structure-save" />
-            <input type="hidden" name="table" value="<?php echo @$import_table; ?>" />
+            <input type="hidden" name="table" value="<?php echo (isset($import_table)) ? $import_table : ''; ?>" />
             
             <div class="dbt-content-margin">
                 <div class="js-clore-master" id="clone_master">
@@ -60,7 +64,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
 
                             <div class="dbt-form-row-column">
                                 <label><span class="dbt-form-label "><?php _e('Column dimension','database_tables'); ?></span>
-                                <?php echo Dbt_fn::html_select([''=>'', 'min'=>'Min','regular'=>'Regular','large' => 'Large', 'extra-large'=>'Extra large' ], true, 'name="fields_width[]" class="js-width-fields"'); ?>
+                                <?php echo Dbt_fn::html_select(['extra-small'=>'Extra small', 'small'=>'Small','regular'=>'Regular','large' => 'Large', 'extra-large'=>'Extra large'], true, 'name="fields_width[]" class="js-width-fields"'); ?>
                                 </label>
                             </div>
 
@@ -155,7 +159,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
 
                                     <div class="dbt-form-row-column">
                                         <label><span class="dbt-form-label "><?php _e('Column dimension','database_tables'); ?></span>
-                                        <?php echo Dbt_fn::html_select([''=>'', 'min'=>'Min','regular'=>'Regular','large' => 'Large', 'extra-large'=>'Extra large' ], true, 'name="fields_width['. esc_attr($item->name).']" class="js-width-fields"', $item->width); ?>
+                                        <?php echo Dbt_fn::html_select(['extra-small'=>'Extra small', 'small'=>'Small','regular'=>'Regular','large' => 'Large', 'extra-large'=>'Extra large'], true, 'name="fields_width['. esc_attr($item->name).']" class="js-width-fields"', $item->width); ?>
                                         </label>
                                     </div>
 
@@ -181,7 +185,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                                         <div style="display:inline-block; min-width:50%">
                                             <?php
                                             if ($item->origin == "FIELD") {
-                                            echo Dbt_fn::html_select(['Standard field'=>[ 'TEXT'=>'Text', 'HTML'=>'Html', 'DATE'=>'Date', 'DATETIME'=>'Date Time', 'IMAGE'=>'Image','LINK'=>'External link', 'DETAIL_LINK' => 'Detail Link', 'SERIALIZE'=>'Serialiaze', 'JSON_LABEL'=>'Checkboxes'],'Special Fields' =>['CUSTOM'=>'Custom','LOOKUP'=>'Lookup','USER' => 'User', 'POST' => 'Post']] , true, 'name="fields_custom_view['. esc_attr($item->name).']" class="js-type-fields" onchange="dbt_change_custom_type(this)" style="display:'. (($item->view =='CUSTOM') ? 'none' :'inline-block').'"', $item->view); 
+                                            echo Dbt_fn::html_select(['Standard field'=>[ 'TEXT'=>'Text', 'HTML'=>'Html', 'DATE'=>'Date', 'DATETIME'=>'Date Time', 'IMAGE'=>'Image','LINK'=>'External link', 'DETAIL_LINK' => 'Detail Link', 'SERIALIZE'=>'Serialiaze', 'JSON_LABEL'=>'Checkboxes'],'Special Fields' =>['CUSTOM'=>'Custom','LOOKUP'=>'Lookup','USER' => 'User', 'POST' => 'Post', 'MEDIA_GALLERY' => 'Media Gallery']] , true, 'name="fields_custom_view['. esc_attr($item->name).']" class="js-type-fields" onchange="dbt_change_custom_type(this)" style="display:'. (($item->view =='CUSTOM') ? 'none' :'inline-block').'"', $item->view); 
                                             } else {
                                                 ?><input type="hidden" name="fields_custom_view[<?php echo esc_attr($item->name); ?>]" class="js-type-fields" onchange="dbt_change_custom_type(this)" value="CUSTOM"><?php
                                             }
@@ -193,6 +197,13 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                                             <?php endif; ?>
                                         </div>
                                     </div>
+
+                                    <div class="dbt-form-row-column">
+                                        <label><span class="dbt-form-label "><?php _e('Align','database_tables'); ?></span>
+                                        <?php echo Dbt_fn::html_select(['top-left'=>'Top Left', 'top-center'=>'Top Center','top-right'=>'Top Right', 'center-left'=>'Center Left', 'center-center'=>'Center Center','center-right'=>'Center Right', 'bottom-left'=>'Bottom Left', 'bottom-center'=>'Bottom Center','bottom-right'=>'Bottom Right'], true, 'name="fields_align['. esc_attr($item->name).']" class="js-width-fields"', $item->align); ?>
+                                        </label>
+                                    </div>
+                                   
                                     <div class="dbt-form-row-column js-dbt-params-column">
                                         <label>
                                             <span class="dbt-form-label js-dbt-params-date"><?php _e('Date format','database_tables'); ?></span>
@@ -266,12 +277,17 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                        
                     <?php endforeach ;?>
                     
-                  
-                  
                 </div>
 
                 <div style="margin:1rem; border-top:1px solid #dcdcde; padding-top:.5rem">
-                <div onclick="dbt_list_structure_add_row(this)" class="button"><?php _e('Add row', 'database_tables'); ?></div>
+                <div onclick="dbt_list_structure_add_row(this)" class="button"><?php _e('Add Custom column', 'database_tables'); ?></div>
+                <div id="dbt-bnt-columns-query" class="button js-show-only-select-query" onclick="dbt_columns_sql_query_edit()"><?php _e('Choose column to show*', 'database_tables'); ?></div>
+
+                <div style="display:none">
+                    <?php Dbt_html_sql::render_sql_from($table_model, false); ?>
+                  
+                </div>
+                <p>* <?php _e('After modifying the query columns, the form will be saved automatically to allow you to view the modifications made', 'database_tables'); ?></p>
                 </div>
                     
                 <hr>

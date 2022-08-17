@@ -25,13 +25,13 @@
 
     }
     static private function render_sql_script($table_model, $show_editor) {
-        $dtf = new Dbt_fn();
-        $list_of_tables = $dtf::get_table_list(); 
+        // $dtf = new Dbt_fn();
+        $list_of_tables = Dbt_fn::get_table_list(); 
         $list_of_tables_js = [];
         foreach ($list_of_tables['tables'] as $lot) {
             $list_of_tables_js[] = $lot;
         }
-        $list_of_columns = $dtf::get_all_columns();
+        $list_of_columns = Dbt_fn::get_all_columns();
         $editor_height =  apply_filters( 'dbt_render_sql_height', 250);
         ?>
        <script>

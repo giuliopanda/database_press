@@ -54,7 +54,7 @@ jQuery(document).ready(function ($) {
                     if (row.query_result == 0 || row.query_error != "") {
                         $box.addClass('dtf-alert-sql-error');
                         $box.append('<p>' + row.query_error + '</p>');
-                        jQuery('#dbt_execute_query_command').css('display','none');
+                      //  jQuery('#dbt_execute_query_command').css('display','none');
                         jQuery('#dbt_msg_fix_error_before').css('display','block');
                     } else {
                         $box.addClass('dtf-alert-info');

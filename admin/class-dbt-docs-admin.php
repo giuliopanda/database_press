@@ -1,5 +1,4 @@
 <?php
-
 /**
  * La sezione documentale
  * @internal
@@ -14,9 +13,9 @@ class DBT_docs_admin
     function controller() {
         wp_enqueue_style( 'database-table-css' , plugin_dir_url( __FILE__ ) . 'css/database-table.css',[],rand());
 		wp_enqueue_script( 'database-table-all-js', plugin_dir_url( __FILE__ ) . 'js/database-table-all.js',[],rand());
-        $dtf = new Dbt_fn();
+        // $dtf = new Dbt_fn();
 		Dbt_fn::require_init();
-        $section =  $dtf::get_request('section', 'home');
+        $section =  Dbt_fn::get_request('section', 'home');
 
         $base_dir ="/../../includes/documentation/pages_".get_user_locale();
 		if (!is_dir($base_dir)) {
@@ -35,6 +34,9 @@ class DBT_docs_admin
 				break;
 			case 'js-controller-form' :
                 $render_content = $base_dir."/js-controller-form.php";
+				break;
+			case 'tutorial_01' :
+                $render_content = $base_dir."/tutorial_01.php";
 				break;
             default :
             $render_content = $base_dir."/home.php";

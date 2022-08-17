@@ -22,9 +22,9 @@ if (!defined('WPINC')) die;
     </div>
     <div id="dbt_help_delimiter" class="dbt_help_div">
         <ul>
-            <li> <b> Delimiter </b> is the character used to divide the column data in the csv </li>
-             <li> <b> Use first row as Headers </b> If checked the first row will not be imported </li>
-             <li> <b> Update Preview </b> Updates your chosen settings. </li>
+            <li> <b>Delimiter </b> is the character used to divide the column data in the csv </li>
+             <li> <b>Use first row as Headers </b> If checked the first row will not be imported </li>
+             <li> <b>Update Preview </b> Updates your chosen settings. </li>
         </ul>
     </div>
     <div id="dbt_help_choose_action" class="dbt_help_div">

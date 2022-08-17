@@ -7,8 +7,10 @@
  * header-package-title: Manage List
  * header-package-link: manage-list.php
  */
+
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
     <div id="dbt_help_list_of_records" class="dbt_help_div">

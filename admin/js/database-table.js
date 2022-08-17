@@ -49,6 +49,9 @@ jQuery(document).ready(function ($) {
      * MOSTRA SUBMENU AL CLICK
      */
     $('.js-dtf-table-show-dropdown').click(function() {
+        if (jQuery('#dbt_sidebar_popup').length > 0 && jQuery('#dbt_sidebar_popup').css('display') == "flex" && jQuery('#dbt_sidebar_popup').css('opacity') == "1") {
+            return;
+        }
         let rif = $(this).data('fieldkey');
         if ($('#dbt_background_dropdown').length == 1) {
             $('.js-dbt-dropdown-header').css('display', 'none');
@@ -151,7 +154,16 @@ jQuery(document).ready(function ($) {
             }
             dtf_submit_table_filter('filter');
         }
-    })
+    });
+
+    $(window).keyup(function(ev) {
+        if (ev.keyCode == 13) {
+            if ($('#dbt_full_search').is(":focus") || $('#dbt_background_dropdown').length) {
+                dtf_submit_table_filter('search');
+            }
+          //  alert("OK");
+        }
+    });
 
     $('.js-dbt-btn-search').click(function() {
         let rif = jQuery(this).data('rif');
@@ -420,11 +432,15 @@ function ajax_load_distinct_values(rif) {
         });
         update_dropdown_footer_checkboxes(rif, 0, $ul_box.find('li.li-show').length);
     } else {
+        ajax_data = {'sql':sql, 'rif':rif, 'column':field, 'action': 'dbt_distinct_values', 'table': jQuery('#filter_search_orgtable_'+rif).val(),'filter_distinct':val_filter};
+        if (typeof dbt_global_list_id != 'undefined' && dbt_global_list_id > 0) {
+            ajax_data.dbt_id = dbt_global_list_id;
+        }
         jQuery.ajax({
             type : "post",
             dataType : "json",
             url : ajaxurl,
-            data : {'sql':sql, 'rif':rif, 'column':field, 'action': 'dbt_distinct_values', 'table': jQuery('#filter_search_orgtable_'+rif).val(),'filter_distinct':val_filter},
+            data : ajax_data,
             success: function(response) {
                 let $ul_box = jQuery('#dbt_checkboxes_value_' + response.rif + ' > ul');
                 $ul_box.find('li').remove();
@@ -487,11 +503,13 @@ function dtf_submit_table_filter(action) {
     if (action == 'filter' || action == 'order') {
         jQuery('#dtf_table_filter_limit_start').val(0);
     }
+    /*
     if (action == 'delete_from_sql') {
         let tq = jQuery('input[name="remove_tables_query"]:checked').val(); 
         jQuery('#sql_query_executed').prop('name', 'sql_query_executed'); 
         jQuery('#table_filter').append('<input type="hidden" name="remove_table_query" value="'+tq+'">');
     }
+    */
     if (action == 'delete_rows') {
         $add_form = jQuery('#dbt_form_deletes_rows').clone();
         $add_form.find('.dbt-xmp').remove();
@@ -543,18 +561,29 @@ function dbt_bulk_actions() {
                     jQuery('#dbt_dbp_content').append('<div class="dtf-alert-sql-error" style="margin-top:0; margin-right:.4rem">'+response.error+'</div>');
                 } else {
                     jQuery('#dbt_dbp_title > .dbt-edit-btns').remove();
-                    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><div id="dbt-bnt-edit-query" class="dbt-submit-warning" onclick="dtf_submit_table_filter(\'delete_from_sql\')">DELETE</div></div>');
-
+                    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><div id="dbt-bnt-edit-query" class="dbt-submit-warning" onclick="dtf_ajax_detete_from_query(0,0,\'\')">DELETE</div>  <div class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
                     let $form = jQuery('<div class="dbt-form-deletes-rows" id="dbt_form_deletes_rows"></div>');
-                    let checkfirst = ' checked="checked"';
-                    for (x in response.items) {
-                        $form.append('<div class="dbt-dropdown-line-flex"><span style="margin-right:.5rem"><input name="remove_tables_query" type="radio"'+checkfirst+' value="'+x+'"></span><div class="dbt-xmp">'+response.items[x]+'</div></div>');
-                        checkfirst = '';
+                    let count_items = 0;
+                    for (x in response.items) count_items++;
+                    if (count_items > 1) {
+                        $form.append('<div  class="dtf-alert-info">The query result records will be removed. Choose the tables from which to clear the data.</div>');
+                        for (x in response.items) {
+                            $form.append('<div class="dbt-dropdown-line-flex"><span style="margin-right:.5rem"><input name="remove_tables_query" type="checkbox" checked="checked" value="'+x+'"></span><div class="dbt-xmp">'+response.items[x]+'</div></div>');
+                        }
+                      
+                    } else if (count_items == 1) {
+                        $form.append('<div class="dtf-alert-info">Are you sure you want to delete all data extracted from the query?</div>');
+                        for (x in response.items) {
+                            $form.append('<div style="display:none"><input name="remove_tables_query" type="checkbox" checked="checked" value="'+x+'"></div>');
+                        }
+                    } else {
+                        $form.append('<div class="dtf-alert-info">I can\'t find any records that can be removed</div>');
                     }
+
+                    $form.append('<div id="box_result_delete_query" style="margin-top:1rem; padding-top:1rem; border-top:1px solid #CCC"></div>');
                     jQuery('#dbt_dbp_content').append($form);
                 }
                
-
                 
             }
         });
@@ -565,7 +594,7 @@ function dbt_bulk_actions() {
         jQuery('#table_filter .js-dbt-table-checkbox:checked').each(function() {
             table_ids.push(dbt_tb_id[jQuery(this).val()]);
         });
-        console.log (" !!DELETE CHECKBOXES: " + table_ids);
+        //console.log (" !!DELETE CHECKBOXES: " + table_ids);
         dbt_delete_confirm(table_ids);
     }
     if (action == "download" && mwith == 'checkboxes') {
@@ -591,6 +620,74 @@ function dbt_bulk_actions() {
         dbt_download_csv(sql, false, 0 ,'');
     }
 }
+
+/**
+ * Preme il bottone delete di una query
+ */
+function dtf_ajax_detete_from_query(limit_start,total,filename) {
+    console.log ('dtf_ajax_detete_from_query !!!');
+    let sql = jQuery('#sql_query_executed').val();
+    let tables = [];
+   // jQuery('.js-temp-checkbox').remove();
+    jQuery('input[name="remove_tables_query"]').each(function() {
+        if (limit_start == 0) {
+            let $clone = jQuery(this).clone();
+            $clone.prop('name','noname').prop('disabled',true).addClass('js-temp-checkbox');
+            jQuery(this).after( $clone);
+            jQuery(this).css('display','none');
+        }
+        if (jQuery(this).is(':checked')) {
+            tables.push(jQuery(this).val());
+        }
+    });
+    
+    jQuery.ajax({
+        type : "post",
+        dataType : "json",
+        url : ajaxurl,
+        cache: false,
+        data : {tables:tables, sql:sql, action:'dbt_prepare_query_delete',limit_start:limit_start, total:total, dbt_filename:filename},
+        success: function(response) {
+            jQuery('.js-to-delete').remove();
+            if (response.executed < response.total) {
+                jQuery('#box_result_delete_query').append('<p class="js-to-delete">Preparing the data to be deleted '+response.executed+"/"+response.total);
+                dtf_ajax_detete_from_query(response.executed,response.total, response.filename);
+            } else {
+                dtf_ajax_detete_from_query2(0,0,response.filename);
+                jQuery('#box_result_delete_query').append('<p>Preparing the data to be deleted '+response.total+"/"+response.total);
+            }
+        }
+    });
+}
+
+/**
+ * Rimuove effettivamente i records
+ */
+ function dtf_ajax_detete_from_query2(executed,total,filename) {
+    console.log ('dtf_ajax_detete_from_query2 !!!');
+    jQuery.ajax({
+        type : "post",
+        dataType : "json",
+        url : ajaxurl,
+        cache: false,
+        data : {action:'dbt_sql_query_delete',executed:executed, total:total, dbt_filename:filename},
+        success: function(response) {
+            //console.log (response);
+           // jQuery('#box_result_delete_query').append('<p>'+response.html+'</p>');
+           jQuery('.js-to-delete').remove();
+            if (response.executed < response.total) {
+                jQuery('#box_result_delete_query').append('<p class="js-to-delete">Deleted '+response.executed+"/"+response.total);
+               
+                dtf_ajax_detete_from_query2(response.executed, response.total, response.filename);
+            } else {
+                jQuery('#box_result_delete_query').append('<p>Deleted '+response.total+"/"+response.total);
+                jQuery('#box_result_delete_query').append('<div class="dbt-submit" onclick="dtf_submit_table_filter(\'custom_query\')">Reload</div>');
+                //TODO: download roll back
+            }
+        }
+    });
+}
+
 
 /**
  * prepara il csv da scaricare 
@@ -698,7 +795,7 @@ function dbt_view_details(json) {
                 hidden_checkbox = 'style="display:none"';
             }
             jQuery('#dbt_dbp_title > .dbt-edit-btns').remove();
-            jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>DELETE ROWS CONFIRM</h3><div id="dbt-bnt-edit-query" class="dbt-submit-warning js-sidebar-btn" onclick="dtf_submit_table_filter(\'delete_rows\')">DELETE</div> <div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
+            jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>DELETE ROWS CONFIRM</h3><div id="dbt-bnt-edit-query" class="dbt-submit-warning js-sidebar-btn" onclick="dtf_submit_table_filter(\'delete_rows\')">DELETE</div> <div  class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
             if (opensidebar == "already_open") {
                 for (x in response.items) {
                     let input_lists = document.querySelectorAll('#dbt_form_deletes_rows input');
@@ -958,9 +1055,7 @@ function dbt_show_save_sql_query() {
     $field_row  = jQuery('<div class="dbt-form-row"><label><span class="dbt-form-label">Description</span><textarea  class="form-textarea-edit" name="new_description"></textarea></label></div>');
     $form.append($field_row);
 
-    $form.append('<div class="dbt-form-row"><label><span class="dbt-form-label">Choose with query use</span>');
-    $form.append('<div class="dbt-dropdown-line-flex"><span style="margin-right:.5rem"><input name="choose_tables_query" type="radio" checked="checked" value="sql_query_executed"></span><div class="dbt-xmp">If you used filters to limit your data, save the query with the filtered results</div></div>');
-    $form.append('<div class="dbt-dropdown-line-flex"><span style="margin-right:.5rem"><input name="choose_tables_query" type="radio" value="sql_query_edit"></span><div class="dbt-xmp">Show all data without filters</div></div>');
+    
     $form.append('<textarea style="display:none" id="dbt_sql_new_list" name="new_sql"></textarea>');
     jQuery('#dbt_dbp_content').append($form);
 
@@ -975,8 +1070,7 @@ function dbt_show_save_sql_query() {
  * Invio la form per la creazione di una nuova lista
  */
 function dbt_save_sql_query() {
-   let sql_id =  jQuery("input:radio[name=choose_tables_query]:checked").val();
-   let sql = jQuery('#'+sql_id).val();
+   let sql = jQuery('#sql_query_executed').val();
    jQuery('#dbt_sql_new_list').val(sql);
    if (jQuery('#dbt_name_create_list').val() == "") {
        alert("Name is required");

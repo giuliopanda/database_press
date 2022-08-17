@@ -246,58 +246,59 @@ function dbt_preselect(el) {
     numeric = ['INT','TINYINT', 'SMALLINT','MEDIUMINT','BIGINT','DECIMAL','FLOAT','DOUBLE'];
     timestamp = ['TIMESTAMP','DATETIME'];
     nolength = ['TIMESTAMP','DATETIME', 'TINYTEXT','TEXT','MEDIUMTEXT','LONGTEXT','DATE','TIME', 'YEAR','BOOLEAN','JSON'];
-   console.log ($el.val());
-   if(nolength.indexOf($el.val()) != -1) {
-       $tr.find(".js-create-table-length").css('visibility','hidden');
-       $tr.find(".js-create-table-length").val('');
-   } else {
-       $tr.find(".js-create-table-length").css('visibility','');
-       if ($tr.find(".js-create-table-length").val() == "") {
-           if ($el.val() =="VARCHAR") {
-               $tr.find(".js-create-table-length").val('255');
-           }
-           if ($el.val() =="INT") {
-               $tr.find(".js-create-table-length").val('11');
-           }
-           if ($el.val() =="BIGINT") {
-               $tr.find(".js-create-table-length").val('20');
-           }
-           if ($el.val() =="CHAR") {
-               $tr.find(".js-create-table-length").val('100');
-           }
-           if ($el.val() =="DECIMAL" || $el.val() =="DOUBLE") {
-               $tr.find(".js-create-table-length").val('9,2');
-           }
-       }
-   }
-   if(timestamp.indexOf($el.val()) != -1) {
-       if ($tr.find(".js-create-table-attributes option[value='on update CURRENT_TIMESTAMP']").length == 0) {
-           $tr.find(".js-create-table-attributes").append('<option value="on update CURRENT_TIMESTAMP">on update CURRENT_TIMESTAMP</option>');
-       }
-       $tr.find(".js-create-table-attributes option[value='UNSIGNED']").remove();
-       $tr.find(".js-create-table-attributes option[value='UNSIGNED ZEROFILL']").remove();
-       $tr.find(".js-create-table-attributes").css('visibility','');
-      
-   } else {
-       $tr.find(".js-create-table-attributes option[value='on update CURRENT_TIMESTAMP']").remove();
-       if(numeric.indexOf($el.val()) != -1) {
-           if ($tr.find(".js-create-table-attributes option[value='UNSIGNED']").length == 0) {
-               $tr.find(".js-create-table-attributes option[value='']").after('<option value="UNSIGNED ZEROFILL">UNSIGNED ZEROFILL</option>');
-               $tr.find(".js-create-table-attributes option[value='']").after('<option value="UNSIGNED">UNSIGNED</option>');
-           }
-           $tr.find(".js-create-table-attributes").css('visibility','');
-           $tr.find(".js-unique-primary").css('visibility','');
-       } else {
-           $tr.find(".js-create-table-attributes").css('visibility','hidden');
-           $tr.find(".js-create-table-attributes option[value='UNSIGNED']").remove();
-           $tr.find(".js-create-table-attributes option[value='UNSIGNED ZEROFILL']").remove();
-           $tr.find(".js-unique-primary").css('visibility','hidden');
-           $tr.find(".js-unique-primary").val('f');
-           if ($tr.find(".js-create-table-default").val() == "0") {
-               $tr.find(".js-create-table-default").val('');
-           }
-           dbt_check_primary();
-       }
-   }
-   check_null_primary();
+    console.log ("dbt_check_type "+$el.val());
+    if(nolength.indexOf($el.val()) != -1) {
+        $tr.find(".js-create-table-length").css('visibility','hidden');
+        $tr.find(".js-create-table-length").val('');
+    } else {
+        $tr.find(".js-create-table-length").css('visibility','');
+        if ($tr.find(".js-create-table-length").val() == "") {
+            if ($el.val() =="VARCHAR") {
+                $tr.find(".js-create-table-length").val('255');
+            }
+            if ($el.val() =="INT") {
+                $tr.find(".js-create-table-length").val('11');
+            }
+            if ($el.val() =="BIGINT") {
+                $tr.find(".js-create-table-length").val('20');
+            }
+            if ($el.val() =="CHAR") {
+                $tr.find(".js-create-table-length").val('100');
+            }
+            if ($el.val() =="DECIMAL" || $el.val() =="DOUBLE") {
+                $tr.find(".js-create-table-length").val('9,2');
+            }
+        }
+    }
+    if(timestamp.indexOf($el.val()) != -1) {
+        if ($tr.find(".js-create-table-attributes option[value='on update CURRENT_TIMESTAMP']").length == 0) {
+            $tr.find(".js-create-table-attributes").append('<option value="on update CURRENT_TIMESTAMP">on update CURRENT_TIMESTAMP</option>');
+        }
+        $tr.find(".js-create-table-attributes option[value='UNSIGNED']").remove();
+        $tr.find(".js-create-table-attributes option[value='UNSIGNED ZEROFILL']").remove();
+        $tr.find(".js-create-table-attributes").css('visibility','');
+        $tr.find(".js-unique-primary").css('visibility','hidden');
+        $tr.find(".js-unique-primary").val('f');
+    } else {
+        $tr.find(".js-create-table-attributes option[value='on update CURRENT_TIMESTAMP']").remove();
+        if(numeric.indexOf($el.val()) != -1) {
+            if ($tr.find(".js-create-table-attributes option[value='UNSIGNED']").length == 0) {
+                $tr.find(".js-create-table-attributes option[value='']").after('<option value="UNSIGNED ZEROFILL">UNSIGNED ZEROFILL</option>');
+                $tr.find(".js-create-table-attributes option[value='']").after('<option value="UNSIGNED">UNSIGNED</option>');
+            }
+            $tr.find(".js-create-table-attributes").css('visibility','');
+            $tr.find(".js-unique-primary").css('visibility','');
+        } else {
+            $tr.find(".js-create-table-attributes").css('visibility','hidden');
+            $tr.find(".js-create-table-attributes option[value='UNSIGNED']").remove();
+            $tr.find(".js-create-table-attributes option[value='UNSIGNED ZEROFILL']").remove();
+            $tr.find(".js-unique-primary").css('visibility','hidden');
+            $tr.find(".js-unique-primary").val('f');
+            if ($tr.find(".js-create-table-default").val() == "0") {
+                $tr.find(".js-create-table-default").val('');
+            }
+            dbt_check_primary();
+        }
+    }
+    check_null_primary();
 }

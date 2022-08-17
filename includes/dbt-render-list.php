@@ -84,7 +84,7 @@ class Dbt_render_list {
 	var $list_setting; 
 
 	/**
-	 * @param \Dbt_model $table_model
+	 * @param \DatabaseTables\Dbt_model $table_model
 	 */
 	function __construct($post_id, $mode = null, $prefix = "") {
 		$this->list_id = $post_id;
@@ -104,8 +104,8 @@ class Dbt_render_list {
         
             Dbt_functions_list::add_frontend_request_filter_to_model($this->table_model, $post->post_content , $post_id, $prefix);
             $this->table_model->get_list();
-			
 			$total_row = $this->table_model->get_count();
+			PinaCode::set_var('total_row', absint($total_row));
 			$this->uniqid_div = 'dbt_' . Dbt_fn::get_uniqid();
 			$this->table_model->update_items_with_setting($post, false);
 			$this->table_model->check_for_filter();
@@ -115,7 +115,7 @@ class Dbt_render_list {
 				Dbt_fn::add_items_frontend_popup_link($this->table_model, $post_id);
 			}
 			$this->add_extra_params($extra_params);
-			if (isset($post->post_content['frontend_view'])) {
+			if (isset($post->post_content['frontend_view']) && isset($post->post_content['frontend_view']['no_result_custom_text'])) {
 				$this->frontend_view_setting = $post->post_content['frontend_view'];
 				$this->no_result = $post->post_content["frontend_view"]['no_result_custom_text'];
 			}
@@ -127,6 +127,7 @@ class Dbt_render_list {
 		} else {
 			$this->mode = $this->get_frontend_view('table_update','get');
 		}
+		$this->set_color();
 	}
 	
 	/**
@@ -143,13 +144,12 @@ class Dbt_render_list {
 	/**
 	 * Setta il colore generico
 	 */
-	public function set_color($color) {
-		if ($color != "") {
-			if ($color == "") {
-				$this->color = $this->get_frontend_view('table_style_color', 'blue');
-			} else {
-				$this->color = $color;
-			}
+	public function set_color($color = '') {
+		
+		if ($color == "") {
+			$this->color = $this->get_frontend_view('table_style_color', 'blue');
+		} else {
+			$this->color = $color;
 		}
 		return $this->color;
 	}
@@ -174,7 +174,7 @@ class Dbt_render_list {
 		}
 	}
 	/**
-	 * Stampa la tabella di una lista
+	 * Stampa la tabella di una lista nel frontend
 	 * @param Array $items Accetta un array di oggetti o un array di array.
 	 * @return void  
 	 */
@@ -214,7 +214,7 @@ class Dbt_render_list {
 					$formatting_class = Dbt_fn::column_formatting_convert($setting->format_styles, $item->$key, '');
 					$item->$key = Dbt_fn::column_formatting_convert($setting->format_values, $item->$key, $item->$key);
 
-					?><td class="dtf-table-td<?php echo $setting->width.' '.$formatting_class; ?>"><div class="btn-div-td"><?php 
+					?><td class="dtf-table-td<?php echo $setting->width.' '.$formatting_class; ?> dtf-td-<?php echo strtolower($setting->align); ?>"><div class="btn-div-td "><?php 
 						echo $item->$key;
 					?></div></td> <?php
 				} 

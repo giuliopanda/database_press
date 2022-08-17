@@ -1,5 +1,5 @@
 jQuery(document).ready(function ($) {
-    //aggiungo la possibilità di fare il sort sulla creazione del nuovo db
+   //aggiungo la possibilità di fare il sort sulla creazione del nuovo db
     jQuery('.js-dragable-table').sortable({
         items: '.js-dragable-tr',
         opacity: 0.5,
@@ -12,6 +12,11 @@ jQuery(document).ready(function ($) {
     jQuery('.js-type-fields').change();
     jQuery('.js-structure-toggle').click();
 });
+
+function dbt_list_structure_query_apply() {
+    console.log ('evento ricevuto: ');
+    dbt_submit_list_structure();
+}
 
 /**
  * Il bottone per creare nuove righe della tabelle per la creazione delle tabelle mysql
@@ -29,12 +34,12 @@ jQuery(document).ready(function ($) {
  * Invia la form, ma prima imposta i campi da riordinare
  */
  function dbt_submit_list_structure() {
-   var count_list = 0;
-   jQuery('.js-dragable-order').each(function() {
-      jQuery(this).val(count_list);
-      count_list++;
-   })
-   jQuery('#list_structure').submit();
+    var count_list = 0;
+    jQuery('.js-dragable-order').each(function() {
+        jQuery(this).val(count_list);
+        count_list++;
+    })
+    jQuery('#list_structure').submit();
  }
 
  /**
@@ -42,13 +47,11 @@ jQuery(document).ready(function ($) {
   * @param DOM el 
   */
 function dbt_list_structure_delete_row(el) {
-   jQuery(el).parents('.js-dbt-structure-card').remove();
+    jQuery(el).parents('.js-dbt-structure-card').remove();
 }
 
 // Questa funzione deve rimanere anche se vuota
-function dbt_change_toggle(el) {
-
-}
+function dbt_change_toggle(el) {}
 
 /**
  * Vede se è un CUSTOM TYPE OPPURE NO
@@ -56,47 +59,47 @@ function dbt_change_toggle(el) {
  */
 function dbt_change_custom_type(el) {
    
-   let $tr = jQuery(el).parents('.js-dbt-structure-card');
-   $tr.find('.js-dbt-params-column').css('display','none');
-   $tr.find('.js-dbt-params-column .dbt-form-label').css('display','none');
-   if (el._first_change === 'no') {
-      $tr.find('.js-input-parasm-custom').val('');
-   }
-   el._first_change = 'no';
-   $tr.find('.js-lookup-params').css('display','none');
-   if (jQuery(el).val() == "CUSTOM") {
-      jQuery(el).css('display', 'none');
-      $tr.find('.js-type-custom-code').css('display', 'inline-block');
-      $tr.find('.js-textarea-btn-cancel').css('display', 'inline-block');
-   } else {
-      jQuery(el).css('display', 'block');
-      $tr.find('.js-type-custom-code').css('display', 'none');
-      $tr.find('.js-textarea-btn-cancel').css('display', 'none');
-      if (jQuery(el).val() == 'DATE' || jQuery(el).val() == 'DATETIME') {
-         $tr.find('.js-dbt-params-column').css('display','block');
-          $tr.find('.js-dbt-params-date').css('display','inline-block');
-      }
-      if ( jQuery(el).val() == 'LINK') {
-         $tr.find('.js-dbt-params-column').css('display','block');
-          $tr.find('.js-dbt-params-link').css('display','inline-block');
-      }
-      if ( jQuery(el).val() == 'USER') {
-         $tr.find('.js-dbt-params-column').css('display','block');
-          $tr.find('.js-dbt-params-user').css('display','inline-block');
-      }
-      if ( jQuery(el).val() == 'POST') {
-         $tr.find('.js-dbt-params-column').css('display','block');
-          $tr.find('.js-dbt-params-post').css('display','inline-block');
-      }
-      if (jQuery(el).val() == 'TEXT') {
-          $tr.find('.js-dbt-params-column').css('display','block');
-          $tr.find('.js-dbt-params-text').css('display','inline-block');
-      }
-      if (jQuery(el).val() == 'LOOKUP') {
-         $tr.find('.js-lookup-params').css('display','block');
-         $tr.find('.js-select-fields-lookup').change();
-      }
-   }
+    let $tr = jQuery(el).parents('.js-dbt-structure-card');
+    $tr.find('.js-dbt-params-column').css('display','none');
+    $tr.find('.js-dbt-params-column .dbt-form-label').css('display','none');
+    if (el._first_change === 'no') {
+        $tr.find('.js-input-parasm-custom').val('');
+    }
+    el._first_change = 'no';
+    $tr.find('.js-lookup-params').css('display','none');
+    if (jQuery(el).val() == "CUSTOM") {
+        jQuery(el).css('display', 'none');
+        $tr.find('.js-type-custom-code').css('display', 'inline-block');
+        $tr.find('.js-textarea-btn-cancel').css('display', 'inline-block');
+    } else {
+        jQuery(el).css('display', 'block');
+        $tr.find('.js-type-custom-code').css('display', 'none');
+        $tr.find('.js-textarea-btn-cancel').css('display', 'none');
+        if (jQuery(el).val() == 'DATE' || jQuery(el).val() == 'DATETIME') {
+            $tr.find('.js-dbt-params-column').css('display','block');
+            $tr.find('.js-dbt-params-date').css('display','inline-block');
+        }
+        if ( jQuery(el).val() == 'LINK') {
+            $tr.find('.js-dbt-params-column').css('display','block');
+            $tr.find('.js-dbt-params-link').css('display','inline-block');
+        }
+        if ( jQuery(el).val() == 'USER') {
+            $tr.find('.js-dbt-params-column').css('display','block');
+            $tr.find('.js-dbt-params-user').css('display','inline-block');
+        }
+        if ( jQuery(el).val() == 'POST') {
+            $tr.find('.js-dbt-params-column').css('display','block');
+            $tr.find('.js-dbt-params-post').css('display','inline-block');
+        }
+        if (jQuery(el).val() == 'TEXT') {
+            $tr.find('.js-dbt-params-column').css('display','block');
+            $tr.find('.js-dbt-params-text').css('display','inline-block');
+        }
+        if (jQuery(el).val() == 'LOOKUP') {
+           $tr.find('.js-lookup-params').css('display','block');
+           $tr.find('.js-select-fields-lookup').change();
+        }
+    }
 }
 
 /**

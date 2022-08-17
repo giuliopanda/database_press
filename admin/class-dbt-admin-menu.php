@@ -64,12 +64,33 @@ class DBT_admin_list_menu
 				$table_model = Dbt_functions_list::get_model_from_list_params($post->post_content);
 				$list_of_columns 				= Dbt_fn::get_all_columns();
 				
-
+				//print $table_model->get_current_query();
 				//	$_REQUEST['table'] = $table_model->get_table();
 				if ($table_model->sql_type() == "multiqueries") {
 					//  NON GESTISCO MULTIQUERY NELLE LISTE
 					$msg_error = __('No Multiquery permitted in list', 'database_tables');
 				} else if ($table_model->sql_type() == "select") {
+
+					// SEARCH in all columns
+					//print "action: ".$action ;
+					$search = stripslashes(Dbt_fn::get_request('search', false)); 
+					if ($search && $search != "" &&  in_array($action, ['search','order','limit_start','change_limit'])) {
+						// TODO se è search deve rimuovere prima tutti i where!!!!
+						$schemas = $table_model->get_schema();
+						$filter =[] ; //[[op:'', column:'',value:'' ], ... ];
+						foreach ($schemas as $schema) {
+							if ($schema->orgtable != ""  && $schema->table != ""  && $schema->name != "") {
+								$filter[] = ['op'=>'LIKE', 'column'=> '`'.esc_attr($schema->table).'`.`'.esc_attr($schema->orgname).'`', 'value' =>$search];
+							}
+						}
+						if (count($filter) > 0) {
+							$table_model->list_add_where($filter, 'OR');
+						}
+						//print ("<p>".$table_model->get_current_query()."</p>");
+					} else {
+						$_REQUEST['search'] = '';
+					}
+
 					Dbt_fn::set_open_form(); 
 					// cancello le righe selezionate!
 					if ($action == "delete_rows" && isset($_REQUEST["remove_ids"]) && is_array($_REQUEST["remove_ids"])) {

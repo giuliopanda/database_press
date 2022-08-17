@@ -17,7 +17,7 @@ if (!defined('WPINC')) die;
             </div>
             <div class="dbt-content-table js-id-dbt-content" >
                 <div class="dbt-content-margin">
-                    <h1>Database tables</h1>
+                    <h1>Easy Database tables</h1>
                     <hr>
                     <div class="dbt-home-grid">
                         <div class="dbt-form-row-column">
@@ -46,50 +46,53 @@ if (!defined('WPINC')) die;
                                 $table_model = new Dbt_model(); 
                                 Dbt_html_sql::render_sql_from($table_model, true); ?>
                             </form>
-                            <h3 style="font-weight:normal"> <?php 
-                                if ($info_db != '') {
-                                    echo $info_db; 
-                                }
-                                if ($database_name != '') {
-                                    echo " - database:".$database_name." ".$database_size;
-                                }
-                                ?>
-                            </h3>
+                           
                             <div class="dbt-home-check">
+                                <h4>Info:</h4>
+                                <?php 
+                                    if ($info_db != '') {
+                                        echo '<div class="dtf-color-info"> &bull; '.$info_db.'</div>'; 
+                                    }
+                                    if ($database_name != '') {
+                                        echo '<div class="dtf-color-info">&bull; Database Name: <b>' . $database_name . '</b></div>';
+                                    }
+                                    echo '<div class="dtf-color-info">&bull; Database Size: <b>' . $database_size . '</b></div>';
+                                    ?>
+                               
                             <?php 
                                 if (DB_USER == "root") {
-                                    ?><div class="dtf-alert-sql-error"><?php _e('Using the mysql root user to connect to the database is not a good idea.','database_tables'); ?></div> <?php 
+                                    ?><div class="dtf-color-error">&bull; <?php _e('Using the mysql root user to connect to the database is not a good idea.','database_tables'); ?></div> <?php 
                                 }
                                 if (count($processlist) > 0) {
-                                    ?><div class="dtf-alert-warning">
+                                    ?><div class="dtf-color-warning">
                                     Some queries are taking longer than expected to execute. <br>   
                                     <?php
                                     foreach ($processlist as $pl) {
-                                        echo "<p>".$pl."</p>";
+                                        echo "<p>&bull; ".$pl."</p>";
                                     }
                                     ?></div><?php 
                                 }
                                 if (is_array($permission_list)) {
                                     if (count($permission_list) > 0) {
-                                        ?><div class="dtf-alert-sql-error"><?php echo  sprintf(__('The mysql user does not have enough permissions to manage this plugin. Missing: <b>%s</b>', 'database_tables'), implode(", ", $permission_list)); ?></div> <?php 
+                                        ?><div class="dtf-color-error">&bull; <?php echo  sprintf(__('The mysql user does not have enough permissions to manage this plugin. Missing: <b>%s</b>', 'database_tables'), implode(", ", $permission_list)); ?></div> <?php 
                                     } else {
-                                        ?><div class="dtf-alert-info"><?php _e('The permissions of the mysql user are correct','database_tables'); ?></div> <?php 
+                                        ?><div class="dtf-color-info">&bull; <?php _e('The permissions of the mysql user are correct','database_tables'); ?></div> <?php 
                                     }
                                 }
                                 $max_input_vars = Dbt_fn::get_max_input_vars();
                                 if ($max_input_vars  < 3000) {
                                     if ($max_input_vars >= 1000) {
-                                    ?><div class="dtf-alert-warning"><?php _e('the max_input_vars value is sufficient, but if you can increase it to at least 5000 it would be better.','database_tables'); ?></div> <?php 
+                                        ?><div class="dtf-color-warning">&bull; <?php _e('the max_input_vars (php.ini) value is sufficient, but if you can increase it to at least 5000 it would be better.','database_tables'); ?></div> <?php 
                                     } else {
-                                        ?><div class="dtf-alert-sql-error"><?php _e('init: the max_input_vars value is very low','database_tables'); ?></div> <?php   
+                                        ?><div class="dtf-color-error">&bull; <?php _e('init: the max_input_vars (php.ini) value is very low','database_tables'); ?></div> <?php   
                                     }
                                 } else {
-                                    ?><div class="dtf-alert-info"><?php _e('max_input_vars is ok','database_tables'); ?></div> <?php 
+                                    ?><div class="dtf-color-info">&bull; <?php _e('max_input_vars is ok','database_tables'); ?></div> <?php 
                                 }
                                 if ($is_writable_dir) {
-                                    ?><div class="dtf-alert-info"><?php _e('Log dir is writable','database_tables'); ?></div> <?php 
+                                    ?><div class="dtf-color-info">&bull; <?php _e('Log dir is writable','database_tables'); ?></div> <?php 
                                 } else {
-                                    ?><div class="tf-alert-sql-error"><?php echo  sprintf(__('Log dir (%s) is NOT writable','database_tables'), $dir); ?></div> <?php 
+                                    ?><div class="dtf-color-error">&bull; <?php echo  sprintf(__('Log dir (%s) is NOT writable','database_tables'), $dir); ?></div> <?php 
                                 }
                             ?>
                             </div>

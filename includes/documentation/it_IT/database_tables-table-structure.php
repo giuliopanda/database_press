@@ -8,8 +8,10 @@
 * header-package-title: Manage DB
 * header-package-link: manage-db.php
 */
+
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
     <p>Modifica la struttura della tabella. Puoi modificare solo le tabelle che soddisfano le seguenti regole: <br>

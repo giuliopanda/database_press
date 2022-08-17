@@ -4,8 +4,10 @@
  * header-title: Indice della documentazione
  * header-tags: document index php hook javascript template engine
 */
+
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
     <ul>

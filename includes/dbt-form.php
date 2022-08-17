@@ -201,12 +201,14 @@ class Dbt_class_form {
 	 * I valori di values sono gestiti nello stesso formato di get_data
 	 *
 	 * @param array $values
+	 * @param Boolean $use_wp_fn Se usare le funzioni di wordpress 
+     * wp_update_post & wp_update_user quando si aggiornano/creano utenti e post
 	 * @return array
 	 * ```json
 	 * {"execute":"boolean", "details":"array}
 	 * ```
 	 */
-	public function save_data($values) {
+	public function save_data($values, $use_wp_fn = true) {
 		global $wpdb;
 		list($settings, $table_options) = $this->get_form();
         $items_groups = $this->convert_items_to_groups($values, $settings, $table_options);
@@ -268,7 +270,7 @@ class Dbt_class_form {
 				}
 			}
 		}
-		$ris =  Dbt_functions_list::execute_query_savedata($query_to_execute, $this->dbt_id, 'php-form');
+		$ris =  Dbt_functions_list::execute_query_savedata($query_to_execute, $this->dbt_id, 'php-form', $use_wp_fn);
 		$execute = true;
 		foreach ($ris as $r) {
 			if (!($r['result'] == true || ($r['result'] == false && $r['error'] == "" && $r['action']=="update"))) {
@@ -694,9 +696,9 @@ class Dbt_class_form {
 				$field->post_types = $form_field['post_types'];
 				$field->post_cats = $form_field['post_cats'];
 			}
-			if ( $field->form_type == "USER") {
+			if ( $field->form_type == "USER" && isset($form_field['user_roles'])) {
 				$field->user_roles = $form_field['user_roles'];
-			}
+			} 
 			if ( $field->form_type == "LOOKUP") {
 				$field->lookup_id  = $form_field['lookup_id'];
 				$field->lookup_sel_val = $form_field['lookup_sel_val'];

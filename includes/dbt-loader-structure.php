@@ -133,14 +133,7 @@ class Dbt_loader_structure {
 							}
 						}
 					}
-				} else if (isset($ctype->curr_action) && $ctype->curr_action == "DELETE" && $ctype->query_error == "") {
-					foreach ($pre_edit as $key_pre=>$val_pre) {
-						if (@$val_pre->$cfield != "" && @$val_pre->$cfield != 0 &&  @$val_pre->$cfield != "0000-00-00"  && @$val_pre->$cfield != "null"   && @$val_pre->$cfield != "0000-00-00 00:00:00" && @$val_pre->$cfield != Null) {
-							$ctype->query_error = __('There will be data loss if you make this change!', 'database_tables');
-							break;
-						} 
-					}
-				}
+				} 
 			}
 		}
 		

@@ -402,10 +402,57 @@ function register_my_post_type() {
 
      <h3>is_*</h3>
     <div class="dbt-help-p">
-        <p>[^IS_PAGE_AUTHOR], [^IS_PAGE_ARCHIVE], [^IS_PAGE_TAG], [^IS_PAGE_DATE], [^IS_PAGE_TAX]</p>
+        <p>[^IS_PAGE_AUTHOR], [^IS_PAGE_ARCHIVE], [^IS_PAGE_TAG], [^IS_PAGE_DATE], [^IS_PAGE_TAX] [^IS_PAGE], [^IS_SINGLE]</p>
         <p>Torna 1 se è la pagina richiesta, altrimenti 0 </p>
     </div>
 
+
+    <h3>[^GET_TAG] or [^GET_CAT]</h3>
+    <div class="dbt-help-p">
+        <p>Ritorna i dati del tag o di una categoria</p>
+        <h4 class="dbt-h4">Attributes</h4>
+        <ul>
+            <li><b>id or term_id</b></li>
+            <li><b>slug</b></li>
+            <li><b>name</b></li>
+        </ul>
+        <h4 class="dbt-h4">Return</h4>
+        <ul>
+            <li><b>id </b></li>
+            <li><b>term_id</b></li>
+            <li><b>name</b></li>
+            <li><b>slug</b></li>
+            <li><b>term_group</b></li>
+            <li><b>taxonomy</b></li>
+            <li><b>parent</b></li>
+            <li><b>link</b></li>
+            <li><b>html</b></li>
+        </ul>
+        <pre class="dbt-code">[^GET_TAG.html id=2]</pre>
+    </div>
+
+
+    <h3>[^GET_POST_TAGS] or [^GET_POST_CATS]</h3>
+    <div class="dbt-help-p">
+        <p>Ritorna i dati dei tag o delle categorie di un post</p>
+        <h4 class="dbt-h4">Attributes</h4>
+        <ul>
+            <li><b>post_id</b></li>
+        </ul>
+        <h4 class="dbt-h4">Return</h4>
+        <ul>
+            <li><b>id </b></li>
+            <li><b>term_id</b></li>
+            <li><b>name</b></li>
+            <li><b>slug</b></li>
+            <li><b>term_group</b></li>
+            <li><b>taxonomy</b></li>
+            <li><b>parent</b></li>
+            <li><b>link</b></li>
+            <li><b>html</b></li>
+        </ul>
+        <pre class="dbt-code">[^GET_POST_CATS.html post_id=2]</pre>
+    </div>
 
     <h1 style="border-bottom:1px solid #CCC">Funzioni specifiche per le liste</h1>
     <h3>[^LIST_URL]</h3>
@@ -417,37 +464,24 @@ function register_my_post_type() {
     <h1 style="border-bottom:1px solid #CCC">Altre funzioni legate alle liste</h1>
     <h3>[^DBT_LIST id="" params]</h3>
 
-    <h3>[^pagination id=Int limit=Int total_items=Int link=Str btn=Str label=Str, values=]</h3>
-    <h3>[^search id=Int type=Str name=Str link=Str btn=Str label=Str, values=  color= ] </h3>
-    <h3>[^open-search method="get" link="" ] </h3>
-    <h3>[^close-search btn=String color=String] </h3>
-    <h3>[^order field="" path="" asc="" desc="" no_sort=""] </h3>
 </div>  
 
   <h1 style="border-bottom:1px solid #CCC">VARIABLES</h1>
 
     <div class="dbt-help-p">
         <p>Si possono aggiungere variabili o json come valori degli attributi</p>
-        <pre class="dbt-code">
-        [%myvar set=[^POST last]] 
-        [%myvar set=["foo","bar"]]
-        [%myvar set={"a":"foo","b":"bar"}]
-        </pre>
+        <pre class="dbt-code"> [%myvar set=[^POST last]] 
+ [%myvar set=["foo","bar"]]
+ [%myvar set={"a":"foo","b":"bar"}]</pre>
         <p>Non si possono mettere variabili al posto dei nomi degli attributi</p>
-        <pre class="dbt-code">
-        [%myvar [%var]="foo"] [// NON CORRETTO //] 
-        </pre>
+        <pre class="dbt-code">[%myvar [%var]="foo"] [// NON CORRETTO //] </pre>
         <p>Questo è permesso solo dentro la funzione [^SET ] purché non ci siano spazi</p>
-        <pre class="dbt-code">
-        [^SET [%var]="foo"] [// CORRETTO //] 
-        [^SET mypost.[%var]="foo"] [// CORRETTO //] 
-        </pre>
+        <pre class="dbt-code">[^SET [%var]="foo"] [// CORRETTO //] 
+[^SET mypost.[%var]="foo"] [// CORRETTO //] </pre>
 
         <p>Si possono chiamare i parametri di un oggetto tramite il .*</p>
-        <pre class="dbt-code">
-        [%post.title] 
-        [%post.0.title] 
-        </pre>
+        <pre class="dbt-code">[%post.title] 
+[%post.0.title]</pre>
         <p>Questo ritornerà una stringa se c'è un solo post, altrimenti un array di titoli.</p>
     </div>
     
@@ -719,6 +753,9 @@ function register_my_post_type() {
             <p>Accetta sia date, timestamp o stringhe anno mese giorno tutto attaccato o anche con orario</p>
             <pre class="dbt-code">[%"1602288000" date-format="Y-m-d"]</pre>
             <div class="dbt-result">2020-10-10</div>
+            <p>Il seguente esempio prende una variabile item.post_date in formato testo day/month/year, lo converte in year-month-day e stampa Y-m-d H:i:S</p>
+            <pre class="dbt-code">[^SET date=[:[%item.post_date left=10 right=4]-[%item.post_date left=5 right=2]-[%item.post_date left=2]:]][%date date-format="Y-m-d H:is"]</pre>
+
         </div>
         <h3>date-modify=</h3>
         <div class="dbt-help-p">

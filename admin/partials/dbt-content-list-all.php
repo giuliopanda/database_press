@@ -26,19 +26,7 @@ if (!defined('WPINC')) die;
         <?php if (@$msg_error != ""): ?>
             <div class="dtf-alert-sql-error"><?php echo $msg_error; ?></div>
         <?php endif ; ?>
-
-        <!--form method="post" action="<?php echo admin_url("admin-post.php"); ?>" e >
-            <input type="hidden" name="page"    value="dbt_list">
-            <input type="hidden" name="section" value="list-add">
-            <input type="hidden" name="action"  value="dbt_create_list">
-            <div class="dbt-import-table-name">
-                <input type="text" name="new_title">
-                <input type="submit" class="dbt-submit" value="<?php _e('Create'); ?>">
-            </div>
-        </form-->
-     
         <hr>
-     
         <?php if ( $post_count['trash'] > 0) : ?>
         <ul class="dbt-submenu" style="margin-bottom:0">
                 <?php if ($action == "show-trashed" ) : ?>
@@ -103,8 +91,8 @@ if (!defined('WPINC')) die;
     </div>
 </div>
 <?php 
-$dtf = new Dbt_fn();
-$list_of_tables = $dtf::get_table_list();
+// $dtf = new Dbt_fn();
+$list_of_tables = Dbt_fn::get_table_list();
 $list_of_tables_js = [];
 foreach ($list_of_tables['tables'] as $lot) {
     $list_of_tables_js[] = $lot;

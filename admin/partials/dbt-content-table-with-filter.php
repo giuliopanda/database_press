@@ -22,10 +22,11 @@ $some_error = $table_model->last_error || @$msg_error != "";
  <div class="dbt-content-table js-id-dbt-content" >
     <form id="table_filter" method="post" action="<?php echo $my_custom_link; ?>">
 
-        <input type="hidden" id="dtf_table_sort_field" name="filter[sort][field]" value="<?php echo $dtf::esc_request('filter.sort.field'); ?>">
-        <input type="hidden" id="dtf_table_sort_order"  name="filter[sort][order]" value="<?php echo $dtf::esc_request('filter.sort.order'); ?>">
+        <input type="hidden" id="dtf_table_sort_field" name="filter[sort][field]" value="<?php echo Dbt_fn::esc_request('filter.sort.field'); ?>">
+        <input type="hidden" id="dtf_table_sort_order"  name="filter[sort][order]" value="<?php echo Dbt_fn::esc_request('filter.sort.order'); ?>">
         <input type="hidden" id="dtf_table_filter_limit_start" name="filter[limit_start]" value="<?php echo esc_attr($table_model->limit_start); ?>">
         <input type="hidden" name="action_query" id="dtf_action_query"  value="">
+        <input type="hidden" name="search" id="dtf_original_search"  value="<?php echo esc_attr(stripslashes(Dbt_fn::get_request('search', ''))); ?>">
         
         <?php Dbt_html_sql::render_sql_from($table_model, $show_query); ?>
         
@@ -53,7 +54,7 @@ $some_error = $table_model->last_error || @$msg_error != "";
                         <span class="" >Element per page: </span>
                         <input type="number" name="filter[limit]" id="Element_per_page" class="dtf-pagination-input" value="<?php echo absint($table_model->limit); ?>" style="width:3.4rem; padding-right:0;" min="1" max="500">
                         <div name="change_limit_start" class="button action dtf-pagination-input"  onclick="dtf_submit_table_filter('change_limit')" >Apply</div>
-                        <?php $dtf::get_pagination($table_model->total_items, $table_model->limit_start, $table_model->limit); ?>
+                        <?php Dbt_fn::get_pagination($table_model->total_items, $table_model->limit_start, $table_model->limit); ?>
                         <?php if (Dbt_fn::is_query_filtered())  : ?>
                             <div id="dbt-bnt-clear-filter-query" class="button"  onclick="dbt_clear_filter()"><?php _e('Clear Filter','database_tables'); ?></div>
                         <?php endif; ?>
@@ -96,7 +97,7 @@ $some_error = $table_model->last_error || @$msg_error != "";
                     </div>
                 </div>
                 <div class="tablenav-pages dtf-table-footer-right">
-                    <?php $dtf::get_pagination($table_model->total_items, $table_model->limit_start, $table_model->limit); ?>
+                    <?php Dbt_fn::get_pagination($table_model->total_items, $table_model->limit_start, $table_model->limit); ?>
                 </div>
                 <br class="clear">
             </div>
@@ -105,11 +106,11 @@ $some_error = $table_model->last_error || @$msg_error != "";
     </form>
     <?php 
     $list_of_tables_js = [];
-    $list_of_tables = $dtf::get_table_list();
+    $list_of_tables = Dbt_fn::get_table_list();
     foreach ($list_of_tables['tables'] as $lot) {
         $list_of_tables_js[] = $lot;
     }
-    $list_of_columns = $dtf::get_all_columns();
+    $list_of_columns = Dbt_fn::get_all_columns();
     ?>
     <script>
     var dtf_tables = <?php echo json_encode($list_of_tables_js); ?>;

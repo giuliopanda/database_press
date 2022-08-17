@@ -241,12 +241,14 @@ class PcRegistry
 				return '';
 			}
 			$curr_block = $block;
+			//print ($type);
 			if ($type == "")  {
 				$curr_block = "";
-				$block = "";
+				//$block = "";
 			}
+			
 			//print "<p>BLOCK: ".$block. " TYPE ".$type."</p>";
-			/* NON CAPISCO A CHE SERVE?
+			/* NON CAPISCO A CHE SERVE? Lo rimuovo alla versione 1.0
 			if ($type == "") {
 				//print "<p>string: ".$pre_string." | ". $block. " | ". $post_string."</p>";	
 				if (in_array(substr($string,0,2), ["[%", "[^"]) && substr($string,-1) == ']') {
@@ -254,10 +256,8 @@ class PcRegistry
 						$pre_string = substr($string,0,2) . $pre_string;
 						$post_string = $post_string."]";
 				}
-				
 			}
 			*/
-
 			//elaboro il blocco
 			if ($type == "sc" || $type == "scfn") {
 				$get_var = pina_get_and_stransform($block);	
@@ -267,7 +267,7 @@ class PcRegistry
 					}
 					$block = $get_var;
 				} else {
-					$block = "";
+					//$block = "";
 				}
 			}
 
@@ -283,9 +283,7 @@ class PcRegistry
 				if (count($set['attributes']) > 0) {
 					foreach ($set['attributes'] as $attk => $data) {
 						if ($attk != "") {
-							
 							$attk = $this->short_code($attk);
-							
 							$this->set($attk, pina_execute_attribute_param($data));
 						}
 					}
@@ -471,7 +469,7 @@ class PcRegistry
 						$block = "";
 					}
 				} else {
-					$block = "";
+					//$block = "";
 				}
 			}
 			if ($type == "while") {
@@ -546,7 +544,6 @@ class PcRegistry
 
 			$offset = strlen($pre_string.$block);
 			
-	
 			$short_code_converted = $block;
 			$string = $pre_string.$block.$post_string;
 			$max_while++;
@@ -554,5 +551,21 @@ class PcRegistry
 		return $string;
 		
 	}
-		
+	
+	/**
+	 * Questa funzione 
+	 */
+	private function  replace_shortcode_to_unique_var($string) {
+		$re = '/(\"(\\\"|\s|.)*?\")/m';
+		preg_match_all($re, $string, $matches, PREG_SET_ORDER, 0);
+		foreach ($matches as $match) {
+			$uniqueId = uniqid("var");
+			while(strpos($string, $uniqueId) != false) {
+				$uniqueId = uniqid("var", true);
+			}
+			$this->variables[$uniqueId] = $match[0];
+			$string = str_replace($match[0], $uniqueId, $string);
+		}
+		return $string;
+	}
 }

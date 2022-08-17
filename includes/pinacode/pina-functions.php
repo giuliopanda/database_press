@@ -172,10 +172,10 @@ function pina_get_and_stransform($var) {
 	} else if ($split['type']=="function") {
 		// verifico se lo shortcode è una funzione speciale
 		$split['shortcode'] = trim(strtolower($split['shortcode']));
+		$split['string_shortcode'] = $var;
 		$get_var = PinaActions::execute($split);
-		
+		//print "<p>split['shortcode']".$split['shortcode']. " = ".$get_var."</p>";
 	} else {
-		
 		$get_var = PinaCode::get_var($split['shortcode']);
 	}
 	//print "<p>".$var." = ".round((microtime(true) - $inizio), 6)."</p>";
@@ -571,6 +571,7 @@ function pina_get_date_to_string($gvalue) {
 		try {
 			$date = new \DateTime($gvalue);
 		} catch (\Exception $e) {
+			//print_r(\DateTime::getLastErrors());
 			$date = false;
 		}
 		if (is_object($date)) {

@@ -21,7 +21,11 @@ $append = '<span class="dbt-submit" onclick="dtf_submit_list_sql()">' . __('Save
     <?php require(dirname(__FILE__).'/dbt-partial-tabs.php'); ?>
 </div>
 <div class="dbt-content-table js-id-dbt-content" >
-    <?php $dtf::echo_html_title_box('list', $list_title, '', $msg,  $msg_error, $append); ?>
+    <div style="float:right; margin:1rem">
+            <?php _e('Shortcode: ', 'database_tables'); ?>
+            <b>[dbt_list id=<?php echo $post->ID; ?>]</b> <?php echo ($post->shortcode_param!= "") ? __('Attributes', 'database_tables').":<b>".$post->shortcode_param.'</b>' : ''; ?>
+    </div>
+    <?php Dbt_fn::echo_html_title_box('list', $list_title, '', $msg,  $msg_error, $append); ?>
     <form id="table_filter" method="post" action="<?php echo admin_url("admin.php?page=dbt_list&section=list-sql-edit&dbt_id=".esc_attr($id)); ?>">
         <div class="dbt-content-margin">
             <input type="hidden" name="section" value="list-sql-edit">
@@ -101,7 +105,7 @@ $append = '<span class="dbt-submit" onclick="dtf_submit_list_sql()">' . __('Save
 
             <h3 class="dbt-h3 dbt-margin-top"><?php _e('Query', 'database_tables'); ?></h3>
             <p class="dtf-alert-gray" style="margin-top:-1rem">
-                <?php _e('La query che estrae i dati nella lista. ','database_tables'); 
+                <?php _e('How the data is extracted','database_tables'); 
                 Dbt_fn::echo_html_icon_help('dbt_list-list-sql-edit','admin_query');
                 ?>
             </p>

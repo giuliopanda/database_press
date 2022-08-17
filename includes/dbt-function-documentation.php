@@ -4,7 +4,6 @@
  * I file di documentazione devono contenere quasi unicamente il testo!
  */
 namespace DatabaseTables;
-
 class Dbt_fn_documentation {
     /**
      * Genera la pagina della ricerca a partire da tutti gli header

@@ -209,7 +209,6 @@ class Dbt_model {
             $limit_position = strripos($this->current_query, 'limit'); // trovo l'ultima occorrenza
             if ($limit > 0) {
                 $this->limit_start =  $limit_start;
-                $this->limit =  $limit;
                 if ($limit_position > 0) {
                     $this->current_query = substr($this->current_query, 0, $limit_position)." LIMIT ".$limit_start.", ".$limit;
                 } else {
@@ -221,13 +220,15 @@ class Dbt_model {
 
     /**
      * Estrae la parte di query del where
-     * @param Boolean $split se dividerlo in gruppi oppure no. SE diviso in gruppi ritorna 
-     * [[single condition], ...]
+     * @param Boolean $split se dividerlo in gruppi oppure no. 
+     * SE diviso in gruppi ritorna  [[single condition], ...]
      * @return String|Array 
      */
     public function get_partial_query_where($split = false) {
-        $first_occurrance = stripos($this->current_query, 'where') + 5;
+        $first_occurrance = stripos($this->current_query, 'where');
         if ($first_occurrance === false) return "";
+        $where_split = [];
+        $first_occurrance += 5;
        
         list($found_string, $pos) = $this->strpos_array($this->current_query, ['order ','group ','limit ','having '],  $first_occurrance);
         if ($found_string != "") {
@@ -236,19 +237,83 @@ class Dbt_model {
             $from = substr($this->current_query,  $first_occurrance);
         }
         if ($split) {
-            $neddles = ['AND', 'OR'];
+            $neddles = [' AND ',' OR ', 'AND(',' OR(' , ')AND ',')OR '];
             $list_of_parts = Dbt_fn::multi_explode($neddles, $from);
             foreach ($list_of_parts as $single_from) {
                 list($pos, $join) = Dbt_fn::find_first($neddles, $single_from);
                 $single = substr($single_from, $pos + strlen($join));
-               
                 $where_split[] = $this->ulitities_marks->restore($single);
-                
             }
             return $where_split;
-
         }
+
         return $this->ulitities_marks->restore($from);
+    }
+
+    /**
+     * Rimuove le clausule del where dove compare la colonna indicata
+     * @param String $column 
+     * @return Void
+     */
+    public function removes_column_from_where_sql($column) {
+        $first_occurrance = stripos($this->current_query, 'where');
+        $column = trim(str_replace('`', '', trim($column)));
+        if ($first_occurrance === false || $column == "") return "";
+        $first_occurrance += 5;
+        list($found_string, $pos) = $this->strpos_array($this->current_query, ['order ','group ','limit ','having '],  $first_occurrance);
+        $rest = '';
+        $where_string = '';
+        if ($found_string != "") {
+            $where_string = substr($this->current_query,  $first_occurrance, $pos -  $first_occurrance);
+            $rest = substr($this->current_query,  $pos );
+        } else {
+            $where_string = substr($this->current_query,  $first_occurrance);
+        }
+
+        if ($where_string  !== '') {
+            $new_query = substr( $this->current_query, 0, $first_occurrance - 5);
+            $where_array = Dbt_fn::multi_explode([' AND ',' OR ', 'AND(',' OR(' , ')AND ',')OR '],  $this->ulitities_marks->restore($where_string), true);
+            $new_where = [];
+            $skip = false;
+            $brackets_open = $brackets_close = 0;
+            foreach ($where_array as $w) {
+                if (str_ireplace([' ','`'],"", $w) == "") continue;
+                if ($skip) {
+                    $skip = false;
+                    if (trim(str_ireplace(['and','or','`'],"", $w)) == "") continue;
+                    $brackets_open = substr_count($w, "(");
+                    $brackets_close = substr_count($w, ")");
+                    $new_where[] = str_ireplace(['and','or'], "", $w);  
+                    continue;
+                }
+                if (stripos(str_replace('`', '',$w), $column." ") === false && stripos(str_replace('`', '',$w), $column.")") === false) {
+                    $brackets_open += substr_count($w, "(");
+                    $brackets_close += substr_count($w, ")");
+                    $new_where[] = $w;
+                } else {
+                    $skip = true;
+                }
+            }
+            
+            if ($skip && count($new_where)) {
+                $other = array_pop($new_where);
+                $brackets_open -= substr_count($other, "(");
+                $brackets_close -= substr_count($other, ")");
+            }
+            while  ($brackets_open > $brackets_close) {
+                $new_where[] = ")";
+                $brackets_close++;
+            }
+            while  ($brackets_open < $brackets_close) {
+                array_unshift($new_where, "(");
+                $brackets_open++;
+            }
+            if (count($new_where) > 0) {
+                $new_query .= " WHERE ".trim( implode(" ",$new_where));
+            }
+            $new_query .= " ".$rest;
+            $this->prepare($new_query);
+        } 
     }
 
     /**
@@ -437,20 +502,28 @@ class Dbt_model {
         $select_string =  stripos($current_query, 'select') + 6;
         $select = Dbt_fn::all_trim(substr($current_query, $select_string , $from - $select_string));
         $sql_schema = $this->get_schema();
+        $table_name_unique = [];
         // se è select * e basta, elenco le vacchie tabelle e ci aggiungo l'asterisco
         if ($select == "*") {
             // trovo tutte le tabelle e cambio il select
             $tables = [];
             foreach ($sql_schema as $field) {
-                if (isset($field->orgtable) && $field->orgtable != "" && isset($field->table)) {
+                if (isset($field->orgtable) && $field->orgtable != "" && isset($field->table) ) {
                     $table_name = ($field->table != "") ? $field->table : $field->orgtable;
-                    $tables[$field->table] = '`'.$table_name."`.*";
+                    if (!in_array($table_name, $table_name_unique)) {
+                        $table_name_unique[] = $table_name;
+                        $table_name_unique[] = '`'.$table_name."`.*";
+                        $table_name_unique[] = $table_name.".*";
+                        $tables[$field->table] = '`'.$table_name."`.*";
+                    }
                 }
             }
-            $select = implode(", ", $tables);
+            $select = implode(", ", array_unique($tables));
         }
         if ($add_select != "") {
-            $select = $select.", ".$add_select;
+            if (!in_array($add_select, $table_name_unique)) {
+                $select = $select.", ".$add_select;
+            }
             $this->list_change_select($this->ulitities_marks->restore($select));
         }
     }
@@ -506,7 +579,9 @@ class Dbt_model {
             list($last_operator_of_query, $pos) = $this->strpos_array($this->current_query, ['having ','order ','group ','limit ','window ','for ']);  
             $where_filter = $this->convert_filter_to_string($filter, $conjunction);
             if ($where_filter != "") {
-                $this->filter = $filter;
+                if ($conjunction == "AND") {
+                    $this->filter = $filter;
+                }
             } else {
                 return "";
             }
@@ -889,6 +964,7 @@ class Dbt_model {
      * Dopo get_list nasconde le chiavi primarie aggiungendo toggle hide ai campi aggiunti
      */
     public function remove_primary_added() {
+        if (!is_array($this->items)) return;
         $table_header = reset($this->items);
         $key0 = key($this->items);
         foreach ($this->primary_added as $pri) {
@@ -916,10 +992,11 @@ class Dbt_model {
      */
     public function update_items_with_setting($post = false, $htmlentities = true, $text_length = 0) {
         $dbt_id = 0;
+        $post_content = Dbt_functions_list::convert_post_content_to_list_params();
         if ($post != false) {
             $post_content = $post->post_content;
             $dbt_id = $post->ID;
-        }
+        } 
         if (is_array($post_content) && isset($post_content['list_setting'])) {
             $setting_custom_list =  Dbt_functions_list::get_list_structure_config($this->items, $post_content['list_setting']);
         } else {
@@ -982,6 +1059,10 @@ class Dbt_model {
             if ($group_position > 0) {
                 $sql = substr($sql, 0, $group_position);
             } 
+            $have_position = strripos($sql, ' HAVING '); // trovo l'ultima occorrenza
+            if ($have_position > 0) {
+                $sql = substr($sql, 0, $have_position);
+            } 
             $sql .=' GROUP BY '.esc_sql($column).' LIMIT 0, 100000';
             $sql = $this->ulitities_marks->restore($sql);
             $result = $wpdb->get_results($sql);
@@ -996,13 +1077,16 @@ class Dbt_model {
                             continue;
                         }
                     } 
-                     // questi  simboli mi servono per fare i filtri speciali
+                    if (str_replace(" ","", strip_tags($r->c)) == "") {
+                        $r->c = htmlentities($r->c);
+                    }
+                    // questi  simboli mi servono per fare i filtri speciali
                     if (strlen($r->c) > 80 || substr($r->c, 0, 1) == "#" ||  substr($r->c, 0, 1) == "^" || esc_sql($r->c) != $r->c) {
                         if (strlen($r->c) > 80 ) {
-                            $r->c = htmlentities(substr($r->c,0, 70))."...";
+                            $r->c = (substr(strip_tags($r->c),0, 70))."...";
                         }
                     } else {
-                        $r->c = htmlentities($r->c);
+                        $r->c = strip_tags($r->c);
                         if (strlen($r->c) == 0) {
                             $r->c = '_##Empty values##_';
                         }
@@ -1057,8 +1141,8 @@ class Dbt_model {
 
     /**
      * Ritorna la tabella del primo from
+     * @todo v0.4 Sostituito da get_partial_query_from
      * @return sring
-     * @deprecated v0.4 Sostituito da get_partial_query_from
      */
     public function get_table() {
        // die ('get_table' .$this->current_query);
@@ -1114,26 +1198,30 @@ class Dbt_model {
     public function get_default_values_from_query( ) {
         $from = $this->get_partial_query_from(true);
         $result = [];
-        foreach ($from as $f) {
-            if (isset($f[2])) {
-                // TODO se è OR non lo gestisco!
-                $temp_exp = explode(" @SPLIT@ ", str_ireplace([" and "," or "], " @SPLIT@ ", $f[2]));
-                foreach ($temp_exp as $exp) {
-                    $where = $this->ulitities_marks->replace($exp);
-                    $ris = $this->where_to_values($where,  str_replace(["`",' '], '', $f[1]));
-                    if (is_array($ris)) {
-                        $result[] = $ris;
+        if (is_array($from)) {
+            foreach ($from as $f) {
+                if (isset($f[2])) {
+                    // TODO se è OR non lo gestisco!
+                    $temp_exp = explode(" @SPLIT@ ", str_ireplace([" and "," or "], " @SPLIT@ ", $f[2]));
+                    foreach ($temp_exp as $exp) {
+                        $where = $this->ulitities_marks->replace($exp);
+                        $ris = $this->where_to_values($where,  str_replace(["`",' '], '', $f[1]));
+                        if (is_array($ris)) {
+                            $result[] = $ris;
+                        }
                     }
+                    
                 }
-                
             }
         }
         $where = $this->get_partial_query_where(true);
         $table = $this->get_table();
-        foreach ($where as $f) {
-            $ris = $this->where_to_values($f, $table);
-            if (is_array($ris)) {
-                $result[] = $ris;
+        if (is_array($where)) {
+            foreach ($where as $f) {
+                $ris = $this->where_to_values($f, $table);
+                if (is_array($ris)) {
+                    $result[] = $ris;
+                }
             }
         }
         
@@ -1387,6 +1475,9 @@ class Dbt_model {
                 if (is_object($f)) $f = (array)$f;
                 if (!is_array($f)) continue;
                 if (is_string($f['value'])) {
+                    //print ($f['value']);
+                   // print (PinaCode::execute_shortcode($f['value']));
+                    //die;
                     $f['value'] = esc_sql(PinaCode::execute_shortcode($f['value']));
                     if (isset($f['required']) && $f['required'] == 1 && $f['value'] == '') {
                         return '(1 = 2)';
@@ -1514,11 +1605,14 @@ class Dbt_model {
                         $table_temp =  explode('`.`', $f['column']);
                         $table = str_replace("`",'',$table_temp[0]);
                         $column_name = str_replace("`",'',$table_temp[1]);
+                        if (isset($f['table'])) {
                         $pri = $this->get_primary_key($f['table']);
-
-                        $new_sel = array_filter(array_unique($new_sel));
-                        if (count ($new_sel) > 0 && strpos($f['column'],'`.`') !== -1) {
-                            $array_or[] =  $f['column'].' '.$op.' (SELECT `'.$column_name.'` FROM `'.$f['table'].'` WHERE `'. $f['table'] .'`.`'.$pri.'` IN ('.implode(', ', $new_sel).'))';
+                        
+                        
+                            $new_sel = array_filter(array_unique($new_sel));
+                            if (count ($new_sel) > 0 && strpos($f['column'],'`.`') !== -1) {
+                                $array_or[] =  $f['column'].' '.$op.' (SELECT `'.$column_name.'` FROM `'.$f['table'].'` WHERE `'. $f['table'] .'`.`'.$pri.'` IN ('.implode(', ', $new_sel).'))';
+                            }
                         }
                         $new_v = array_filter(array_unique($new_v));
                         if (count ($new_v) > 0) {

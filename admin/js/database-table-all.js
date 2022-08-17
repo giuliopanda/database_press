@@ -18,7 +18,26 @@ jQuery(document).ready(function () {
     jQuery('#sidebar-tabs .js-sidebar-title').click(function() {
         jQuery('#sidebar-tabs .js-sidebar-block').removeClass('dbt-open-sidebar');
         jQuery(this).parents('.js-sidebar-block').addClass('dbt-open-sidebar');
+		set_cookie('_dbt_sidebar_open', jQuery(this).data('dbtname'));
     });
+
+	/**
+	 * Vedo se la sidebar deve essere visibile o no
+	 */
+	 let sidebar = get_cookie('_dbt_sidebar');
+	 if (sidebar == 'hide') {
+		dbt_click_toggle_sidebar();
+	 }
+	/**
+	 * Apro la disebar settata dal cookie
+	 */
+	//console.log ("_dbt_sidebar_open: "+get_cookie('_dbt_sidebar_open'));
+	let open_sidebar = get_cookie('_dbt_sidebar_open');
+	if (open_sidebar != '') {
+		console.log ('APRO LA SIDEBAR '+open_sidebar);
+		jQuery('#sidebar-tabs .js-dbtblock-'+open_sidebar+' > .js-sidebar-title').click();
+	}
+
 
     /**
      * documentazione
@@ -60,6 +79,10 @@ jQuery(document).ready(function () {
         jQuery(this).html(query_color(jQuery(this).text()));
     });
 
+	/**
+	 * Gestisco i link di tipo detail view
+	 */
+	 setup_dbt_popup_frontend();
 });
 
 
@@ -109,6 +132,9 @@ function anchor_help(file, anchor) {
 	// verifica se sei già nella pagina corretta
 	// se no apri la pagina
 	// scrolla fino al punto richiesto
+	if (jQuery('#dbt_column_sidebar').css('display') == "none") {
+		dbt_click_toggle_sidebar();
+	}
 	if (!jQuery('#dbt_documentation_box').hasClass('dbt-open-sidebar')) {
 		jQuery('#sidebar-tabs .js-sidebar-block').removeClass('dbt-open-sidebar');
 		jQuery('#dbt_documentation_box').addClass('dbt-open-sidebar');
@@ -292,6 +318,7 @@ function delete_cookie( name, path, domain ) {
   * help filtro tabelle/campi sql
   */
 
+
  function dbt_help_filter(el) {
 	
 	let $ul_rif = jQuery('#'+jQuery(el).data('idfilter'));
@@ -433,4 +460,44 @@ function dbt_doc_load_link(page_url, anchor) {
 			pina_doc_ajax_free = true;
 		}
 	});
+}
+
+
+
+/**
+ * Gestisco in amministrazione I link del frontend 
+ */
+ function setup_dbt_popup_frontend() {
+    document.getElementById('table_filter').querySelectorAll('.js-dbt-popup').forEach(function(el) {
+        if (el.__dbt_data_popup_href == undefined) {
+            el.__dbt_data_popup_href = el.getAttribute('href');
+            el.removeAttribute('target');
+            el.setAttribute('href', "javascript: void(0)");
+
+            el.addEventListener('click', (e) => { 
+				dbt_open_sidebar_popup('info');
+				jQuery('#dbt_dbp_title > .dbt-edit-btns').remove();
+				jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>Frontend link</h3><div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
+				dbt_close_sidebar_loading();
+				jQuery('#dbt_dbp_content').append('<div class="dtf-alert-gray" style="margin:.4rem">This link is used in the frontend to show a popup with the content details.<br><br>Go to the "Frontend" tab and activate the detail view section.<br>In the textarea you can enter the data to be displayed using the integrated template engine.</div>');
+				return false;
+            });
+        }
+    });
+}
+
+
+function dbt_click_toggle_sidebar() {
+	jQuery('#dbt_collapse_btn').empty();
+	if (jQuery('#dbt_column_sidebar').css('display') == "none") {
+		jQuery('#dbt_container').css('grid-template-columns', '1fr 320px');
+		jQuery('#dbt_column_sidebar').css('display','block');
+		jQuery('#dbt_collapse_btn').html('<span class="dashicons dashicons-arrow-right" style="background: #1d2327; border-radius: 50%; color: #FFF;" ></span> Collapse sidebar');
+		set_cookie('_dbt_sidebar', 'show');
+	} else {
+		jQuery('#dbt_container').css('grid-template-columns', '1fr');
+		jQuery('#dbt_column_sidebar').css('display','none');
+		jQuery('#dbt_collapse_btn').html('<span class="dashicons dashicons-arrow-left" style="background: #1d2327; border-radius: 50%; color: #FFF;" ></span> Show sidebar');
+		set_cookie('_dbt_sidebar', 'hide');
+	}
 }

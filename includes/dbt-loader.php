@@ -9,7 +9,13 @@
 namespace DatabaseTables;
 
 class Dbt_loader {
+	/**
+	 * @var Object $saved_queries le ultime query salvate per tipo
+	 */
+	public static $saved_queries;
+
 	public function __construct() {
+		self::$saved_queries = (object)[];
 		add_action( 'admin_menu', [$this, 'add_menu_page'] );
 		// aggiungo eventuali pagine di menu
 		add_action('admin_menu',  [$this, 'init_add_menu_page'] );
@@ -32,6 +38,12 @@ class Dbt_loader {
 		add_action( 'wp_ajax_dbt_save_details', [$this, 'dbt_save_details']);
 		// l'ajax per generare le query per eliminare tutti i record di una query
 		add_action( 'wp_ajax_dbt_check_delete_from_sql', [$this, 'dbt_check_delete_from_sql']);
+		// l'ajax preparare gli id da rimuovere successiva a dbt_check_delete_from_sql
+		add_action( 'wp_ajax_dbt_prepare_query_delete', [$this, 'prepare_query_delete']);
+		// Dopo aver preparato i dati da rimuovere, li rimuovo tutti.
+		add_action( 'wp_ajax_dbt_sql_query_delete', [$this, 'sql_query_delete']);
+
+		
 		// l'ajax per generare il csv che salva sui file temporanei e poi li puoi scaricare
 		add_action( 'wp_ajax_dbt_download_csv', [$this, 'dbt_download_csv']);
 		// l'ajax mostra l'elenco delle colonne di una query pee permettere di scegliere quali visualizzare
@@ -72,8 +84,23 @@ class Dbt_loader {
         add_action ('wp_ajax_dbt_get_detail', [$this,'get_detail']);
        
 		//add_filter('query_vars', [$this, 'add_rewrite_rule']);
+		add_action ('wp_ajax_dbt_sql_test_replace', [$this,'sql_test_replace']);
+		
+		add_action ('wp_ajax_dbt_sql_search_replace', [$this,'sql_search_replace']);
+		
+		add_action('in_admin_header', function () {
+			
+			if (is_admin() && isset($_REQUEST['page'])  && 
+				in_array($_REQUEST['page'],['database_tables', 'dbt_list']) ) { 
+				remove_all_actions('admin_notices');
+				remove_all_actions('all_admin_notices');
+			}
+		}, 1000);
+
 		
 		if (is_admin())  {
+			// Memorizzo le ultime query eseguite per tipo (insert, delete) altrimenti quando provo a mostrarle usando last_query mi capita di vedere una query al posto di un'altra.
+			add_filter ( 'query', [$this, 'store_query'] );
 			require_once(DBT_DIR . "includes/dbt-loader-documentation.php");
 			$Dbt_loader_documentation = new Dbt_loader_documentation();
 		}
@@ -127,8 +154,11 @@ class Dbt_loader {
 		if ( ! class_exists( '_WP_Editors', false ) ) {
 			require( ABSPATH . WPINC . '/class-wp-editor.php' );
 		}
-		$settings = wp_get_code_editor_settings( $args );
+		wp_enqueue_editor();
+
+		$settings = wp_get_code_editor_settings([]);
 		// copio wp_enqueue_code_editor per escludere 'false' === wp_get_current_user()->syntax_highlighting
+		
 		if ( empty( $settings ) || empty( $settings['codemirror'] ) ) {
 			return false;
 		}
@@ -140,8 +170,7 @@ class Dbt_loader {
 		wp_enqueue_script( 'htmlhint' );
 		wp_enqueue_script( 'jshint' );
 		wp_add_inline_script( 'code-editor', sprintf( 'jQuery.extend( wp.codeEditor.defaultSettings, %s );', wp_json_encode( $settings ) ) );
-		wp_enqueue_editor();
-
+		
 	}
 
 	/**
@@ -150,6 +179,7 @@ class Dbt_loader {
 	 *	     ["sql"]=> string(26) "SELECT * FROM  `wpx_posts`"["rif"]=> string(21) "wpx_posts_post_author", ["column"]=> string(25) "`wpx_posts`.`post_author`", ["action"]=> string(19) "dbt_distinct_values", ["table"]=> string(9) "wpx_posts"
 	 *  }
 	 *  [{c=>il testo del campo distinct, p=>l'id se serve di filtrare per id oppure -1 n il numero di volte che compare},{}] | false if is not a select query 
+	 *
 	 */
 	public function dbt_distinct_values() {
 		global $wpdb;
@@ -161,7 +191,11 @@ class Dbt_loader {
 		
 		$model = new Dbt_model(@$_REQUEST['table']); // è la tabella a cui appartiene il singolo campo!
 		if (isset($_REQUEST['sql'])) {
-			$model->prepare(html_entity_decode($_REQUEST['sql']));
+			$req_sql = html_entity_decode($_REQUEST['sql']);
+			$model->prepare($req_sql);
+			if (!isset($_REQUEST['dbt_id'])) {
+				$model->removes_column_from_where_sql($_REQUEST['column']);
+			}
 		}
 		$result = $model->distinct($_REQUEST['column'], @$_REQUEST['filter_distinct']);
 		
@@ -185,6 +219,7 @@ class Dbt_loader {
 		wp_send_json(['error' => $error, 'result' => $result, 'rif' => $_REQUEST['rif'], 'count'=>$count, 'filter_distinct'=>@$_REQUEST['filter_distinct'] ]);
 		die();
 	}
+	
 	/**
 	 * L'ajax per la richiesta dell'elenco dei valori unici per mostrarli nei filtri di ricerca 
 	 *  $_REQUEST = array(5) {
@@ -343,8 +378,7 @@ class Dbt_loader {
 	 * I casi del template redirect
 	 */
 	public function template_redirect() {
-		if (!is_admin()) return;	
-		if (isset($_REQUEST['page'])  && $_REQUEST['page'] == 'database_tables') {
+		if (is_admin() && isset($_REQUEST['page'])  && $_REQUEST['page'] == 'database_tables') {
 			if (isset($_REQUEST['section']) && ($_REQUEST['section'] == 'table-structure') ) {
 				if (!isset($_REQUEST['action']) && !isset($_REQUEST['table'])) {
 					wp_redirect(admin_url('?page=database_tables&section=information-schema') );
@@ -656,24 +690,6 @@ class Dbt_loader {
 						
 						if (count($sql) > 0 &&  !(isset($sql['_dbt_leave_empty_']) && $sql['_dbt_leave_empty_'] == 1 )) {
 							$query_to_execute[] = ['action'=>'insert', 'table'=>$table, 'sql_to_save'=>$sql, 'table_alias'=>$alias_table, 'pri_val'=>$primary_value, 'pri_name'=>$primary_key, 'setting' => $setting];
-							/*
-							$ris_insert = $wpdb->insert($table, $sql);
-							
-							if ($ris_insert !== false) {
-								$queries_executed[] = $wpdb->last_query;
-								PinaCode::set_var($pri_name, $wpdb->insert_id);
-							} else {
-								$json_result['result'] = 'nook';
-								$json_result['error'] = $wpdb->last_error;
-								Dbt_fn::set_cookie('error', $json_result['error']);
-								if (is_countable($queries_executed) && count($queries_executed) > 0) {
-									$json_result['msg'] = __(sprintf('%s queries were executed successfully:', count($queries_executed)),'database_tables')."<br>".implode("<br>", $queries_executed);
-									Dbt_fn::set_cookie('msg', $json_result['msg']);
-								}
-								wp_send_json($json_result);
-								die();
-							} 
-							*/
 						}
 					} else {
 						// ha trovaro risultati doppi?
@@ -706,12 +722,12 @@ class Dbt_loader {
 			Dbt_fn::set_cookie('msg', $json_result['msg']);
 		}
 		// preparo i dati da inviare per aggiornare la tabella nel frontend!
-		
-		$table_model = $this->get_table_model_for_sidebar($_REQUEST['dbt_global_list_id']);
+		$dbt_global_list_id = Dbt_fn::get_request('dbt_global_list_id', 0, 'absint');
+		$table_model = $this->get_table_model_for_sidebar($dbt_global_list_id);
 		if ($table_model != false) {
 			$table_model->get_list();
 			if (isset($_REQUEST['dbt_global_list_id'])) {
-				$post = Dbt_functions_list::get_post_dbt(absint($_REQUEST['dbt_global_list_id']));
+				$post = Dbt_functions_list::get_post_dbt($dbt_global_list_id);
 				if (isset($post->post_content)) {
 					$table_model->update_items_with_setting($post);
 				}
@@ -759,7 +775,7 @@ class Dbt_loader {
 
 	/**
 	 * bulk delete on sql: 
-	 * Mostro la conferma prima di rimuovere i record selezionati
+	 * Scelgo da quali tabelle rimuovere i dati
 	 */
 	function dbt_check_delete_from_sql() {
 		Dbt_fn::require_init();
@@ -773,7 +789,7 @@ class Dbt_loader {
 			die();
         }
         if (count($table_items) < 2) {
-			wp_send_json(['items'=>[],'error'=>__("There was an unexpected problem", 'database_tables')]);
+			wp_send_json(['items'=>[],'error'=>__("There are no records to delete", 'database_tables')]);
 			die();
         }
 		
@@ -781,31 +797,115 @@ class Dbt_loader {
 		// trovo le tabelle interessate
 		$temp_groups = [];
 		foreach ($header as $key=>$th) {
-			if (isset($th['schema']->table) && isset($th['schema']->orgtable) && $th['schema']->table != "" && $th['schema']->orgtable != "") {
-				if (!isset($temp_groups[$th['schema']->table])) {
-					//$temp_groups[$th['schema']->table] =['table'=>$th['schema']->orgtable, 'pri' => Dbt_fn::get_primary_key($th['schema']->orgtable)];
-					$id = Dbt_fn::get_primary_key($th['schema']->orgtable);
-					$new_id_schema = Dbt_fn::find_primary_key_from_header($header, $th['schema']->table, $id);
-					if ($id != "" && $new_id_schema != false) {
-						$table_model->list_change_select('`'.$new_id_schema->table.'`.`'.$new_id_schema->name.'`');
-						$table_model->remove_limit();
-						$new_query = 	$table_model->get_current_query();
-						if ($new_query != "") {
-							$option = Dbt_fn::get_dbt_option_table($th['schema']->orgtable);
-							if ($option['status'] != "CLOSE") {
-								$temp_groups[$th['schema']->table] = 'DELETE FROM `'.$th['schema']->orgtable.'` WHERE `'.esc_sql($id).'` IN ('.$new_query.')';
-							} else {
-								$errors[] = sprintf(__('Records in the "%s" table cannot be removed because they are in a closed state. If you want to be able to remove the data, change the status from the table structure to "published"','database_tables'), $th['schema']->orgtable);
-							}
-						}
-					}
+			if ($th['schema']->table == '' OR $th['schema']->orgtable == '') continue;
+			$id = Dbt_fn::get_primary_key($th['schema']->orgtable);
+			$option = Dbt_fn::get_dbt_option_table($th['schema']->orgtable);
+			if ($option['status'] != "CLOSE" && $id != "") {
+				if ($th['schema']->table == $th['schema']->orgtable) {
+					$temp_groups[$th['schema']->table] =  $th['schema']->table;
+				} else {
+					$temp_groups[$th['schema']->table] = $th['schema']->orgtable." AS ". $th['schema']->table;
 				}
 			}
 		}
+
 		wp_send_json(['items'=>$temp_groups, 'error'=>implode("<br>", array_unique($errors))]);
 		die();
 	}
 
+	/**
+	 * Preparo gli id da rimuovere in delete from query
+	 */
+	function prepare_query_delete() {
+		Dbt_fn::require_init();
+		$errors = [];
+		$table_model = new Dbt_model();
+		$tables = Dbt_fn::get_request('tables', 0);
+		$limit_start = Dbt_fn::get_request('limit_start', 0);
+		$limit = 1000;
+		$total = Dbt_fn::get_request('total', 0);
+		$filename = Dbt_fn::get_request('dbt_filename', '');
+		$table_model->prepare(Dbt_fn::get_request('sql', ''));
+		$table_model->add_primary_ids();
+		$table_model->list_add_limit($limit_start, $limit);
+		$table_model->get_list();
+		$table_model->update_items_with_setting();
+
+		if ($total == 0) {
+			$total = $table_model->get_count();
+		}
+		$data_to_delete = [];
+		$table_items = $table_model->items;
+		$temporaly_file = new Dbt_temporaly_files();
+		if ($filename != "") {
+			$data_to_delete = $temporaly_file->read($filename);
+		} else {
+			$temporaly_file->read($filename);
+		}
+		if (count($table_items) > 1) {
+			$header = array_shift($table_items);
+			$header_pris = [];
+			foreach ($header as $key=>$th) {
+				if ($th->pri && in_array($th->table, $tables)) {
+					if (!isset($data_to_delete[$th->original_table."|".$th->original_name])) {
+						$data_to_delete[$th->original_table."|".$th->original_name] = [];
+					}
+					$header_pris[$key] = $th;
+				}
+			}
+			//var_dump ($table_items);
+			foreach($table_items as $item) {
+				foreach ($header_pris as $key => $hpri) {
+					if (!in_array( $item->$key, $data_to_delete[$hpri->original_table."|".$hpri->original_name])) {
+						$data_to_delete[$hpri->original_table."|".$hpri->original_name][] = $item->$key;
+					}
+				}
+			}
+			$filename = $temporaly_file->store($data_to_delete, $filename);
+		}
+		wp_send_json(['executed'=>$limit_start+$limit, 'total'=>$total, 'filename'=>$filename]);
+		die();
+	}
+
+	function sql_query_delete() {
+		global $wpdb;
+		Dbt_fn::require_init();
+		$filename = Dbt_fn::get_request('dbt_filename', '');
+		$temporaly_file = new Dbt_temporaly_files();
+		$data_to_delete = $temporaly_file->read($filename);
+		$total = Dbt_fn::get_request('total', 0);
+		$base_executed = $executed = Dbt_fn::get_request('executed', 0);
+		$limit = 1000;
+		//$data_to_delete[$th->original_table."|".$th->original_name] 
+		if ($total == 0) {
+			
+			foreach ($data_to_delete as $dtd) {
+				foreach ($dtd as $id) {
+					$total++;
+				}
+			}
+		}
+		//ob_start();
+		$count = 0;
+		foreach ($data_to_delete as $key => $dtd) {
+			list($table,$field) = explode("|", $key);
+			$query = "DELETE FROM `".esc_sql($table)."` WHERE `".esc_sql($field)."` = '%s';";
+			foreach ($dtd as $id) {
+				$count++;
+				if ($count <= $base_executed) continue;
+				if ($count > $base_executed + $limit) break;
+				$executed++;
+				//print sprintf($query, absint($id));
+				if (absint($id) > 0) {
+					$wpdb->query(sprintf($query, absint($id)));
+				}
+			}
+		}
+		//$html = ob_get_clean();
+		wp_send_json(['executed'=>$executed, 'total'=>$total, 'filename'=>$filename]);
+		die();
+	}
+	
 	/**
 	 * Prepara il csv 
 	 */
@@ -1090,10 +1190,12 @@ class Dbt_loader {
 			$table_model2->prepare($table_model->get_current_query());
 			$table_model2->list_add_select('`' . $table_alias . '`.*');
 			$sql_schema2 = $table_model2->get_schema();
+			
 			$add_select = [];
 			$sql_query_temp = $table_model->get_partial_query_select(); // Il select per evitare colonne duplicate
 			if (is_countable($sql_schema2)) {
 				foreach ($sql_schema2 as $field) {
+				
 					if (isset($field->orgtable) && $field->orgtable != "" && isset($field->table) && $field->table == $table_alias) {
 						
 						$new_name = Dbt_fn::get_column_alias(strtolower($table_alias . '_' .substr(str_replace(" ", "_", $field->name), 0, 50)), $sql_query_temp);
@@ -1102,6 +1204,7 @@ class Dbt_loader {
 						$add_select[] = '`' . $table_alias . '`.`' .$field->name . '` AS `'.$new_name.'`';
 					}
 				}
+				
 				if (count($add_select) > 0) {
 					$table_model->list_add_select(implode(", ", $add_select));
 				}
@@ -1268,7 +1371,6 @@ class Dbt_loader {
 		}
 		$pri = $_REQUEST['pri_key'];
 		$parent_id = $_REQUEST['parent_id'];
-		$dbt_add_field_pri = (isset($_REQUEST['dbt_add_field_pri']) && $_REQUEST['dbt_add_field_pri']) ? true : false;
 		$table2 =  $_REQUEST['dbt_meta_table'];
 		$_sql_table_temp = explode("::", $table2);
 		$_parent_table_temp = array_shift($_sql_table_temp); // la tabella.primary_id su cui sono collegati i meta 
@@ -1294,9 +1396,6 @@ class Dbt_loader {
 					$alias = Dbt_fn::get_table_alias($table, $sql." ".implode(", ",$temp_sql_from), str_replace("_","",$meta));
 					$temp_sql_from[] = ' LEFT JOIN `'.$table.'` `'.$alias.'` ON `'.$alias.'`.`'.$parent_id.'` = `'.$parent_table.'`.`'.$parent_table_id.'` AND `'.$alias.'`.`meta_key` = \''.esc_sql($meta).'\'';
 					$temp_sql_select[] = '`'.$alias.'`.`meta_value` AS `'.Dbt_fn::get_column_alias($meta, $sql).'`';
-					if ($dbt_add_field_pri) {
-						$temp_sql_select[] = '`'.$alias.'`.`' . $pri .'` AS `'.Dbt_fn::get_column_alias($meta."_id", $sql).'`';
-					}
 				}
 			}
 
@@ -1341,6 +1440,172 @@ class Dbt_loader {
 		$html = Dbt_html_sql::get_html_fields($table_model);
 		wp_send_json(['sql' => $table_model->get_current_query(), 'html'=>$html]);
 		die();
+	}
+
+	/**
+	 * mostra come cambierebbero i dati dopo il replace 
+	 */
+	function sql_test_replace() {
+		global $wpdb;
+		Dbt_fn::require_init();
+		$table_model = new Dbt_model();
+		$sql = Dbt_fn::get_request('sql');
+		$table_model->prepare($sql);    
+		$search = stripslashes(Dbt_fn::get_request('search', false)); 
+		$schemas = $table_model->get_schema();
+		$filter =[] ; //[[op:'', column:'',value:'' ], ... ];
+		foreach ($schemas as $schema) {
+			if ($schema->orgtable != ""  && $schema->table != ""  && $schema->name != "") {
+				$filter[] = ['op'=>'LIKE', 'column'=> '`'.esc_attr($schema->table).'`.`'.esc_attr($schema->orgname).'`', 'value' =>$search];
+			}
+		}
+		if (count($filter) > 0) {
+			$table_model->list_add_where($filter, 'OR');
+		}
+		$table_model->list_add_limit(0, 100);
+		$items = $table_model->get_list();
+		$replace = stripslashes(Dbt_fn::get_request('replace', false)); 
+		if (count ($items) > 0) {
+			ob_start();
+			$first_row = array_shift($items);
+			?>
+			<h2><?php _e('Text the first 100 records', 'database_tables'); ?></h2>
+			<table class="wp-list-table widefat striped dbt-table-view-list">
+				<thead>
+					<tr>
+						<?php foreach ($first_row as $key=>$_) : ?>
+							<th><?php echo $key; ?></th>
+						<?php endforeach; ?>
+					</tr>
+				</thead>
+				<tbody>
+				<?php 
+				if (count($items) > 0) {
+					foreach ($items as $item) {
+						pinacode::set_var('data', $item);
+						$temp_replace = PinaCode::execute_shortcode($replace);
+						?><tr><?php
+						// sostituisco i dati
+						foreach ($item as $value) {
+							if (stripos($value, $search) !== false) {
+								if (is_serialized($value)) {
+									$value_ser = maybe_unserialize($value);
+									$value_ser2 = Dbt_fn::search_and_resplace_in_serialize($value_ser, $search, $temp_replace);
+									$value_serialized = maybe_serialize($value_ser2);
+									if (strlen($value) > 100) {
+										$temp_pos = stripos($value, $search);
+										if ($temp_pos > 20) {
+											$value = "... ". substr($value,$temp_pos - 10);	
+											$value_serialized = "... ". substr($value_serialized,$temp_pos - 10);
+										}
+										if (strlen($value) > 100) {
+											$value =  substr($value,0,80)." ...";
+											$value_serialized  =  substr($value_serialized,0,80)." ...";
+										}
+									}
+
+									$value = "<b>Change serialized data (only values):</b><br >".str_ireplace(htmlentities($search),'<span style="text-decoration: line-through; color:red">??'.htmlentities($search)."</span>", $value)."<br>".$value_serialized;
+								} else {
+									$value = htmlentities($value);
+									if (strlen($value) > 100) {
+										$temp_pos = stripos($value, $search);
+										if ($temp_pos > 20) {
+											$value = "... ". substr($value,$temp_pos - 10);	
+										}
+										if (strlen($value) > 100) {
+											$value =  substr($value,0,80)." ...";
+										}
+									}
+									$value = str_ireplace(htmlentities($search),'<span style="text-decoration: line-through; color:red">'.htmlentities($search)."</span>", $value)."<br>".str_ireplace(htmlentities($search), '<b style="color:#259">'.htmlentities($temp_replace).'</b>', $value );
+								}
+							} else {
+								$value = htmlentities($value);
+								if (strlen($value) > 100) {
+									$value =  substr($value,0,80)." ...";
+								}
+							}
+							?><td><?php echo $value; ?></td><?php
+						}
+						?></tr><?php
+					}
+				}
+				?>
+				</tbody>
+			</table>
+			<?php
+			$html = ob_get_clean();
+		} else{
+			$html = _e('Non ho trovato nulla da sostituire'); 
+		}
+		wp_send_json(['html'=>$html]);
+		die();
+	}
+
+
+	/**
+	 * mostra come cambierebbero i dati dopo il replace 
+	 */
+	function sql_search_replace() {
+		global $wpdb;
+		Dbt_fn::require_init();
+		$table_model = new Dbt_model();
+		$sql = Dbt_fn::get_request('sql');
+		$table_model->prepare($sql);
+		$table_model->add_primary_ids();
+		$search = stripslashes(Dbt_fn::get_request('search', false)); 
+
+		$limit_start = Dbt_fn::get_request('limit_start', 0);
+		
+		$total = Dbt_fn::get_request('total', 0);
+		$replaced = Dbt_fn::get_request('row_replaced', 0);
+		if ($total == 0) {
+			$total = $table_model->get_count();
+		}
+
+		$table_model->list_add_limit($limit_start, 200);
+		$items = $table_model->get_list();
+		if (count ($items) > 1) {
+			$replace = stripslashes(Dbt_fn::get_request('replace', false)); 
+			$executed = $limit_start + count($items) - 1;
+		
+			$first_row = array_shift($items);
+	
+			foreach ($items as $item) {
+				pinacode::set_var('data', $item);
+				$temp_replace = PinaCode::execute_shortcode($replace);
+				// sostituisco i dati
+				$update = false;
+				foreach ($item as &$value) {
+					if (stripos($value, $search) !== false && $value != "") {
+						$update =true;
+						$replaced++;
+						if (is_serialized($value)) {
+							$value_ser = maybe_unserialize($value);
+							
+							$value_ser2 = Dbt_fn::search_and_resplace_in_serialize($value_ser, $search, $temp_replace);
+							$value = maybe_serialize($value_ser2);
+						} else {
+							$value = str_ireplace($search, $temp_replace, $value );
+						}
+					}	
+				}
+				if ($update) {
+					// aggiorno i dati!
+					//print "\nSAVE\n";
+				
+					$ris = Dbt::save_data($sql, $item, false);
+					//var_dump ($ris);
+					//die;
+				}
+			}
+		} else {
+			$executed = $total;
+		}
+		wp_send_json(['total'=>$total, 'executed' => $executed, 'replaced' => $replaced ]);
+		die();
+
+		$replace = stripslashes(Dbt_fn::get_request('replace', false)); 
+
 	}
 
 	/**
@@ -1412,6 +1677,28 @@ class Dbt_loader {
 			$status = 'PUBLISH';
 		}
 		return $status;
+	}
+
+	/**
+	 * Memorizzo le query di modifica che vengono eseguite dentro change
+	 */
+	function store_query($query) {
+		if (!isset(self::$saved_queries->change) || !is_array(self::$saved_queries->change)) {
+			self::$saved_queries->change = [];
+		}
+		switch (strtolower(substr(trim($query), 0, 6))) {
+
+			case 'update':
+				self::$saved_queries->change[] = $query;
+				break;
+			case 'insert':
+				self::$saved_queries->change[] = $query;
+				break;
+			case 'delete':
+				self::$saved_queries->change[] = $query;
+				break;
+		}
+		return $query;
 	}
 }
 

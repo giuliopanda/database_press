@@ -545,3 +545,13 @@ function dbt_lf_show_field_example($card) {
         $card.find('.js-lf-form-field-example .js-dbt-example').css({'overflow-y':'initial','overflow-x':'initial','overflow':'initial'});
     }
 }
+
+
+function dbt_select_change_toggle_form_title(el) {
+    $row = jQuery(el).parents('.js-dbt-lf-box-table-info').find('.js-form-row-title');
+    if ( jQuery(el).val() == "SHOW") {
+        $row.css('display','grid');
+    } else {
+        $row.css('display','none');
+    }
+}

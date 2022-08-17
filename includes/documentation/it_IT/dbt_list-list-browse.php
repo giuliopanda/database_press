@@ -4,10 +4,11 @@
  * header-title: La visualizzazione della lista
 * header-tags: Browse list
 * header-description: Visualizzare il risultato di una query salvata.
-* header-lang:ITA
 */
+
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
     <p>I dati estratti da una lista sono gestiti da una query che può essere modificata dal tab setting. Tuttavia modificare la query di una lista può risultare un'operazione pericolosa perché infuisce su tutte le configurazioni, quindi finché è possibile sarebbe meglio cercare di cambiare la query di una lista il meno possibile.</p>

@@ -22,7 +22,15 @@ if (!defined('WPINC')) die;
                 <a href="<?php echo admin_url("admin.php?page=dbt_list&section=list-sql-edit&dbt_id=".$post->ID); ?>" class="page-title-action" target="blank"><span class="dashicons dashicons-admin-generic" style="vertical-align: sub;"></span></a>
             <?php endif; ?>
             <form id="table_filter" method="post" action="<?php echo admin_url("admin.php?page=".$_REQUEST['page']); ?>">
-
+                <p class="search-box">   
+                    <input type="search" id="dbt_full_search" name="search" value="<?php echo esc_attr(stripslashes(Dbt_fn::get_request('search'))); ?>">
+                    <span class="button" onclick="dtf_submit_table_filter('search');">Search</span>
+                    &nbsp; 
+                    <?php if (count($table_model->tables_primaries) > 0) : ?>
+                    <div class="dbt-submit" onclick="dbt_edit_details_v2()"><?php _e('Add New record','database_tables'); ?></div>
+                    <?php endif; ?>
+                </p>
+                
                 <?php if ($table_model->last_error === false) : ?>
                     <?php 
                     $max_input_vars = (int)Dbt_fn::get_max_input_vars();
@@ -53,7 +61,7 @@ if (!defined('WPINC')) die;
                 <input type="hidden" id="dtf_table_sort_field" name="filter[sort][field]" value="<?php echo Dbt_fn::esc_request('filter.sort.field'); ?>">
                 <input type="hidden" id="dtf_table_sort_order"  name="filter[sort][order]" value="<?php echo Dbt_fn::esc_request('filter.sort.order'); ?>">
                 <input type="hidden" id="dtf_table_filter_limit_start" name="filter[limit_start]" value="<?php echo Dbt_fn::esc_request($table_model->limit_start); ?>">
-                
+              
                 <?php if ($table_model->last_error == false && $table_model->total_items > 0) : ?>
                     <div class="tablenav top dbt-tablenav-top">
                         <span class="displaying-num">Show <?php echo count($table_items) -1; ?> of <?php echo $table_model->total_items; ?> items</span>

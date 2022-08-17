@@ -1,20 +1,20 @@
 <?php
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
-$list_of_tables = $dtf::get_table_list();
+$list_of_tables = Dbt_fn::get_table_list();
 
 $lists = get_posts(['post_status' => 'publish',
 'numberposts' => -1,
 'post_type'   => 'dbt_list']);
 
-$post_type = $dtf::get_post_types();
-$request_table = @$_REQUEST['table'];
-$request_dbt_id =  @$_REQUEST['dbt_id'];
+$post_type = Dbt_fn::get_post_types();
+$request_table = Dbt_fn::get_request('table');
+$request_dbt_id =  Dbt_fn::get_request('dbt_id');
 ?>
 
 <div id="sidebar-tabs" data-section="<?php echo esc_attr(@$_REQUEST['page']); ?>">
-    <div class="js-sidebar-block" data-open="database_tables">
-        <h3 class="js-sidebar-title dbt-sidebar-title" ><?php _e('Database table actions', 'database_tables'); ?></h3>
+    <div class="js-sidebar-block js-dbtblock-dbtaction" data-open="database_tables">
+        <h3 class="js-sidebar-title dbt-sidebar-title" data-dbtname="dbtaction"><?php _e('Database table actions', 'database_tables'); ?></h3>
         <div class="js-sidebar-content dbt-sidebar-content" >
             <a class="dbt-sidebar-link" href="<?php echo admin_url("admin.php?page=database_tables&section=information-schema"); ?>"><span class="dashicons dashicons-editor-ul"></span> <?php _e('Show all tables', 'database_tables'); ?></a>
 
@@ -28,11 +28,12 @@ $request_dbt_id =  @$_REQUEST['dbt_id'];
 
         </div>
     </div>
-    <div class="js-sidebar-block" data-open="dbt_list">
-        <h3 class="js-sidebar-title dbt-sidebar-title" ><?php _e('LIST (Query saved)', 'database_tables'); ?></h3>
+    <div class="js-sidebar-block js-dbtblock-dbtlist" data-open="dbt_list">
+        <h3 class="js-sidebar-title dbt-sidebar-title" data-dbtname="dbtlist"><?php _e('LIST (Query saved)', 'database_tables'); ?></h3>
         <div class="js-sidebar-content dbt-sidebar-content" >
                
                 <ul>
+                    <li><a class="dbt-sidebar-link" href="<?php echo admin_url("admin.php?page=dbt_list"); ?>"><span class="dashicons dashicons-editor-ul"></span> <?php _e('Show all (Create new)', 'database_tables'); ?></a></li>
                     <?php foreach ($lists as $post) :?>
                         <?php $slt = ($request_dbt_id  == $post->ID) ? ' dbt-sidebar-link-selected' : ''; ?>
                         <?php $link = admin_url("admin.php?page=dbt_list&section=list-browse&dbt_id=".$post->ID); ?>
@@ -41,12 +42,13 @@ $request_dbt_id =  @$_REQUEST['dbt_id'];
                 </ul>
         </div>
     </div>
-    <div class="js-sidebar-block"  data-open="no_database_tables">
-        <h3 class="js-sidebar-title dbt-sidebar-title"><?php _e('DB TABLES', 'database_tables'); ?></h3>
+    <div class="js-sidebar-block js-dbtblock-dbttables"  data-open="no_database_tables">
+        <h3 class="js-sidebar-title dbt-sidebar-title" data-dbtname="dbttables"><?php _e('DB TABLES', 'database_tables'); ?></h3>
         <div class="js-sidebar-content dbt-sidebar-content" >
             <?php $wordpress_tables = Dbt_fn::wordpress_table_list(); ?>
             <?php $list = $list_of_tables['tables']; ?>
             <ul>
+                <li><a class="dbt-sidebar-link" href="<?php echo admin_url("admin.php?page=database_tables&section=information-schema"); ?>"><span class="dashicons dashicons-editor-ul"></span> <?php _e('Show all tables', 'database_tables'); ?></a></li>
                 <?php foreach ($list as $table_name) :?>
                     <?php if (! in_array( $table_name, $wordpress_tables)) : ?>
                         <?php $slt = ($request_table == $table_name) ? ' dbt-sidebar-link-selected' : ''; ?>
@@ -60,18 +62,18 @@ $request_dbt_id =  @$_REQUEST['dbt_id'];
                     <?php if (in_array( $table_name, $wordpress_tables)) : ?>
                         <?php $slt = ($request_table == $table_name) ? ' dbt-sidebar-link-selected' : ''; ?>
                         <li><a class="dbt-sidebar-link-2<?php echo $slt; ?>" href="<?php echo add_query_arg(['section'=>'table-browse', 'table'=>$table_name], admin_url("admin.php?page=database_tables")); ?>"><?php echo $table_name; ?></a>
-                        <?php if ($table_name == $dtf::get_prefix().'posts') : ?>
+                        <?php if ($table_name == Dbt_fn::get_prefix().'posts') : ?>
                         <ul class="dbt-ul-2">
                             <?php foreach ($post_type as $p) : ?>
                                 <li>
-                                    <form  method="POST" action="<?php echo admin_url('admin.php?page=database_tables&section=table-browse&table='.$dtf::get_prefix().'posts'); ?>">
-                                        <input type="hidden" name="custom_query" value="SELECT * FROM `<?php echo $dtf::get_prefix(); ?>posts`">
-                                        <input type="hidden" name="filter[search][<?php echo $dtf::get_prefix(); ?>posts_post_type][op]" value="IN">
+                                    <form  method="POST" action="<?php echo admin_url('admin.php?page=database_tables&section=table-browse&table='.Dbt_fn::get_prefix().'posts'); ?>">
+                                        <input type="hidden" name="custom_query" value="SELECT * FROM `<?php echo Dbt_fn::get_prefix(); ?>posts`">
+                                        <input type="hidden" name="filter[search][<?php echo Dbt_fn::get_prefix(); ?>posts_post_type][op]" value="IN">
                                         <input type="hidden" name="action_query" value="filter">
-                                        <input type="hidden" name="filter[search][<?php echo $dtf::get_prefix(); ?>posts_post_type][r]" value="2">
-                                        <input type="hidden" name="filter[search][<?php echo $dtf::get_prefix(); ?>posts_post_type][table]" value="<?php echo $dtf::get_prefix(); ?>posts">
-                                        <input type="hidden" name="filter[search][<?php echo $dtf::get_prefix(); ?>posts_post_type][column]" value="`<?php echo $dtf::get_prefix(); ?>posts`.`post_type`">
-                                        <input type="hidden" name="filter[search][<?php echo $dtf::get_prefix(); ?>posts_post_type][value]" value="<?php echo esc_attr($p); ?>">
+                                        <input type="hidden" name="filter[search][<?php echo Dbt_fn::get_prefix(); ?>posts_post_type][r]" value="2">
+                                        <input type="hidden" name="filter[search][<?php echo Dbt_fn::get_prefix(); ?>posts_post_type][table]" value="<?php echo Dbt_fn::get_prefix(); ?>posts">
+                                        <input type="hidden" name="filter[search][<?php echo Dbt_fn::get_prefix(); ?>posts_post_type][column]" value="`<?php echo Dbt_fn::get_prefix(); ?>posts`.`post_type`">
+                                        <input type="hidden" name="filter[search][<?php echo Dbt_fn::get_prefix(); ?>posts_post_type][value]" value="<?php echo esc_attr($p); ?>">
                                         <div class="dbt-ul-2-submit" onclick="jQuery(this).parent().submit();"><?php echo $p; ?></div>
                                     </form>
                                 </li>

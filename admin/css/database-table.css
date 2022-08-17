@@ -7,7 +7,7 @@
 }
 
 .dbt-table-view-list thead tr th {
-   padding:8px
+   padding:8px;
 }
 
 .dbt-table-view-list tr {
@@ -322,6 +322,10 @@
     color:#252525; 
 }
 
+.dtf-color-error { color:#970803; }
+.dtf-color-warning {color:#727100;}
+.dtf-color-info {color:#212121;}
+
 .dtf-description {
     padding: .3rem .5rem;
     margin: -0.7rem 0px 1rem 0;
@@ -336,6 +340,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 500;
 }
 
 .dtf-pagination-input {
@@ -628,9 +633,9 @@
     line-height: 2rem;
 }
 
-.dtf-th-dim-date  {min-width: 5rem;}
-.dtf-th-dim-varchar {min-width: 10rem;}
-.dtf-th-dim-text {min-width: 12rem; max-width: 20rem;}
+.dtf-th-dim-date  {min-width: 3rem;}
+.dtf-th-dim-varchar {min-width: 4rem;}
+.dtf-th-dim-text {min-width: 8rem; max-width: 20rem;}
 .dtf-th-dim-wp_html {min-width: 6rem;}
 
 .dtf-th-dim-checkbox input {margin:0 !Important;}
@@ -647,6 +652,9 @@
 .dbt-tabs-container > .dbt-tab:last-child {border-right: 1px solid #ccc;}
 .dbt-tabs-container > .dbt-tab-active {background:#FFF;  border-bottom: 1px solid #FFF; margin-bottom: -2px;}
 .dbt-tabs-container > .dbt-tab-active:hover {background:#FFF;}
+
+.btn-div-td-number {text-align: right;}
+.btn-div-td-text {min-width: 10rem;}
 
 .dbt-import-content-create-table {
     margin:1rem .5rem .5rem .5rem;
@@ -1177,9 +1185,11 @@ table td.dtf-table-td {padding:0;}
     line-height: 2;
     font-size: .8em;
     color:#135e96;
-    cursor:pointer
+   
 }
-
+.dbt-structure-toggle span {
+    cursor:pointer;
+}
 .dbt-label-grid { display: grid; grid-template-columns: auto 1fr; margin-bottom:1rem ; grid-row-gap:1rem;}
 
 .dbt-link-click {
@@ -1771,3 +1781,22 @@ input[type=checkbox].dbt-checkbox-left {float: left; margin-top: 0.1rem; margin-
     margin: 0 0% 0 2%;
     clear:none;
 }
+
+
+.dbt-tutorial-img {
+    max-width: 90%;
+    margin: 1rem auto;
+    display: block;
+}
+
+
+.dbt-tutorial-table, .dbt-tutorial-table th, .dbt-tutorial-table td {
+    border: 1px solid #999;
+    border-collapse: collapse;
+    padding:.5rem;
+    
+}
+.dbt-tutorial-table {
+    border:none;
+}
+.dbt-tutorial p {font-size: 1rem;}

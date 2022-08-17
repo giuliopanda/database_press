@@ -1108,19 +1108,21 @@ class Dbt_fn {
     }
 
     /**
-     * sul primo elemento visibile dei risultati di una query (dentro $table_model) 
+     * Sul primo elemento visibile dei risultati di una query (dentro $table_model) 
      * aggiungo i link per le azioni tipo edit|view|delete.
      * I risultati li ripassa dentro table_model->items
      */
     static function items_add_action(&$table_model, $post_content = []) {
+      
        // var_dump ($table_model->items);
         if (!is_countable($table_model->items) || count($table_model->items) == 0 ){
            return false;
         }
         $table_header = reset($table_model->items);
         $table_model->add_primary_ids();
+      
         $primaries = $table_model->get_pirmaries();
-        
+        //var_dump ($primaries);
         $first_table_header = 0;
         // trovo la colonna a cui aggiungere le azioni
         foreach ($table_header as $key=>$v) {
@@ -1143,25 +1145,24 @@ class Dbt_fn {
         $found_at_least_one_pri = false;
         foreach ($table_header as $k=>$th) {
             if (isset($th->table) && isset($primaries[$th->original_table]) && strtolower($primaries[$th->original_table]) == strtolower($th->original_name)) {
-
                 $table_model->items[$keytmi][$k]->pri = true;
                 $found_at_least_one_pri = true;
                 $table_model->items[$keytmi][$first_table_header]->type = "WP_HTML";
-                if (!$table_model->items[$keytmi][$k]->adding_setting) {
+                if (count($post_content) == 0) {
                     $table_model->items[$keytmi][$k]->name = $table_model->items[$keytmi][$k]->name . ' <span class="dashicons dashicons-admin-network" style="color:#e2c447" title="Primary"></span>';
                 }
             } 
         } 
+      
         //TODO DEVE CALCOLARE TUTTE LE CHIAVI PRIMARIE E NON SOLO ALCUNE!
         // Non trovo chiavi primarie nel select Propongo di inserirle in automatico. TODO DOVE LO PROPONGO?
         if (!$found_at_least_one_pri) {
+           
             return false;
         }
         $count_unique_id = 0;
         $primary_values_ori_table = [];
         //var_dump ($table_header);
-        // prendo tutte le cartelle e vedo la situazione
-
         $table_status = $table_model->table_status();
         $max_input_vars = Dbt_fn::get_max_input_vars();
         $tables = $table_model->get_partial_query_from(true);
@@ -1169,11 +1170,12 @@ class Dbt_fn {
         //print $max_input_vars." / ".count($tables)." = ". $max_checkboxes_view ;
         $show_chekboxes = (count($table_model->items)-1 <= $max_checkboxes_view);
         // Importo dentro le singole righe i bottoni delle azioni
+      
         if ($table_status != 'CLOSE') {
             foreach ($table_model->items as $key => $_) {
                 if ($key == 0 || $key == "" ) {
                     if ($show_chekboxes) {
-                        $table_model->items[$key] = array_merge(['__checkbox_' =>  (object)['name'=>'ck', 'original_table' => '',  'table' => '', 'name_column'=>'', 'original_name' => '','field_key'=>'', 'original_field_name'=>'', 'type'=> "CHECKBOX", 'sorting'=>'', 'dropdown' => false, 'width'=>'', 'mysql_name' =>'', 'name_request' =>'', 'searchable' => false, 'custom_param' => '', 'format_values' => '', 'format_styles' => '']], $table_model->items[$key]);
+                        $table_model->items[$key] = array_merge(['__checkbox_' =>  (object)['name'=>'ck', 'original_table' => '',  'table' => '', 'name_column'=>'', 'original_name' => '','field_key'=>'', 'original_field_name'=>'', 'type'=> "CHECKBOX", 'sorting'=>'', 'dropdown' => false, 'width'=>'', 'align'=>'', 'mysql_name' =>'', 'name_request' =>'', 'searchable' => false, 'custom_param' => '', 'format_values' => '', 'format_styles' => '']], $table_model->items[$key]);
                     }
                     continue;
                 }
@@ -1564,14 +1566,16 @@ class Dbt_fn {
      * Separa una stringa secondo una serie di occorrenze definite in un array 
      * @param Array $separators L'elenco delle parole per cui dividere la stringa
      * @param String $string la stringa da dividere
-     * @return Array ritorna un array di stringe divise prima dei delimitatori
+     * @param Bool $add_separators Aggiunge nei risultati anche i delimitatori es: [ris1, delimiter, ris2]
+     * @return Array ritorna un array di stringe divise dai delimitatori
      */
-    static function multi_explode($separators, $string) {
+    static function multi_explode($separators, $string, $add_separators = false) {
         $delimiter = 1;
         $old_delimiter = 0;
         $offset  = 0;
         $explode = [];
         while($delimiter > 0) {
+            $current_delimiter = '';
             $delimiter = 0;
             $curr_pos = strlen($string);
             foreach ($separators as $separator) {
@@ -1579,10 +1583,17 @@ class Dbt_fn {
                 if ($pos < $curr_pos && $pos !== false) {
                     $curr_pos = $pos;
                     $delimiter = strlen($separator);
+                    $current_delimiter = $separator;
                 }
             }
             if ($curr_pos > 0) {
-                $explode[] =  substr($string, $offset - $old_delimiter , $curr_pos -  $offset + $old_delimiter);
+               
+                if ($add_separators) {
+                    $explode[] =  substr($string, $offset  , $curr_pos -  $offset );
+                    $explode[] = $current_delimiter;
+                } else {
+                    $explode[] =  substr($string, $offset - $old_delimiter , $curr_pos -  $offset + $old_delimiter);
+                }
             }
             $offset = $curr_pos + $delimiter;
             $old_delimiter = $delimiter;
@@ -1973,6 +1984,32 @@ class Dbt_fn {
         return false;
     }
 
+    /**
+     * Cerca e sostituisce nei dati serializzati
+     */
+    static function search_and_resplace_in_serialize($obj, $search, $replace) {
+        if (is_array($obj)) {
+            foreach ($obj as $key=>$o) {
+                if (is_array($o) || is_object($o)) {
+                    $obj[$key] = self::search_and_resplace_in_serialize($o, $search, $replace);
+                } else {
+                    $obj[$key] = str_ireplace($search, $replace, $o);
+                }
+            }
+        } else if (is_object($obj)) {
+            foreach ($obj as $key=>$o) {
+                if (is_array($o) || is_object($o)) {
+                    $obj->$key= self::search_and_resplace_in_serialize($o, $search, $replace);
+                } else {
+                    $obj->$key = str_ireplace($search, $replace, $o);
+                }
+            }
+        } else {
+            $obj = str_ireplace($search, $replace, $obj);
+        }
+        return $obj;
+    }
+    
 
 }
 // setto 'inizio dell'esecuzione dello script;

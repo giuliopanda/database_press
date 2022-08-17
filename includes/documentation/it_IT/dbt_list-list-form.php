@@ -6,8 +6,10 @@
 * header-description: Una volta salvata una query è possibile modificare la visualizzazione dei dati dal tab List view formatting
 * header-lang:ITA
 */
+
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
     <p>Gestisci i moduli per l'inserimento dei dati</p>

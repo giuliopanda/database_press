@@ -34,17 +34,17 @@ class database_tables_admin
 		wp_enqueue_style( 'database-table-css' , plugin_dir_url( __FILE__ ) . 'css/database-table.css',[],rand());
 		wp_enqueue_script( 'database-table-all-js', plugin_dir_url( __FILE__ ) . 'js/database-table-all.js',[],rand());
 
-		$dtf = new Dbt_fn();
+		// $dtf = new Dbt_fn();
 		Dbt_fn::require_init();
 		$temporaly_files = new Dbt_temporaly_files();
 	    /**
 		 * @var $section Definisce il tab che sta visualizzando
 		 */
-        $section =  $dtf::get_request('section', 'home');
+        $section =  Dbt_fn::get_request('section', 'home');
          /**
 		 * @var $action Definisce l'azione
 		 */
-       	$action = $dtf::get_request('action', '', 'string');
+       	$action = Dbt_fn::get_request('action', '', 'string');
 		//print $section." ".$action;	
 		$msg =  $msg_error = '';
 		if (isset($_COOKIE['dbt_msg'])) {
@@ -61,7 +61,7 @@ class database_tables_admin
 				$this->table_structure();
 				break;
 			case 'table-import' :
-				$this->table_list = $dtf::get_table_list();
+				$this->table_list = Dbt_fn::get_table_list();
 			
 				if ($action =='import-sql-file') {
 					$this->import_sql_file();
@@ -74,7 +74,7 @@ class database_tables_admin
 				} else {
 					$max_row_allowed = floor(Dbt_fn::get_max_input_vars()/10);
 					$temporaly_files->clear_old();
-					$import_table = $dtf::get_request('table', '');
+					$import_table = Dbt_fn::get_request('table', '');
 					$render_content = "/dbt-content-table-import.php";
 					require(dirname( __FILE__ ) . "/partials/dbt-page-base.php");
 				}
@@ -82,8 +82,8 @@ class database_tables_admin
 			case 'table-sql' :
 				wp_enqueue_script( 'jquery-ui-sortable' );
 				wp_enqueue_script( 'database-sql-editor-js', plugin_dir_url( __FILE__ ) . 'js/database-sql-editor.js',[],rand());
-				$this->table_list = $dtf::get_table_list();
-				// TODO: $list_of_columns 				= $dtf::get_all_columns();
+				$this->table_list = Dbt_fn::get_table_list();
+				// TODO: $list_of_columns 				= Dbt_fn::get_all_columns();
 				add_filter( 'dbt_render_sql_btns', [$this, 'filter_render_sql_btns'] );
 
 				$render_content = "/dbt-content-sql.php";
@@ -110,7 +110,7 @@ class database_tables_admin
 				$permission_list = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'RELOAD', 'INDEX', 'ALTER', 'SHOW DATABASES', 'CREATE TEMPORARY TABLES', 'CREATE VIEW', 'SHOW VIEW'];
 				$user_permission = $wpdb->get_results("SHOW GRANTS");
 				if (!is_array($user_permission) || count($user_permission) >0) {
-					$user_permission = $wpdb->get_results("SHOW GRANTS FOR '".esc_sql(DB_USER)."'@localhost'");
+					$user_permission = $wpdb->get_results("SHOW GRANTS FOR '".esc_sql(DB_USER)."'@'localhost'");
 				} 
 				if (is_array($user_permission) && count($user_permission) > 0) {
 				
@@ -168,10 +168,10 @@ class database_tables_admin
 	private function information_schema() {
 		global $wpdb;
 
-		$dtf = new Dbt_fn();
+		// $dtf = new Dbt_fn();
 		$temporaly_files = new Dbt_temporaly_files();
-        $section =  $dtf::get_request('section', 'home');
-       	$action = $dtf::get_request('action', '', 'string');
+        $section =  Dbt_fn::get_request('section', 'home');
+       	$action = Dbt_fn::get_request('action', '', 'string');
 		wp_enqueue_script( 'jquery-ui-sortable' );
 		wp_enqueue_script( 'database-sql-editor-js', plugin_dir_url( __FILE__ ) . 'js/database-information-schema.js',[],rand());
 		
@@ -190,10 +190,10 @@ class database_tables_admin
 	 * Il tab structure
 	 */
 	private function table_structure() {
-		$dtf = new Dbt_fn();
+		// $dtf = new Dbt_fn();
 		// da ricordarsi: il salvataggio è in post (dbt-loader-structure.php)
-        $section =  $dtf::get_request('section', 'home');
-       	$action = $dtf::get_request('action', '', 'string');
+        $section =  Dbt_fn::get_request('section', 'home');
+       	$action = Dbt_fn::get_request('action', '', 'string');
 		$msg =  $msg_error = $table = $table_new_name = '';	
 		if ($action == 'edit-index') {
 			wp_enqueue_script( 'database-table-import-js', plugin_dir_url( __FILE__ ) . 'js/database-table-structure.js',[],rand());
@@ -278,10 +278,12 @@ class database_tables_admin
 				}
 				if (count($old_primaries) == 1 &&  $is_old_primaries_type_numeric ) {
 					$msg_error .= sprintf(__('<p style="background:#F2F2F2; border:1px solid #EEE; padding:.5rem">ALTER TABLE `%s` MODIFY %s INT NOT NULL AUTO_INCREMENT;<br></p>', 'database_tables'), $table, implode(", ", $old_primaries));
-				} else {
+				} else if (count($old_primaries) >1) {
 					$msg_error .= sprintf(__('<p style="background:#F2F2F2; border:1px solid #EEE; padding:.5rem">ALTER TABLE `%s` drop primary key;<br>
 					CREATE UNIQUE INDEX old_primary_key ON `%s` (%s);<br>
 					ALTER TABLE `%s` ADD dbt_id BIGINT AUTO_INCREMENT PRIMARY KEY;<br></p>','database_tables'), $table, $table, implode(", ", $old_primaries), $table);
+				} else {
+					$msg_error .= sprintf(__('<p style="background:#F2F2F2; border:1px solid #EEE; padding:.5rem">ALTER TABLE `%s` ADD dbt_id BIGINT AUTO_INCREMENT PRIMARY KEY;<br></p>','database_tables'), $table);
 				}
 			}
 
@@ -323,19 +325,19 @@ class database_tables_admin
 			$msg_error = stripslashes($_COOKIE['dbt_error']);
 		}	
 		$temporaly_files = new Dbt_temporaly_files();
-		$dtf = new Dbt_fn();
-        $section =  $dtf::get_request('section', 'home');
-       	$action = $dtf::get_request('action_query', '', 'string');
+		// $dtf = new Dbt_fn();
+        $section =  Dbt_fn::get_request('section', 'home');
+       	$action = Dbt_fn::get_request('action_query', '', 'string');
 
 		//	wp_add_inline_script( 'database-table-js', 'dbt_admin_post = "'.esc_url( admin_url("admin-post.php")).'";', 'before' );
 		//	wp_enqueue_script( 'database-table-js', plugin_dir_url( __FILE__ ) . 'js/database-table.js',[],rand());
 
 		$table_model 				= new Dbt_model(@$_REQUEST['table']);
-		$list_of_columns 				= $dtf::get_all_columns();
+		$list_of_columns 				= Dbt_fn::get_all_columns();
 		$show_query = false;
 		// cancello le righe selezionate!
 		if ($action == "delete_rows" && isset($_REQUEST["remove_ids"]) && is_array($_REQUEST["remove_ids"])) {
-			$result_delete = $dtf::delete_rows($_REQUEST["remove_ids"], $_REQUEST['custom_query']);
+			$result_delete = Dbt_fn::delete_rows($_REQUEST["remove_ids"], $_REQUEST['custom_query']);
 			if ($result_delete['error'] != "") {
 				$msg_error = $result_delete;
 			} else {
@@ -344,7 +346,7 @@ class database_tables_admin
 		}
 
 		if ($action == "delete_from_sql") {
-			$result_delete = $dtf::dbt_delete_from_sql($dtf::get_request('sql_query_executed'), $dtf::get_request('remove_table_query'));
+			$result_delete = Dbt_fn::dbt_delete_from_sql(Dbt_fn::get_request('sql_query_executed'), Dbt_fn::get_request('remove_table_query'));
 			if ($result_delete != "") {
 				$msg_error = $result_delete;
 			} else {
@@ -352,7 +354,7 @@ class database_tables_admin
 			}
 		}
 	
-		$custom_query = $dtf::get_request('custom_query', '');
+		$custom_query = Dbt_fn::get_request('custom_query', '');
 
 		// Dbt_util_marks_parentheses diventa lentissimo con testi troppo lunghi > 1.000.000 chr 
 	
@@ -385,7 +387,7 @@ class database_tables_admin
 			} 
 
 			$mysqli->close();	
-			$dtf::get_table_list(false);
+			Dbt_fn::get_table_list(false);
 		
 			$render_content = "/dbt-content-table-with-filter.php";
 		
@@ -394,7 +396,7 @@ class database_tables_admin
 			return;
 		}
 
-		$table_model->prepare($dtf::get_request('custom_query', ''));
+		$table_model->prepare(Dbt_fn::get_request('custom_query', ''));
 		
 		$_REQUEST['table'] = $table_model->get_table();
 		if ($table_model->sql_type() == "multiqueries") {
@@ -407,19 +409,40 @@ class database_tables_admin
 			}
 			$render_content = "/dbt-content-multiquery.php";
 		} else {
-			$dtf::add_request_filter_to_model($table_model, $this->max_show_items);
-			$table_model->add_primary_ids();
-			$table_items = $table_model->get_list();
+
+			// SEARCH in all columns
+			$search = stripslashes(Dbt_fn::get_request('search', false)); 
+			if ($search && $search != "" &&  in_array($action, ['search','order','limit_start','change_limit'])) {
+				$schemas = $table_model->get_schema();
+				$filter =[] ; //[[op:'', column:'',value:'' ], ... ];
+				foreach ($schemas as $schema) {
+					if ($schema->orgtable != ""  && $schema->table != ""  && $schema->name != "") {
+						$filter[] = ['op'=>'LIKE', 'column'=> '`'.esc_attr($schema->table).'`.`'.esc_attr($schema->orgname).'`', 'value' =>$search];
+					}
+				}
+				if (count($filter) > 0) {
+					$table_model->list_add_where($filter, 'OR');
+				}
+			} else {
+				$_REQUEST['search'] = '';
+			}
 			
+			Dbt_fn::add_request_filter_to_model($table_model, $this->max_show_items);
+			$table_model->add_primary_ids();
+
+			$table_items = $table_model->get_list();
 			$table_model->update_items_with_setting();
-			$dtf::items_add_action($table_model);
+		
+			Dbt_fn::items_add_action($table_model);
+			
 			$table_model->check_for_filter();
 			$table_model->remove_primary_added();
-			$dtf::remove_hide_columns($table_model);
+			Dbt_fn::remove_hide_columns($table_model);
 		
 			if ( count($table_model->get_pirmaries()) == 0 && count($table_model->get_query_tables()) > 0 && $msg_error == '' && $table_model->sql_type() == "select") {
 				$msg_error = __('This system works better with tables that have only one field set as the autoincrement primary key.','database_tables');
 				$msg_error .= '<br>'.__('Most of the features have been disabled.','database_tables').'<br>';
+				$msg_error .= '<br>'.__('If you can modify the table, go to the structure tab and follow the proposed instructions.','database_tables').'<br>';
 				if ($table_model->table_status() == "DRAFT")  {
 					$msg_error .= '<b>'.__('If you can alter the table, go to Structure and follow the instructions.','database_tables').'</b>';
 				}
@@ -427,6 +450,7 @@ class database_tables_admin
 			if ($table_model->table_status() == 'CLOSE' && $msg == '' && $msg_error == '') {
 				$msg = __('The table can no longer be modified because it is in the "CLOSE" state.', 'database_tables');
 			}
+			//var_dump($table_model->items);
 			$html_table   = new Dbt_html_table();
 			$html_content = $html_table->template_render($table_model); // lo uso nel template
 			//print (get_class($table_model) );
@@ -441,10 +465,10 @@ class database_tables_admin
 	 * Importa un file sql
 	 */
 	function import_sql_file() {
-		$dtf = new Dbt_fn();
-		$section =  $dtf::get_request('section', 'home');
-		$action = $dtf::get_request('action_query', '', 'string');
-		$import_table = $dtf::get_request('table', '');
+		// $dtf = new Dbt_fn();
+		$section =  Dbt_fn::get_request('section', 'home');
+		$action = Dbt_fn::get_request('action_query', '', 'string');
+		$import_table = Dbt_fn::get_request('table', '');
 		$this->msg = '';
 		$this->last_error = "";
 		$render_content = "/dbt-content-table-import.php";
@@ -479,7 +503,7 @@ class database_tables_admin
 			} 
 
 			$mysqli->close();	
-			$dtf::get_table_list(false);
+			Dbt_fn::get_table_list(false);
 		}
 		require(dirname( __FILE__ ) . "/partials/dbt-page-base.php");
 
@@ -496,12 +520,12 @@ class database_tables_admin
 			die();
 		}
 		$max_row_allowed = floor(Dbt_fn::get_max_input_vars()/10);
-		$dtf = new Dbt_fn();
+		// $dtf = new Dbt_fn();
 		Dbt_fn::require_init();
-		$section =  $dtf::get_request('section', 'home');
-       	$action = $dtf::get_request('action', '', 'string');
-		$import_table = $dtf::get_request('table', '');
-		if ($import_table != "" && $dtf::exists_table($import_table)) {
+		$section =  Dbt_fn::get_request('section', 'home');
+       	$action = Dbt_fn::get_request('action', '', 'string');
+		$import_table = Dbt_fn::get_request('table', '');
+		if ($import_table != "" && Dbt_fn::exists_table($import_table)) {
 			$select_action = "insert_records";
 			$current_table = $import_table;
 		}
@@ -511,6 +535,7 @@ class database_tables_admin
 
 		$csv_filename = $temporaly_files->move_uploaded_file('sql_file');
 		if ($csv_filename == "") {
+			$csv_structure = [];
 			$this->last_error = $temporaly_files->last_error;
 			$action = '';
 		} else {
@@ -522,6 +547,7 @@ class database_tables_admin
 			if (!$allow_use_first_row) {
 				$csv_items = $temporaly_files->read_csv($csv_filename, $csv_delimiter, false, 20);
 			}
+
 			$csv_structure = $temporaly_files->csv_structure($csv_filename, $csv_delimiter, $csv_first_row_as_headers);
 
 			$csv_structure = self::csv_create_table_add_primary($csv_structure);
@@ -543,23 +569,32 @@ class database_tables_admin
 	function execute_csv_data() {
 		wp_enqueue_script( 'database-table-import-js', plugin_dir_url( __FILE__ ) . 'js/database-table-import.js',[],rand());
 		wp_enqueue_script( 'jquery-ui-sortable' );
-		$dtf = new Dbt_fn();
+		// $dtf = new Dbt_fn();
 		Dbt_fn::require_init();
 		$max_row_allowed = floor(Dbt_fn::get_max_input_vars()/10);
-		$section =  $dtf::get_request('section', 'home');
-       	$action = $dtf::get_request('action', '', 'string');
-		$import_table = $dtf::get_request('table', '');
+		$section =  Dbt_fn::get_request('section', 'home');
+       	$action = Dbt_fn::get_request('action', '', 'string');
+		$import_table = Dbt_fn::get_request('table', '');
 		$temporaly_files = new Dbt_temporaly_files();
 		
-		$csv_filename = $dtf::get_request('csv_temporaly_filename');
-		$csv_delimiter = $dtf::get_request('csv_delimiter');
-		$allow_use_first_row = $dtf::get_request('allow_use_first_row', 1);
+		$csv_filename = Dbt_fn::get_request('csv_temporaly_filename');
+		$csv_delimiter = Dbt_fn::get_request('csv_delimiter');
+		$allow_use_first_row = Dbt_fn::get_request('allow_use_first_row', 1);
 		$model_structure = new Dbt_model_structure();
-		$name_of_file = $model_structure->change_unique_table_name($dtf::get_request('csv_name_of_file'));
+		$name_of_file = $model_structure->change_unique_table_name(Dbt_fn::get_request('csv_name_of_file'));
 
-		$csv_first_row_as_headers = $dtf::get_request('csv_first_row_as_headers', false, 'boolean');
+		$csv_first_row_as_headers = Dbt_fn::get_request('csv_first_row_as_headers', false, 'boolean');
 		$csv_items = $temporaly_files->read_csv($csv_filename, $csv_delimiter, $csv_first_row_as_headers, 20);
 		
+		if (is_array($csv_items)) {
+			foreach ($csv_items as &$item) {
+				foreach ($item as &$i) {
+					if (!is_array($i) && !is_object($i)) {
+						$i = htmlentities($i);
+					}
+				}
+			} 
+		}
 		$csv_structure = $temporaly_files->csv_structure($csv_filename, $csv_delimiter, $csv_first_row_as_headers);
 		$csv_structure = self::csv_create_table_add_primary($csv_structure);
 		$render_content = "/dbt-content-table-import.php";
@@ -579,7 +614,7 @@ class database_tables_admin
 				break;
 			}
 		}
-		if (!$has_primary) {
+		if (!$has_primary && is_array($csv_structure)) {
 			array_unshift($csv_structure, json_decode('{"field_name":"dbt_id", "field_type":"INT", "auto_increment":"t", "field_length":"11", "attributes":"UNSIGNED", "null":"f", "default":"", "primary": "t", "ai":"t", "comment":"", "preset":"pri"}'));
 		}
 		return $csv_structure;
@@ -592,16 +627,16 @@ class database_tables_admin
 		global $wpdb;
 		wp_enqueue_script( 'database-table-import-js', plugin_dir_url( __FILE__ ) . 'js/database-table-import.js',[],rand());
 		wp_enqueue_script( 'jquery-ui-sortable' );
-		$dtf = new Dbt_fn();
+		// $dtf = new Dbt_fn();
 		Dbt_fn::require_init();
 		$max_row_allowed = floor(Dbt_fn::get_max_input_vars()/10);
-		$section =  $dtf::get_request('section', 'home');
-       	$action = $dtf::get_request('action', '', 'string');
-		$import_table = $dtf::get_request('table', '');
+		$section =  Dbt_fn::get_request('section', 'home');
+       	$action = Dbt_fn::get_request('action', '', 'string');
+		$import_table = Dbt_fn::get_request('table', '');
 		$temporaly_files = new Dbt_temporaly_files();
 		$csv_filename = $_REQUEST['csv_temporaly_filename'];
 		$csv_delimiter = $_REQUEST['csv_delimiter'];
-		$csv_first_row_as_headers = $dtf::get_request('csv_first_row_as_headers', false, 'boolean');
+		$csv_first_row_as_headers = Dbt_fn::get_request('csv_first_row_as_headers', false, 'boolean');
 		$csv_items = $temporaly_files->read_csv($csv_filename, $csv_delimiter, $csv_first_row_as_headers, 20);
 		
 		$csv_structure = $temporaly_files->csv_structure($csv_filename, $csv_delimiter, $csv_first_row_as_headers);
@@ -674,7 +709,7 @@ class database_tables_admin
 					Dbt_fn::update_dbt_option_table_status($model_structure->get_table_name(), 'DRAFT', 'Table created with the csv import procedure');
 				}
 				Dbt_fn::$table_list = [];
-				$this->table_list = $dtf::get_table_list();
+				$this->table_list = Dbt_fn::get_table_list();
 				$select_action = "insert_records";
 				$current_table = $model_structure->get_table_name();
 				
@@ -712,12 +747,24 @@ class database_tables_admin
 	}
 
 	function browse_table_filter_render_sql_btns($btns) {
+		
 		$btns = array_merge(['save_query' =>
 		'<div class="dbt-right-query-btns">
 		<div id="dbt-bnt-save-query" class="button js-show-only-select-query"  onclick="dbt_show_save_sql_query()">'. __('Create list from query','database_tables').'</div></div>'], $btns) ;
-
 		$btns = array_merge(['go_custom' =>
 		'<div id="dbt-bnt-go-query" class="dbt-submit" onclick="dtf_submit_table_filter(\'custom_query\')">'. __('Go','database_tables').'</div>'], $btns) ;
+		$btns['search'] =  '<div  class="button js-show-only-select-query  dbt-btn-disabled js-btn-disabled" onclick="dbt_search_sql()">'. __('Search','database_tables').'</div>';
+	
+		/*
+		<div class="tablenav top dbt-tablenav-top">   
+                <input type="search"  name="search" value="<?php echo Dbt_fn::get_request('search'); ?>">
+                <span class="button" onclick="dtf_submit_table_filter('search');">Search</span>
+                &nbsp; 
+                <?php if (count($table_model->tables_primaries) > 0) : ?>
+                <div class="dbt-submit" onclick="dbt_edit_details_v2()"><?php _e('Add New record','database_tables'); ?></div>
+                <?php endif; ?>
+            </div>
+		*/
 		return $btns;
 	}
 

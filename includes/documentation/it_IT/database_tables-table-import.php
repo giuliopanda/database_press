@@ -8,8 +8,10 @@
 * header-package-title: Manage DB
 * header-package-link: manage-db.php
 */
+
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
     <p>Dal tab import è possibile importare istruzioni sql o serie di dati in csv.</p>

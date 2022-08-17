@@ -6,8 +6,10 @@
 * header-description: Le liste permettono di salvare una query e gestire la sua visualizzazione e modifica in modo più avanzato.
 * header-lang:ITA
 */
+
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
     <p>A partire da una query, una lista permette di gestire la modifica e la visualizzazione dei dati in modo più avanzato.</p>

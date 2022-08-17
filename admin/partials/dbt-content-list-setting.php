@@ -14,8 +14,13 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_setting()">' . __('
 </div>
 
 <div class="dbt-content-table js-id-dbt-content">
+    <div style="float:right; margin:1rem">
+            <?php _e('Shortcode: ', 'database_tables'); ?>
+            <b>[dbt_list id=<?php echo $post->ID; ?>]</b> <?php echo ($post->shortcode_param!= "") ? __('Attributes', 'database_tables').":<b>".$post->shortcode_param.'</b>' : ''; ?>
+    </div>
+    <?php Dbt_fn::echo_html_title_box('list', $list_title, '', $msg,  $msg_error, $append); ?>
+  
 
-    <?php $dtf::echo_html_title_box('list', $list_title, '', $msg,  $msg_error, $append); ?>
     <div class="dbt-content-margin">
         <form id="list_setting_form" method="POST" action="<?php echo admin_url("admin.php?page=dbt_list&section=list-setting&dbt_id=" . $id); ?>" id="dbt_create_table">
             <input type="hidden" name="action" value="list-setting-save" />
@@ -24,11 +29,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_setting()">' . __('
                 <?php _e('List of records', 'database_tables'); ?>
                 <?php  Dbt_fn::echo_html_icon_help('dbt_list-list-setting','list_of_records');  ?>
             </h3>
-            <p>
-                <?php _e('You can publish the list in the frontend using this shortcode: ', 'database_tables'); ?>
-                <b>[dbt_list id=<?php echo $post->ID; ?>]</b> <?php echo ($post->shortcode_param!= "") ? __('Attributes', 'database_tables').":<b>".$post->shortcode_param.'</b>' : ''; ?>
-            </p>
-
+    
             <div id="block_if">
                 <div class="dbt-form-row dbt-show-if">
                     <label style="vertical-align: top;">
@@ -61,7 +62,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_setting()">' . __('
                         <div class="dbt-form-row">
                             <label>
                                 <span class="dbt-form-label"><?php _e('Style color', 'database_tables'); ?></span>
-                                <?php echo Dbt_fn::html_select(['blue' => 'BLue', 'green' => 'Green', 'red' => 'Red', 'pink' => 'Pink', 'yellow' => 'Yellow',  'gray' => 'Gray'], true, 'name="frontend_view[table_style_color]" onchange="dbt_update_css_table()" id="dbt_css_color"', @$few['table_style_color']); ?>
+                                <?php echo Dbt_fn::html_select(['blue' => 'BLue', 'green' => 'Green', 'red' => 'Red', 'pink' => 'Pink', 'yellow' => 'Yellow',  'gray' => 'Gray', 'white'=>'White'], true, 'name="frontend_view[table_style_color]" onchange="dbt_update_css_table()" id="dbt_css_color"', @$few['table_style_color']); ?>
                             </label>
                         </div>
                         
@@ -244,16 +245,19 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_setting()">' . __('
                 <div class="dbt-form-row dbt-show-if">
                     <label>
                         <span class="dbt-form-label"><?php _e('ELSE :', 'database_tables'); ?></span>
+                      
                     </label>
                 </div>
                 <div class="dbt-form-row dbt-list-setting-color-margin-left">
+                <p class="dtf-alert-gray" >
+                        In addition to the normal template engine tags here you can use: <b>[%total_row]</b> to know how many rows have been extracted. <b>[%html.search]</b> to print the search form. <b>[%html.pagination]</b> for pagination. <b>[%html.table]</b> prints the table. <b>[%html.no_result]</b> prints the result of the "no result" field. <b>[%data]</b> the list of rows extracted from the database.</p>
                     <textarea id="editor_else" name="frontend_view[content_else]" style="height:300px"><?php echo esc_textarea(@$few['content_else']); ?></textarea>
                 </div>
             </div>
             <div id="no_result">
                 <h3 class="dbt-h3 dbt-margin-top"><?php _e('No result', 'database_tables'); ?></h3>
                 <p class="dtf-alert-gray" style="margin-top:-1rem">
-                <?php _e('What appears if there are no results.','database_tables');  ?>
+                <?php _e('What appears if there are no results. It is used only when compiled. Unlike "show if [% total_row]> 0", no result keeps showing the search field.','database_tables');  ?>
                 </p>
                 <div>
                     <div class="dbt-form-row">

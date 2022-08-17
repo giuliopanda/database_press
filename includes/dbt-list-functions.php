@@ -68,8 +68,6 @@ class Dbt_functions_list {
                 if ($temp_list_structue->mysql_name == "") {
                     $temp_list_structue->searchable = 'no';
                 }
-           
-                $temp_list_structue->width = '';
                 $temp_list_structue->custom_param = '';
                 $temp_list_structue->format_values = '';
                 $temp_list_structue->format_styles = '';
@@ -122,7 +120,7 @@ class Dbt_functions_list {
      * @param string $post_content
      * @return array
      */
-    static function convert_post_content_to_list_params($post_content) {
+    static function convert_post_content_to_list_params($post_content = []) {
         $content = maybe_unserialize($post_content);
         if (is_object($content)) {
             $content = (array)$content;
@@ -149,10 +147,12 @@ class Dbt_functions_list {
         if (!array_key_exists('form', $content)) {
             $content['form'] = [];
         } else {
-            // TODO converto $content['form'] in DBT_form_setting
+            //@TODO converto $content['form'] in DBT_form_setting
         }
-        if (!array_key_exists('sql', $content)) {
+        if (array_key_exists('sql', $content)) {
             $content['sql'] = stripslashes($content['sql']);
+        } else {
+            $content['sql'] = '';
         }
 
         if (array_key_exists('delete_params', $content)) {
@@ -191,7 +191,7 @@ class Dbt_functions_list {
     /**
      * Inserisce nella query di table_model il limit, l'order ed eventuali filtri 
      * @param Array $post_content
-     * @return Dbt_model; 
+     * @return \DatabaseTables\Dbt_model
      */
     public static function get_model_from_list_params($post_content) {
         $sql =  @$post_content['sql'];
@@ -617,16 +617,17 @@ class Dbt_functions_list {
      * ```
      * @param $dbt_id la lista da salvare
      * @param string $origin Un testo che viene passato ai filtri
-     * 
+     * @param Boolean $use_wp_fn Se usare le funzioni di wordpress 
+     * wp_update_post & wp_update_user quando si aggiornano/creano utenti e post
      * @return array
      * ```json
      *  {"action":"string", "result":"boolean", "table":"string", "table_alias":"string, "id":"int", "error"=>"string", "sql":"array"};
      * ```
      */
-    static public function execute_query_savedata($query_to_execute, $dbt_id = 0, $origin = "") {
+    static public function execute_query_savedata($query_to_execute, $dbt_id = 0, $origin = "", $use_wp_fn = true) {
         global $wpdb;
         $queries_executed = [];
-
+       
 		if (count($query_to_execute) > 0) {
 			if ($dbt_id > 0) {
 				$query_to_execute = apply_filters('dbt_save_data', $query_to_execute, $dbt_id, $origin);
@@ -654,15 +655,18 @@ class Dbt_functions_list {
                 }
 
 				$error = '';
+                Dbt_loader::$saved_queries->change = [];
 				if ($qtx['action'] == 'update') {
-					if ($qtx['table'] == $wpdb->posts) {
+					if ($qtx['table'] == $wpdb->posts && $use_wp_fn) {
 						$qtx['sql_to_save']['ID'] = $qtx['pri_val']; 
+                        remove_action('pre_post_update', 'wp_save_post_revision');// stop revisions
 						$ris_update = wp_update_post($qtx['sql_to_save']);
+                        add_action('pre_post_update', 'wp_save_post_revision');//  enable revisions again
 						if( is_wp_error( $ris_update ) ) {
 							$error = $ris_update->get_error_message();
 							$ris_update = false;
 						}
-					} else if ($qtx['table'] == $wpdb->users) {
+					} else if ($qtx['table'] == $wpdb->users && $use_wp_fn) {
 						$qtx['sql_to_save']['ID'] = $qtx['pri_val']; 
 						$ris_update = wp_update_user($qtx['sql_to_save']);
 						if( is_wp_error( $ris_update ) ) {
@@ -676,20 +680,23 @@ class Dbt_functions_list {
 					if ($ris_update == false) {
 						$queries_executed[] = ['action'=>'update', 'result'=>false, 'table'=>$qtx['table'], 'table_alias'=>$qtx['table_alias'], 'id'=>$qtx['pri_val'], 'error'=>$error, 'sql' => $qtx['sql_to_save'], 'query'=>''];
 					} else {
-						$queries_executed[] = ['action'=>'update', 'result'=>true, 'table'=>$qtx['table'], 'table_alias'=>$qtx['table_alias'], 'id'=>$qtx['pri_val'], 'error'=>'', 'sql' => $qtx['sql_to_save'], 'query'=>$wpdb->last_query];
+                       
+						$queries_executed[] = ['action'=>'update', 'result'=>true, 'table'=>$qtx['table'], 'table_alias'=>$qtx['table_alias'], 'id'=>$qtx['pri_val'], 'error'=>'', 'sql' => $qtx['sql_to_save'], 'query'=> implode("<br>", Dbt_loader::$saved_queries->change)];
 					}
 				}
 				if ($qtx['action'] == 'insert') {
-					if ($qtx['table'] == $wpdb->posts) {
+					if ($qtx['table'] == $wpdb->posts && $use_wp_fn) {
 						if (isset($qtx['sql_to_save']['ID'])) {
 							unset($qtx['sql_to_save']['ID']);
 						}
+                        remove_action('pre_post_update', 'wp_save_post_revision');// stop revisions
 						$ris_insert = wp_insert_post($qtx['sql_to_save']);
+                        add_action('pre_post_update', 'wp_save_post_revision');//  enable revisions 	
 						if( is_wp_error( $ris_insert ) ) {
 							$error = $ris_insert->get_error_message();
 							$ris_insert = false;
 						}
-					} else if ($qtx['table'] == $wpdb->users) {
+					} else if ($qtx['table'] == $wpdb->users && $use_wp_fn) {
 						if (isset($qtx['sql_to_save']['ID'])) {
 							unset($qtx['sql_to_save']['ID']);
 						}
@@ -707,13 +714,12 @@ class Dbt_functions_list {
 					} else {
 						PinaCode::set_var(Dbt_fn::clean_string($qtx['table_alias']).".".Dbt_fn::clean_string($qtx['pri_name']), $ris_insert);
 
-						$queries_executed[] = ['action'=>'insert', 'result'=>true, 'table'=>$qtx['table'], 'table_alias'=>$qtx['table_alias'], 'id'=>$ris_insert, 'error'=>'', 'sql' => $qtx['sql_to_save'], 'query'=>$wpdb->last_query];
+						$queries_executed[] = ['action'=>'insert', 'result'=>true, 'table'=>$qtx['table'], 'table_alias'=>$qtx['table_alias'], 'id'=>$ris_insert, 'error'=>'', 'sql' => $qtx['sql_to_save'], 'query'=>implode("<br>", Dbt_loader::$saved_queries->change)];
 					}
 				}
 			}
 		}
 		return $queries_executed;
 	}
-
 
 }

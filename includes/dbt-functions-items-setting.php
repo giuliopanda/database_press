@@ -53,7 +53,7 @@ class Dbt_items_list_setting {
          * @var Array $first_row
          */
         $first_row = [];
-	
+		$primaries = $table_model->get_pirmaries();
         foreach ($array_thead as $key => $value) {
             $row_sorting = true;
 			$schema = (isset($value['schema'])) ? $value['schema'] : $key;
@@ -88,12 +88,16 @@ class Dbt_items_list_setting {
 			} else {
 				$width = "";
 			}
+			
 			$drop_down = is_object($schema);
+			
 			if (isset($settings_fields[$key])) {
 				$print_column_name =$settings_fields[$key]->title; 
 				$drop_down = ($settings_fields[$key]->view == "CUSTOM" || $settings_fields[$key]->view == "LOOKUP") ? false : $drop_down;
 			}
-			$first_row[$key] = (object)['name'=>$print_column_name, 'original_table' => $orgtable,  'table' => $table, 'name_column'=>$name_column, 'original_name' => $orgname,'field_key'=>$field_key, 'original_field_name'=>$original_field_name,'toggle'=>(isset($value['toggle']) ? $value['toggle'] : 'SHOW'), 'type'=> $simple_type, 'sorting'=>$row_sorting, 'dropdown' => $drop_down, 'width'=>$width, 'mysql_name' => @$value['mysql_name'], 'name_request' => @$value['name_request'], 'searchable' => @$value['searchable'], 'custom_param' => @$value['custom_param'], 'format_values' => @$value['format_values'], 'format_styles' => @$value['format_styles'],  'adding_setting'=>($settings_fields === false) ? false : true];
+			$pri = ($table != "" && isset($primaries[$orgtable]) && strtolower($primaries[$orgtable]) == strtolower($orgname));
+			
+			$first_row[$key] = (object)['name'=>$print_column_name, 'original_table' => $orgtable,  'table' => $table, 'name_column'=>$name_column, 'original_name' => $orgname,'field_key'=>$field_key, 'original_field_name'=>$original_field_name,'toggle'=>(isset($value['toggle']) ? $value['toggle'] : 'SHOW'), 'type'=> $simple_type, 'sorting'=>$row_sorting, 'dropdown' => $drop_down, 'width'=>$width, 'align'=>@$value['align'], 'mysql_name' => @$value['mysql_name'], 'name_request' => @$value['name_request'], 'searchable' => @$value['searchable'], 'custom_param' => @$value['custom_param'], 'format_values' => @$value['format_values'], 'format_styles' => @$value['format_styles'], 'pri'=>$pri];
         } 
         $count = 0;
 	
@@ -122,6 +126,7 @@ class Dbt_items_list_setting {
 				}
             } 
         }
+		
         array_unshift($items, $first_row);
         return $items;
 
@@ -150,6 +155,7 @@ class Dbt_items_list_setting {
 					} else {
 						$new_first_key[$key]['schema']->type = Dbt_fn::h_type2txt($new_first_key[$key]['schema']->type);
 					}
+					$new_first_key[$key]['align'] =  $setting->align;
 					$new_first_key[$key]['order'] =  $setting->order;
 					$new_first_key[$key]['toggle'] =   $setting->toggle;
 					$new_first_key[$key]['name_request'] =  $setting->name_request;
@@ -336,7 +342,10 @@ class Dbt_items_list_setting {
 				} else {
 					$value = $user->user_login ;
 				}
-			} else if (@$setting['setting']->view == "CUSTOM") {
+			} else if (@$setting['setting']->view == "MEDIA_GALLERY") {
+				$value = wp_get_attachment_image($value);
+				$max_char_show = 20000;
+			}else if (@$setting['setting']->view == "CUSTOM") {
 				$max_char_show = -1;
 				PinaCode::set_var('key', $key) ;
 				PinaCode::set_var('count', $count) ;

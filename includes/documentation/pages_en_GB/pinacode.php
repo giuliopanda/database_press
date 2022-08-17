@@ -412,6 +412,55 @@ function register_my_post_type() {
         <p> Return 1 if it is the requested page, 0 otherwise </p>
     </div>
 
+    <h3>[^GET_TAG] or [^GET_CAT]</h3>
+    <div class="dbt-help-p">
+        <p>Returns the data of the tag or category</p>
+        <h4 class="dbt-h4">Attributes</h4>
+        <ul>
+            <li><b>id or term_id</b></li>
+            <li><b>slug</b></li>
+            <li><b>name</b></li>
+        </ul>
+        <h4 class="dbt-h4">Return</h4>
+        <ul>
+            <li><b>id </b></li>
+            <li><b>term_id</b></li>
+            <li><b>name</b></li>
+            <li><b>slug</b></li>
+            <li><b>term_group</b></li>
+            <li><b>taxonomy</b></li>
+            <li><b>parent</b></li>
+            <li><b>link</b></li>
+            <li><b>html</b></li>
+        </ul>
+        <pre class="dbt-code">[^GET_TAG.html id=2]</pre>
+    </div>
+
+
+    <h3>[^GET_POST_TAGS] or [^GET_POST_CATS]</h3>
+    <div class="dbt-help-p">
+        <p>Returns the tag or category data of a post</p>
+        <h4 class="dbt-h4">Attributes</h4>
+        <ul>
+            <li><b>post_id</b></li>
+        </ul>
+        <h4 class="dbt-h4">Return</h4>
+        <ul>
+            <li><b>id </b></li>
+            <li><b>term_id</b></li>
+            <li><b>name</b></li>
+            <li><b>slug</b></li>
+            <li><b>term_group</b></li>
+            <li><b>taxonomy</b></li>
+            <li><b>parent</b></li>
+            <li><b>link</b></li>
+            <li><b>html</b></li>
+        </ul>
+        <pre class="dbt-code">[^GET_POST_CATS.html post_id=2]</pre>
+    </div>
+
+
+
     <h1 style="border-bottom:1px solid #CCC">List specific functions</h1>
     <h3>[^LIST_URL]</h3>
     <div class="dbt-help-p">
@@ -684,6 +733,8 @@ alert(a);
             <p>It accepts either dates, timestamps or strings year month day all attached or even timed</p>
             <pre class="dbt-code">[%"1602288000" date-format="Y-m-d"]</pre>
             <div class="dbt-result">2020-10-10</div>
+            <p>The following example takes an item.post_date variable in text day/month/year format, converts it to year-month-day and prints Y-m-d H:i:S</p>
+            <pre class="dbt-code">[^SET date=[:[%item.post_date left=10 right=4]-[%item.post_date left=5 right=2]-[%item.post_date left=2]:]][%date date-format="Y-m-d H:is"]</pre>
         </div>
         <h3>date-modify=</h3>
         <div class="dbt-help-p">

@@ -10,6 +10,7 @@
 */
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
     <p>Changes the structure of the table. You can only edit tables that meet the following rules: <br>

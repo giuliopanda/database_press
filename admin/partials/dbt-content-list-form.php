@@ -15,11 +15,15 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_form()">' . __('Sav
     <?php require(dirname(__FILE__).'/dbt-partial-tabs.php'); ?>
 </div>
 <div class="dbt-content-table js-id-dbt-content">
+    <div style="float:right; margin:1rem">
+            <?php _e('Shortcode: ', 'database_tables'); ?>
+            <b>[dbt_list id=<?php echo $post->ID; ?>]</b> <?php echo ($post->shortcode_param!= "") ? __('Attributes', 'database_tables').":<b>".$post->shortcode_param.'</b>' : ''; ?>
+    </div>
     <?php if (Dbt_fn::echo_html_title_box('list', $list_title, '', $msg, $msg_error, $append)) : ?>
         <div class="dbt-lf-container-table-pre">&nbsp;</div>
         <form id="list_form" method="POST" action="<?php echo admin_url("admin.php?page=dbt_list&section=list-form&dbt_id=".$id); ?>">
             <input type="hidden" name="action" value="list-form-save" />
-            <input type="hidden" name="table" value="<?php echo @$import_table; ?>" />
+            <input type="hidden" name="table" value="<?php echo (isset($import_table)) ? $import_table : ''; ?>" />
             <input type="hidden" name="dbt_id" value="<?php echo @$id; ?>" id="dbt_id_list" />
             <div class="dbt-content-margin">
                 
@@ -47,20 +51,8 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_form()">' . __('Sav
                                 </div>
                                 <div class="js-dbt-lf-box-attributes" style="display:none">
                                     <div class="dbt-structure-grid">
-                                        <div class="dbt-form-row-column">
-                                            <label class="dbt-label-grid dbt-css-mb-0"><span class="dbt-form-label"><?php _e('It allows you not to create the record','database_tables'); ?></span>
-                                                <?php echo Dbt_fn::html_select(['SHOW'=>'Show', 'HIDE'=>'Hide'], true, 'name="table_allow_create['. esc_attr($key) .']"', $table_options->allow_create); ?>
-                                            </label>
-                                        </div>
 
-                                        <div class="dbt-form-row-column">
-                                            <label class="dbt-label-grid dbt-css-mb-0"><span class="dbt-form-label"><?php _e('Allowing you to remove the record ','database_tables'); ?></span>
-                                                <?php echo Dbt_fn::html_select(['SHOW'=>'Show', 'HIDE'=>'Hide'], true, 'name="table_allow_delete['. esc_attr($key) .']"', $table_options->allow_delete); ?>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="dbt-structure-grid">
-                                        <div class="dbt-form-row-column">
+                                    <div class="dbt-form-row-column">
                                             <label class="dbt-label-grid dbt-css-mb-0"><span class="dbt-form-label"><?php _e('Module Type','database_tables'); ?></span>
                                                 <?php
                                                 $add_style = "";
@@ -75,16 +67,26 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_form()">' . __('Sav
                                                     $module_type = $table_options->module_type;
                                                 }
                                                 
-                                                echo Dbt_fn::html_select(['EDIT'=>'Editable' ,'READONLY'=>'Read nly',  'HIDE'=>'Hide'], true, 'name="table_module_type['. esc_attr($key) .']" class="js-module-type"'.$add_style, $module_type); ?>
+                                                echo Dbt_fn::html_select(['EDIT'=>'Editable' ,'READONLY'=>'Read only',  'HIDE'=>'Hide'], true, 'name="table_module_type['. esc_attr($key) .']" class="js-module-type"'.$add_style, $module_type); ?>
                                             </label>
                                         </div>
 
+
+
+                                        <div class="dbt-form-row-column">
+                                            <label class="dbt-label-grid dbt-css-mb-0"><span class="dbt-form-label"><?php _e('It allows you not to create the record','database_tables'); ?></span>
+                                                <?php echo Dbt_fn::html_select(['SHOW'=>'Show', 'HIDE'=>'Hide'], true, 'name="table_allow_create['. esc_attr($key) .']"', $table_options->allow_create); ?>
+                                            </label>
+                                        </div>
+
+                                       
                                     </div>
+                                 
 
                                     <div class="dbt-structure-grid">
                                         <div class="dbt-form-row-column">
                                             <label class="dbt-label-grid dbt-css-mb-0"><span class="dbt-form-label"><?php _e('Show Title','database_tables'); ?></span>
-                                                    <?php echo Dbt_fn::html_select(['SHOW'=>'Show', 'HIDE'=>'Hide'], true, 'name="table_show_title['. esc_attr($key) .']"',$table_options->show_title); ?>
+                                                    <?php echo Dbt_fn::html_select(['SHOW'=>'Show', 'HIDE'=>'Hide'], true, 'name="table_show_title['. esc_attr($key) .']" onchange="dbt_select_change_toggle_form_title(this)"',$table_options->show_title); ?>
                                             </label>
                                         </div>
                                         <div class="dbt-form-row-column">
@@ -94,7 +96,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_form()">' . __('Sav
                                         </div>
                                     </div>
 
-                                    <div class="dbt-form-row dbt-label-grid">
+                                    <div class="dbt-form-row dbt-label-grid js-form-row-title">
                                         <label><span class="dbt-form-label"><?php _e('Custom title','database_tables'); ?></span></label>
                                         <input class="dbt-input" style="width:100%"  name="table_title[<?php echo esc_attr($key); ?>]" value="<?php echo esc_attr($table_options->title); ?>">
                                     </div>

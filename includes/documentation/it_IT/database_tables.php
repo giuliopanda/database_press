@@ -6,8 +6,10 @@
 * header-description: scrittura degli attributi
 * header-lang:ITA
 */
+
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
 Database tables permette di visualizzare e modificare i dati estratti da una  query mysql.

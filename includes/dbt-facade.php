@@ -1,7 +1,7 @@
 <?php
 /**
 * funzioni pubbliche
-* get_list
+* Se stai in function.php ricordati di chiamarle attraverso il namespace: DatabaseTables\Dbt::get_list(...);
 */
 namespace DatabaseTables;
 
@@ -24,12 +24,7 @@ class Dbt
             return $custom_data;
         }
         $ori_params =  PinaCode::get_var('params');
-        // se esiste un div_id allora verifico se esistono i params specifici per quella lista
-        //if (isset($_REQUEST['dbt_div_id'])) {   
-        //    $spec_params =  PinaCode::has_var('params.'.$_REQUEST['dbt_div_id']);
-        //    $params = PinaCode::get_var('params.'.$_REQUEST['dbt_div_id']);
-        //    PinaCode::set_var('params', $params);
-        //}
+       
         PinaCode::set_var('params', $params);
         $show_trappings = true;
         if (Dbt_fn::is_form_open()) {
@@ -43,38 +38,68 @@ class Dbt
         //print ("REQUEST['dbt_div_id'] ");
         //var_dump($_REQUEST);
         if ($only_table || !$show_trappings) {
-            //print " OK ";   
             $list->hide_div_container();
             // setto il div
             if (isset($_REQUEST['dbt_div_id'])) {
                 $list->set_uniqid($_REQUEST['dbt_div_id']);
             }
         }
-		//print ("RIS : ".$list->uniqid_div."| ");
         if (!$show_trappings) {
             // Faccio finta che la form è stata già create
             $list->block_opened = true;
             $list->frontend_view_setting['table_sort'] = false;
         }
         if ( $list->get_frontend_view('type', 'TABLE_BASE') == "TABLE_BASE") {
+            
             ob_start();
-            if ($list->get_frontend_view('table_search') == 'simple' && $show_trappings) {
-                $list->search();
-            }
-            if (in_array($list->get_frontend_view('table_pagination_position'), ["up",'both']) && $show_trappings) {
-                $list->pagination();
-            }
-            if (($list->no_result == '' || empty($list->no_result)) || count($list->table_model->items) > 1) {
-                $list->table();
-            } else {
-                echo $list->no_result; 
-            }
-            if (in_array($list->get_frontend_view('table_pagination_position'), ["down",'both']) && $show_trappings) {
-                $list->pagination();
-            }
-            if ($show_trappings) {
-                $list->end();
+            $show_table = true;
+            if (isset($list->frontend_view_setting['checkif']) && $list->frontend_view_setting['checkif'] == 1 && isset($list->frontend_view_setting['if_textarea']) && $list->frontend_view_setting['if_textarea'] != '') {
+                $show_table = (boolean)trim(PinaCode::math_and_logic($list->frontend_view_setting['if_textarea']));
             } 
+            if ($show_table) {
+                if ($list->get_frontend_view('table_search') == 'simple' && $show_trappings) {
+                    $list->search();
+                }
+                if (in_array($list->get_frontend_view('table_pagination_position'), ["up",'both']) && $show_trappings) {
+                    $list->pagination();
+                }
+                if (($list->no_result == '' || empty($list->no_result)) || count($list->table_model->items) > 1) {
+                    $list->table();
+                } else {
+                    echo $list->no_result; 
+                }
+                if (in_array($list->get_frontend_view('table_pagination_position'), ["down",'both']) && $show_trappings) {
+                    $list->pagination();
+                }
+                if ($show_trappings) {
+                    $list->end();
+                } 
+            } else {
+                if ($list->get_frontend_view('table_update') != "none") {
+                    ob_start() ;
+                    $list->open_block(false);
+                    $result[] = ob_get_clean();
+                    ob_start();
+                    $list->search();
+                    $search = ob_get_clean();
+                    PinaCode::set_var('html.search',  $search);
+                    ob_start();
+                    $list->pagination();
+                    $pagination = ob_get_clean();
+                    PinaCode::set_var('html.pagination',  $pagination);
+                   
+                } else {
+                    PinaCode::set_var('html.pagination',  '');
+                    PinaCode::set_var('html.search',  '');
+                }
+                ob_start();
+                $list->table();
+                $table = ob_get_clean();
+                PinaCode::set_var('html.table',  $table);
+                PinaCode::set_var('html.no_result',  $list->no_result);
+                PinaCode::set_var('data',  $list->table_model->items);
+                echo PinaCode::execute_shortcode($list->frontend_view_setting['content_else']);
+            }
             return ob_get_clean();
         } else {
             // EDITOR
@@ -97,7 +122,7 @@ class Dbt
                 $table_header = reset($list->table_model->items);  
                 $first_row = array_shift($items);
                 $first_row = array_map(function($el) {return $el->name;}, $first_row);
-                PinaCode::set_var('total_row', $list->table_model->get_count());
+                PinaCode::set_var('total_row', absint($list->table_model->get_count()));
                 PinaCode::set_var('key',0);
                 $first_row = Dbt_fn::remove_hide_columns_in_row($table_header, $first_row);
                 PinaCode::set_var('data',  $first_row);
@@ -443,7 +468,7 @@ class Dbt
     }
 
       /**
-     * ritorna la struttura del salvataggio dei dati
+     * ritorna la struttura della classe get_form per il salvataggio dei dati
      * @return array
      */
     static function get_save_data_structure($dbt_id) {
@@ -459,10 +484,15 @@ class Dbt
     }
 
     /**
-     * Salva i dati 
+     * Salva i dati a partire da un ID o una query. 
+     * Per fare l'update devono essere inserite le chiavi primarie
+     * @param String $dbt_id è l'id della lista, ma accetta anche una stringa con una query di select
+     * @param Array $data i Dati da aggiornare hanno la stessa struttura della query del select!
+     * @param Boolean $use_wp_fn Se usare le funzioni di wordpress 
+     * wp_update_post & wp_update_user quando si aggiornano/creano utenti e post
      * @return array
      */
-    static function save_data($dbt_id, $data) {
+    static function save_data($dbt_id, $data, $use_wp_fn = true) {
         if (!class_exists('Dbt_class_form')) {
             Dbt_fn::require_init();
         }
@@ -471,7 +501,7 @@ class Dbt
         if (is_a($data, 'stdClass')) {
             $data = [$data];
         }
-        $result = $form->save_data($data);
+        $result = $form->save_data($data, $use_wp_fn);
         return $result;
     }
     

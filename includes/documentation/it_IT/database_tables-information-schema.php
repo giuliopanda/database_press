@@ -10,6 +10,7 @@
  */
 namespace DatabaseTables;
 if (!defined('WPINC')) die;
+
 ?>
 <div class="dbt-content-margin">
     <p>Mostra tutte le tabelle del database. Le tabelle di wordpress hanno un prefisso che le identifica. Non tutte le tabelle possono essere modificate, questo dipende dal loro stato.</p>

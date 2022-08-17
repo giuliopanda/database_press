@@ -52,7 +52,7 @@ class Dbt_html_table {
 
 	/**
 	 * Ritorna l'html Un div con un messaggio se c'è stato un errore o se il totale dei risultati è 0 oppure la tabella
-	 * @param \Dbt_model $table_model
+	 * @param \DatabaseTables\Dbt_model $table_model
 	 * @return String
 	 */
 	public function template_render($table_model) {
@@ -142,14 +142,14 @@ class Dbt_html_table {
 			
 			<tr id="<?php echo $id_base.'_'.$count_row; ?>">
 				<?php 
-				
 				$count_row++;
 				foreach ($array_thead as $key=>$setting) { 
-					
+					//$css_name = strtolower($setting->type);
 					$formatting_class = Dbt_fn::column_formatting_convert($setting->format_styles, $item->$key, '');
 					$item->$key = Dbt_fn::column_formatting_convert($setting->format_values, $item->$key, $item->$key);
+					$css_name = (strlen(html_entity_decode($item->$key)) < 30 || in_array(strtolower($setting->type), ["number","checkbox", "wp_html"])) ? strtolower($setting->type) : 'text';
 					if ($setting->type == "CHECKBOX" && $max_input_vars - 50 <= count($items) ) continue;
-					?><td class="dtf-table-td<?php echo $setting->width.' '.$formatting_class; ?>"><div class="btn-div-td btn-div-td-<?php echo strtolower($setting->type); ?>" data-dbt_rif_value="<?php echo esc_attr($key); ?>"><?php echo $item->$key; ?></div></td> <?php
+					?><td class="dtf-table-td<?php echo $setting->width.' '.$formatting_class; ?>"><div class="btn-div-td btn-div-td-<?php echo $css_name; ?>" data-dbt_rif_value="<?php echo esc_attr($key); ?>"><?php echo $item->$key; ?></div></td> <?php
 				} 
 				?>
 			</tr>
