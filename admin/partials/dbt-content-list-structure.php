@@ -17,7 +17,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
 <div class="dbt-content-table js-id-dbt-content">
     <div style="float:right; margin:1rem">
             <?php _e('Shortcode: ', 'database_tables'); ?>
-            <b>[dbt_list id=<?php echo $post->ID; ?>]</b> <?php echo ($post->shortcode_param!= "") ? __('Attributes', 'database_tables').":<b>".$post->shortcode_param.'</b>' : ''; ?>
+            <b>[dbt_list id=<?php echo $post->ID; ?>]</b>
     </div>
     <?php if (Dbt_fn::echo_html_title_box('list', $list_title, '', $msg, $msg_error, $append)) : ?>
         <form id="list_structure" method="POST" action="<?php echo admin_url("admin.php?page=dbt_list&section=list-structure&dbt_id=".$id); ?>">
@@ -114,25 +114,23 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                         
                     <?php $names = [];
                     foreach ($items as $key=>$item) : 
-                        //print "<pre>";
-                        //var_dump ($item);
-                        //print "</pre>"; 
+                        $pri = ($item->table != "" && isset($primaries[$item->orgtable]) && strtolower($primaries[$item->orgtable]) == strtolower($item->orgname));
                         ?>
                         <div class="js-dragable-tr dbt-structure-card js-dbt-structure-card">
                             <div class="dbt-structure-title" >
-                              
                                 <span class="dbt-form-label js-dragable-handle"><span class="dashicons dashicons-sort"></span></span>
                                 <input class="js-dragable-order" name="fields_order[<?php echo esc_attr($item->name); ?>]" value="<?php echo esc_attr($item->order); ?>"></label>
+                              
                                 <span class="dbt-lf-edit-icon">
                                 <span class="dashicons dashicons-edit js-structure-toggle" onclick="dbt_structure_toggle(this)"></span>
                                 </span>
-                                <span onclick="dbt_structure_toggle(this)"><?php echo ($item->mysql_name) ? '<b>'.$item->title.'</b> - <span title="mysql column">'. $item->mysql_name.'</span>' : '<b>'.$item->title.'</b>'; ?></span>
-                                
+                                <?php if ($pri) : ?><span class="dashicons dashicons-admin-network" title="Primary"></span><?php endif; ?>
+                                <span onclick="dbt_structure_toggle(this)"><?php echo ($item->mysql_name) ? '<b>'.$item->title.'</b> - <span title="mysql column: '.esc_attr($item->mysql_name).'" >'. substr($item->name,0,70 - strlen($item->title)).'</span>' : '<b>'.$item->title.'</b>'; ?></span>  
                                 <span class="dbt-structure-type" onclick="dbt_structure_toggle(this)">(<?php echo $item->type; ?>)</span>
                                 <?php if ($item->origin == "CUSTOM") : ?>
                                     <span class="button" onClick="dbt_list_structure_delete_row(this);"><?php _e('DELETE', 'database_tables'); ?></span>
                                 <?php endif; ?>
-                                <span class="dbt-structure-title-label"><span><?php _e('Show in frontend','database_tables'); ?></span>
+                                <span class="dbt-structure-title-label">
                                 <?php echo Dbt_fn::html_select(['SHOW'=>'Show', 'HIDE'=>'Hide'], true, 'name="fields_toggle['. esc_attr($item->name) . ']" onchange="dbt_change_toggle(this)"  class="js-toggle-row"', $item->toggle); ?>
                                
                             </div>
@@ -184,10 +182,12 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                                         </label>
                                         <div style="display:inline-block; min-width:50%">
                                             <?php
-                                            if ($item->origin == "FIELD") {
+                                            if ($item->origin == "FIELD" && !$pri) {
                                             echo Dbt_fn::html_select(['Standard field'=>[ 'TEXT'=>'Text', 'HTML'=>'Html', 'DATE'=>'Date', 'DATETIME'=>'Date Time', 'IMAGE'=>'Image','LINK'=>'External link', 'DETAIL_LINK' => 'Detail Link', 'SERIALIZE'=>'Serialiaze', 'JSON_LABEL'=>'Checkboxes'],'Special Fields' =>['CUSTOM'=>'Custom','LOOKUP'=>'Lookup','USER' => 'User', 'POST' => 'Post', 'MEDIA_GALLERY' => 'Media Gallery']] , true, 'name="fields_custom_view['. esc_attr($item->name).']" class="js-type-fields" onchange="dbt_change_custom_type(this)" style="display:'. (($item->view =='CUSTOM') ? 'none' :'inline-block').'"', $item->view); 
+                                            } else if ($pri) {
+                                                ?><input type="hidden" name="fields_custom_view[<?php echo esc_attr($item->name); ?>]" class="js-type-fields" onchange="dbt_change_custom_type(this)"  value="TEXT"><span style="line-height: 1.7rem;">Text</span><?php
                                             } else {
-                                                ?><input type="hidden" name="fields_custom_view[<?php echo esc_attr($item->name); ?>]" class="js-type-fields" onchange="dbt_change_custom_type(this)" value="CUSTOM"><?php
+                                                ?><input type="hidden" name="fields_custom_view[<?php echo esc_attr($item->name); ?>]" class="js-type-fields" onchange="dbt_change_custom_type(this)"  value="CUSTOM"><span style="line-height: 1.7rem;">Custom</span><?php
                                             }
                                             ?> 
                                             <textarea name="fields_custom_code[<?php echo esc_attr($item->name); ?>]" class="js-type-custom-code dbt-input" rows="2" style="display:<?php echo ($item->view =='CUSTOM') ? 'inline-block' :'none'; ?>; width:80%; min-width:250px"><?php echo esc_textarea($item->custom_code); ?></textarea>
@@ -205,7 +205,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                                     </div>
                                    
                                     <div class="dbt-form-row-column js-dbt-params-column">
-                                        <label>
+                                        <label<?php echo ($pri) ? ' style="display:none"' : ''; ?>>
                                             <span class="dbt-form-label js-dbt-params-date"><?php _e('Date format','database_tables'); ?></span>
                                             <span class="dbt-form-label js-dbt-params-link"><?php _e('Link text','database_tables'); ?></span>
                                             <span class="dbt-form-label js-dbt-params-user"><?php _e('Show user attributes [%user.]','database_tables'); Dbt_fn::echo_html_icon_help('dbt_list-list-structure','user'); ?></span>
@@ -229,7 +229,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                                         $lookup_col_list = [];
                                     }
                                     ?>
-                                    <div class="dbt-structure-grid">
+                                    <div class="dbt-structure-grid" <?php echo ($pri) ? ' style="display:none"' : ''; ?>>
                                         <div class="dbt-form-row-column">
                                             <div class="dbt-form-row-column dbt-css-mb-2">
                                                 <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('List:','database_tables'); ?></span>
@@ -253,9 +253,9 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_structure()">' . __
                                     </div>
                                 </div>
                                     
-                                <h3>column formatting</h3>
+                                <h3<?php echo ($pri) ? ' style="display:none"' : ''; ?>>column formatting</h3>
                                    
-                                <div class="dbt-structure-grid">
+                                <div class="dbt-structure-grid" <?php echo ($pri) ? ' style="display:none"' : ''; ?>>
                                     <div class="dbt-form-row-column js-form-row-custom-field">
                                         <label><span class="dbt-form-label" style="vertical-align:top"><?php _e('change values','database_tables'); Dbt_fn::echo_html_icon_help('dbt_list-list-structure','format');?></span>
                                         </label>

@@ -41,7 +41,7 @@ foreach ($table['fields'] as $item) {
                 <?php if ($item->is_pri) : ?>
                     <span class="dashicons dashicons-admin-network" style="color:#e2c447; vertical-align: text-top;" title="Primary"></span>
                 <?php endif;   ?>
-                <?php echo $item->js_rif . ' <span style="font-size:.9rem">('.$item_type_txt .')</span>'; ?>
+                <?php echo '<b>'.$item->name . '</b> <span style="font-size:.9rem">('.$item_type_txt .')</span>'; ?>
                 <?php echo (@$item->js_script != '') ? '<span class="dbt-jsicon">JS</span>' : ''; ?>
             </span>
             <?php 

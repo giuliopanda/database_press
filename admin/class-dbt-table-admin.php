@@ -498,7 +498,7 @@ class database_tables_admin
 						$this->last_error .= '<p>'.$el['error'].'</p>' ;
 					}
 				} else {
-					$this->msg = sprintf(__('%s queries executed successfully.', 'database_tables', $count_query ));
+					$this->msg = sprintf(__('%s queries executed successfully.', 'database_tables'), $count_query );
 				}
 			} 
 

@@ -697,7 +697,7 @@
     font-size:1.2em;
 }
 
-.dbt-form-label {
+.dbt-form-label, .dbt-form-label-large {
     white-space: nowrap;
 }
 .dbt-table-preview-csv {
@@ -940,6 +940,15 @@
     vertical-align: middle;
     line-height: 1.7rem;
 }
+
+.dbt-form-row .dbt-form-label-large, .dbt-form-row-column .dbt-form-label-large{
+    display: inline-block;
+    margin-right:1rem;
+    min-width: 12rem;
+    vertical-align: middle;
+    line-height: 1.7rem;
+}
+
 .dbt-form-row label {
     vertical-align: middle;
 }

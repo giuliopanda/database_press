@@ -400,6 +400,7 @@ class Dbt_class_form {
 					'type' => $schema->type,
 					'is_pri' => $is_pri,
 					'edit_view' => $edit_view,
+					'order' => $count_form_block + 1000,
 					'field_name' => "edit_table[".$count_form_block."][".$schema->orgtable."][".$schema->orgname."][]",
 					'form_type'=> $form_type
 				]);

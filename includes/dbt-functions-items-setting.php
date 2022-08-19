@@ -143,34 +143,31 @@ class Dbt_items_list_setting {
 		$new_first_key = [];
 		if (is_array($this->settings_fields) && count ($this->settings_fields) > 0) {
 			foreach ( $this->settings_fields as $key=>$setting) {
-				//if ( $setting->toggle != 'HIDE') {
-					if (array_key_exists($key, $items[$first_key])) {
-						$new_first_key[$key] = $items[$first_key][$key];
-					} else {
-						$new_first_key[$key] = ['schema'=>(object)['type'=>'CUSTOM', 'name'=>$key]];
-					}
-					$new_first_key[$key]['setting'] = $setting;
-					if ($setting->isset('view') && $setting->view != "") {
-						$new_first_key[$key]['schema']->type =  $setting->view;
-					} else {
-						$new_first_key[$key]['schema']->type = Dbt_fn::h_type2txt($new_first_key[$key]['schema']->type);
-					}
-					$new_first_key[$key]['align'] =  $setting->align;
-					$new_first_key[$key]['order'] =  $setting->order;
-					$new_first_key[$key]['toggle'] =   $setting->toggle;
-					$new_first_key[$key]['name_request'] =  $setting->name_request;
-					$new_first_key[$key]['mysql_name'] =  $setting->mysql_name;
-					$new_first_key[$key]['searchable'] =  $setting->searchable;
-					$new_first_key[$key]['custom_param'] =  $setting->custom_param;
-					$new_first_key[$key]['format_values'] =  $setting->format_values;
-					$new_first_key[$key]['format_styles'] =  $setting->format_styles;
-					if ( $setting->view == 'LOOKUP') {
-						$new_first_key[$key]['lookup_id'] =  $setting->lookup_id;
-						$new_first_key[$key]['lookup_sel_val'] =  $setting->lookup_sel_val;
-						$new_first_key[$key]['lookup_sel_txt'] =  $setting->lookup_sel_txt;
-					}
-					
-			//	}
+				if (array_key_exists($key, $items[$first_key])) {
+					$new_first_key[$key] = $items[$first_key][$key];
+				} else {
+					$new_first_key[$key] = ['schema'=>(object)['type'=>'CUSTOM', 'name'=>$key]];
+				}
+				$new_first_key[$key]['setting'] = $setting;
+				if ($setting->isset('view') && $setting->view != "") {
+					$new_first_key[$key]['schema']->type =  $setting->view;
+				} else {
+					$new_first_key[$key]['schema']->type = Dbt_fn::h_type2txt($new_first_key[$key]['schema']->type);
+				}
+				$new_first_key[$key]['align'] =  $setting->align;
+				$new_first_key[$key]['order'] =  $setting->order;
+				$new_first_key[$key]['toggle'] =   $setting->toggle;
+				$new_first_key[$key]['name_request'] =  $setting->name_request;
+				$new_first_key[$key]['mysql_name'] =  $setting->mysql_name;
+				$new_first_key[$key]['searchable'] =  $setting->searchable;
+				$new_first_key[$key]['custom_param'] =  $setting->custom_param;
+				$new_first_key[$key]['format_values'] =  $setting->format_values;
+				$new_first_key[$key]['format_styles'] =  $setting->format_styles;
+				if ( $setting->view == 'LOOKUP') {
+					$new_first_key[$key]['lookup_id'] =  $setting->lookup_id;
+					$new_first_key[$key]['lookup_sel_val'] =  $setting->lookup_sel_val;
+					$new_first_key[$key]['lookup_sel_txt'] =  $setting->lookup_sel_txt;
+				}
 			}
 			$items[$first_key] = $new_first_key;
 		

@@ -32,7 +32,7 @@ jQuery(document).ready(function ($) {
     jQuery('.js-dragable-order').each(function() {
         jQuery(this).val(count_list);
         count_list++;
-    })
+    });
     // prevent Input variables exceeded 1000.
     jQuery('#list_form .js-prevent-exceeded-1000').each(function() {
         if (jQuery(this).val() == "") {

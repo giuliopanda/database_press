@@ -576,13 +576,16 @@ class DBT_list_admin
 				$list = $table_model->get_list();
 			
 				$items = Dbt_functions_list::get_list_structure_config($table_model->items, $post->post_content['list_setting']);
+				
 			} else {
 				$link = admin_url("admin.php?page=dbt_list&section=list-sql-edit&dbt_id=".$id);
 				$msg_error = '<a href="' . $link . '">'.__('You have to config the query first!', 'database_tables')."</a>";
 			}
 			$pinacode_fields = [];
+			
+			$primaries = $table_model->get_pirmaries();
 			if (is_countable($items)) {
-				foreach ($items as $key=>$item) {
+				foreach ($items as $key=>$item) {	
 					$pinacode_fields[] = $item->name;
 				}
 				Dbt_fn::echo_pinacode_variables_script(['data'=>$pinacode_fields]);
@@ -667,8 +670,10 @@ class DBT_list_admin
 					}
 				}
 			}
-			foreach ($_REQUEST['list_general_setting'] as $lgs_key => $list_general_setting) {
-				$post->post_content['list_general_setting'][$lgs_key] = sanitize_text_field($list_general_setting);
+			if (isset($_REQUEST['list_general_setting']) && is_countable($_REQUEST['list_general_setting'])) {
+				foreach ($_REQUEST['list_general_setting'] as $lgs_key => $list_general_setting) {
+					$post->post_content['list_general_setting'][$lgs_key] = sanitize_text_field($list_general_setting);
+				}
 			}
 
 			wp_update_post(array(

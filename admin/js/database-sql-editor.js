@@ -186,6 +186,10 @@ jQuery(document).ready(function ($) {
     });
          
     wp.CodeMirror.registerHelper("hint", "database_tables", function (editor, options) {
+        if (editor.getValue().length > 10000) {
+            editor.setOption("mode", 'text');  
+            return null;
+        }
          var cur = editor.getCursor(), curLine = editor.getLine(cur.line);
         
          var start = cur.ch, end = start;
@@ -321,7 +325,7 @@ jQuery(document).ready(function ($) {
     if (jQuery('#dbt-bnt-columns-query').hasClass('js-btn-disabled')) return;
     dbt_open_sidebar_popup('columns_sql');
     jQuery('#dbt_dbp_title > .dbt-edit-btns').remove();
-    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>ORGANIZE COLUMNS</h3></div>');
+    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>ORGANIZE COLUMNS</h3>  <div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
     if (jQuery('#dbt_cookie_msg').length > 0) {
         jQuery('#dbt_cookie_msg').empty().css('display','none');
     }
@@ -337,7 +341,7 @@ jQuery(document).ready(function ($) {
                 dbt_close_sidebar_loading();
                 if (!response.msg) { 
                     jQuery('#dbt_dbp_title > .dbt-edit-btns').remove();
-                    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>ORGANIZE COLUMNS</h3><div id="dbt-bnt-edit-query" class="dbt-submit" onclick="columns_sql_query_apply()">Apply</div></div>');
+                    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>ORGANIZE COLUMNS</h3><div id="dbt-bnt-edit-query" class="dbt-submit" onclick="columns_sql_query_apply()">Apply</div> <div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
                     $form = jQuery('<form class="dbt-form-columns-query" id="dbt_form_columns_new_query"></form>');
                     $custom_query = jQuery('<textarea style="display:none" class="form-input-edit" name="sql" ></textarea>');
                     $custom_query.val(sql);
@@ -352,9 +356,10 @@ jQuery(document).ready(function ($) {
                             checked = ' checked="checked"';
                             val_label = response.sql_fields[x];
                         }
-                        $checkbox = jQuery('<div class="dbt-dropdown-line-flex js-dragable-item dbt-line-choose-columns"><span class="dbt-sort-choose-columns dashicons dashicons-sort js-dragable-handle"></span><label><span style="vertical-align:middle;margin-left:.5rem;"><input name="choose_columns['+count_xxx+']" type="checkbox" value="" style="vertical-align:middle"'+checked+'></span><div style="width:250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display:inline-block; margin:.2rem .5rem; vertical-align:middle">'+x+'</div></label> AS&nbsp;&nbsp;&nbsp; <input class="label_as" type="text" name="label['+count_xxx+']" ></div>');
+                        $checkbox = jQuery('<div class="dbt-dropdown-line-flex js-dragable-item dbt-line-choose-columns"><span class="dbt-sort-choose-columns dashicons dashicons-sort js-dragable-handle"></span><label><span style="vertical-align:middle;margin-left:.5rem;"><input name="choose_columns['+count_xxx+']" type="checkbox" value="" style="vertical-align:middle"'+checked+'></span><div style="width:250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display:inline-block; margin:.2rem .5rem; vertical-align:middle" class="js-column-name-o">'+x+'</div></label> AS&nbsp;&nbsp;&nbsp; <input class="label_as" type="text" name="label['+count_xxx+']" ></div>');
                         $checkbox.find('input:checkbox').val(x);
                         $checkbox.find('.label_as').val(val_label);
+                        $checkbox.find('.js-column-name-o').prop('title', x);
                         $sortable.append($checkbox); 
                         count_xxx++;
                     }
@@ -386,7 +391,7 @@ jQuery(document).ready(function ($) {
 function dbt_merge_sql_query_edit() {
     if (jQuery('#dbt-bnt-merge-query').hasClass('js-btn-disabled')) return;
     dbt_open_sidebar_popup('merge_sql');
-    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>MERGE QUERY</h3></div>');
+    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>MERGE QUERY</h3> <div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
     sql = dbt_get_sql_string();
     if (jQuery('#dbt_cookie_msg').length > 0) {
         jQuery('#dbt_cookie_msg').empty().css('display','none');
@@ -402,15 +407,15 @@ function dbt_merge_sql_query_edit() {
                 dbt_close_sidebar_loading();
                 if (!response.msg) {
                     jQuery('#dbt_dbp_title > .dbt-edit-btns').remove();
-                    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>MERGE QUERY</h3> <div id="dbt-bnt-edit-query" class="dbt-submit" onclick="merge_sql_query_apply()">Apply</div></div>');
+                    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>MERGE QUERY</h3> <div id="dbt-bnt-edit-query" class="dbt-submit" onclick="merge_sql_query_apply()">Apply</div> <div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
                     $form = jQuery('<form class="dbt-form-merge-query" id="dbt_form_merge_new_query"></form>');
                     $custom_query = jQuery('<textarea style="display:none" class="form-input-edit" name="sql" ></textarea>');
                     $custom_query.val(sql);
                     $form.append($custom_query);
-                    $form.append('<p class="dtf-alert-info" style="margin-bottom:1rem">A join is a method of linking data between one ( self-join) or more tables based on values of the common column between the tables.</p>');
+                    $form.append('<p class="dtf-alert-gray" style="margin-bottom:1rem">A join is a method of linking data between one ( self-join) or more tables based on values of the common column between the tables.</p>');
                     
                     $field_row = jQuery('<div class="dbt-dropdown-line-flex dbt-form-row"></div>');
-                    $field_label = jQuery('<label class="dbt-form-label">Origin</label>');
+                    $field_label = jQuery('<label class="dbt-form-label">Select a join column</label>');
                     $field_select = jQuery('<select name="dbt_ori_field"></select>');
                     $field_row.append($field_label).append($field_select);
                     $form.append($field_row);
@@ -421,11 +426,11 @@ function dbt_merge_sql_query_edit() {
                         $field_select.append($option);
                     }
 
-                    $form.append('<div class="dbt-dropdown-line-flex dbt-form-row"><label class="dbt-form-label">Join Method</label><select id="dbt_merge_join" name="dbt_merge_join" onchange="explain_join_in_merge(this)"><option value="INNER JOIN">Inner join</option><option value="LEFT JOIN">left join</option><option value="RIGHT JOIN">Right join</option></select></div><div id="dbt_explain_join" class="dtf-alert-info"></div>');
+                    $form.append('<div class="dbt-dropdown-line-flex dbt-form-row" style="display:none"><label class="dbt-form-label">Join Method</label><select id="dbt_merge_join" name="dbt_merge_join" onchange="explain_join_in_merge(this)"><option value="LEFT JOIN">left join</option></select></div><div id="dbt_explain_join" class="dtf-alert-gray" style="display:none"></div>');
 
 
                     $field2_row = jQuery('<div class="dbt-dropdown-line-flex dbt-form-row"></div>');
-                    $field2_label = jQuery('<label class="dbt-form-label">Table</label>');
+                    $field2_label = jQuery('<label class="dbt-form-label">Related table</label>');
                     $field2_select = jQuery('<select name="dbt_merge_table"></select>');
 
                     $field2_row.append($field2_label).append($field2_select);
@@ -442,7 +447,7 @@ function dbt_merge_sql_query_edit() {
                     })
 
 
-                    $form.append('<div class="dbt-dropdown-line-flex dbt-form-row"><label class="dbt-form-label">Columns</label><select id="dbt_merge_columns"  name="dbt_merge_column"></select></div>');
+                    $form.append('<div class="dbt-dropdown-line-flex dbt-form-row"><label class="dbt-form-label">Column to be connected</label><select id="dbt_merge_columns"  name="dbt_merge_column"></select></div>');
                     jQuery('#dbt_dbp_content').append($form);
                     jQuery('#dbt_merge_join').change();
                     $field2_select.change();
@@ -483,6 +488,7 @@ function get_fields_in_merge_sidebar(el_select) {
 
 /**
  * Mostra la spiegazione dei tre join
+ * @deprecated V0.9.1 è stato rimosso il tipo di join del merge nella form di scelta del tipo di merge
  */
 function explain_join_in_merge(el) {
     let desc = {'LEFT JOIN':'LEFT JOIN: Returns all rows from the left table and matched records from the right table or returns null if it does not find any matching record.','RIGHT JOIN':'RIGHT JOIN: Returns all rows from the right-hand table, and only those results from the other table that fulfilled the join condition','INNER JOIN':'INNER JOIN: Returns only the matching results from table1 and table2:'};
@@ -587,7 +593,7 @@ function dbt_metadata_sql_query_edit() {
     }
     if ( sql != "") {
         dbt_open_sidebar_popup('add_metadata');
-        jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>ADD META DATA</h3></div>');
+        jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>ADD META DATA</h3>  <div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
         jQuery.ajax({
             type : "post",
             dataType : "json",
@@ -643,7 +649,7 @@ function dbt_metadata_sql_query_edit_step2() {
                 let count_xxx = 0;
                 if (response.distinct.length > 0) {
                     jQuery('#dbt_dbp_title .dbt-edit-btns').empty();
-                    jQuery('#dbt_dbp_title .dbt-edit-btns').append('<h3>ADD META DATA</h3><div id="dbt-bnt-edit-query" class="dbt-submit" onclick="dbt_addmeta_sql_query_apply()">Apply</div>');
+                    jQuery('#dbt_dbp_title .dbt-edit-btns').append('<h3>ADD META DATA</h3><div id="dbt-bnt-edit-query" class="dbt-submit" onclick="dbt_addmeta_sql_query_apply()">Apply</div> <div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div>');
                 }
                 jQuery('#container_metadata').remove();
                 $container = jQuery('<div id="container_metadata"></div>');
@@ -784,7 +790,7 @@ function dbt_get_sql_string() {
     if (jQuery('#dbt-bnt-merge-query').hasClass('js-btn-disabled')) return;
     dbt_open_sidebar_popup('search_sql');
     dbt_close_sidebar_loading();
-    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>SEARCH IN QUERY</h3></div>');
+    jQuery('#dbt_dbp_title').append('<div class="dbt-edit-btns"><h3>SEARCH IN QUERY</h3>  <div class="dbt-submit" onclick="dbt_submit_search()" style="margin-left:.2rem;">Search</div> <div id="dbt-bnt-edit-query" class="dbt-btn-cancel" onclick="dbt_close_sidebar_popup()">CANCEL</div></div>');
     
     $search_form = jQuery('<div class="dbt-form-columns-query dbt-dropdown-line-flex" id="dbt_form_search"></div>');
     $search_input = jQuery('<input type="search" name="search" id="dbt_search_input">');

@@ -17,7 +17,7 @@ $append = '<span class="dbt-submit" onclick="dbt_submit_list_form()">' . __('Sav
 <div class="dbt-content-table js-id-dbt-content">
     <div style="float:right; margin:1rem">
             <?php _e('Shortcode: ', 'database_tables'); ?>
-            <b>[dbt_list id=<?php echo $post->ID; ?>]</b> <?php echo ($post->shortcode_param!= "") ? __('Attributes', 'database_tables').":<b>".$post->shortcode_param.'</b>' : ''; ?>
+            <b>[dbt_list id=<?php echo $post->ID; ?>]</b>
     </div>
     <?php if (Dbt_fn::echo_html_title_box('list', $list_title, '', $msg, $msg_error, $append)) : ?>
         <div class="dbt-lf-container-table-pre">&nbsp;</div>
