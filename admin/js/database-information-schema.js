@@ -1,4 +1,4 @@
-function dbt_get_backup(table, limit_start, div_id, filename) {
+function dbp_get_backup(table, limit_start, div_id, filename) {
     if (limit_start == 0) {
         jQuery('#'+div_id).empty();
         jQuery('#'+div_id).text('0%');
@@ -7,7 +7,7 @@ function dbt_get_backup(table, limit_start, div_id, filename) {
         type : "post",
         dataType : "json",
         url : ajaxurl,
-        data : {'page':'database_tables','section':'information-schema','action':'dbt_dump_table','table':table,'limit_start':limit_start,'div_id':div_id, 'filename':filename},
+        data : {'page':'database_press','section':'information-schema','action':'dbp_dump_table','table':table,'limit_start':limit_start,'div_id':div_id, 'filename':filename},
         success: function(response) {
             console.log(response);
             let tot = parseInt(response.tot);
@@ -15,9 +15,9 @@ function dbt_get_backup(table, limit_start, div_id, filename) {
             perc = Math.round((done/tot) * 100);
             jQuery('#'+div_id).empty().text(perc+'%');
             if (done < tot && done > 0) {
-                dbt_get_backup( response.table, done, response.div_id, response.filename); 
+                dbp_get_backup( response.table, done, response.div_id, response.filename); 
             } else {
-                jQuery('#'+div_id).empty().append('<a href="'+response.download+'" class="dbt-submit">Download export</a>');
+                jQuery('#'+div_id).empty().append('<a href="'+response.download+'" class="dbp-submit">Download export</a>');
 
             }
             //  ['filename' => $filename, 'tot'=>$tot, 'exec'=>count($rows), 'limit_start'=>$limit_start];

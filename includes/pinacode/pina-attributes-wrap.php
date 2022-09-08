@@ -10,7 +10,7 @@
  * aggiunge uno o più testi (tag html per lo più) prima e dopo la stringa elaborata. 
  * 
  */
-namespace DatabaseTables;
+namespace DatabasePress;
 
 class PinaAfterAttributes
 {

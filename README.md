@@ -1,4 +1,4 @@
-# database_tables 
+# database_press
 database press is designed to manage the administration and publication of new MySQL (or Maria Db) tables through an integrated template engine.
 
 -------------
@@ -30,7 +30,6 @@ On your site show the result through a simple shortcode.
 - You have all the typical instructions of programming languages ​​such as loops, conditions, variable management and so on.
 - You can access data related to wordpress, such as the post you are viewing or upload images or the current user.
 
-
 ### Differences with other systems
 
 - The modification of posts and users is entrusted to the native functions of wordpress thus preventing any errors in the data structure.
@@ -43,16 +42,31 @@ Compared to phpmyadmin or adminer database press:
 - If you want to show a table in the frontend most other systems require the loading of datatables and jquery to work, database press for the frontend part uses pure javascript.
 
 
-# Installation
-
-The plugin is not yet published in the wordpress repository
+Attention: the plugin is opensource and I take no responsibility for any bugs. Before any operation done on the database make a backup
 
 # Versions
+
+= 1.0.0 - 2022-09-08 =
+- Notes: 
+  - Changed the name from database_tables to database_press.
+  - Changed the lookup params, now they no longer connect to lists, but to tables. Now you can sort the columns created by lookup.
+- Fixbug: Warnings & notice.
+- fixbug: show and hide the save and delete buttons in the edit form. In the list it shows Edit or view if the single row is editable or not.
+- Improvement in the form tab the management of module_type and what is visible and what is not.
+- Added popup to rate the plugin.
+- Improvement: Added search field for tables and lists in the sidebar.
+- Removed: Removed the page with the list of tables and fields from the guide.
+- feat: Added light style to tables
+- feat: Template engine added decode_ids attribute
+- doc: Tutorial_02 written
+- improved: The detail view of the forntend.
+- Improved: The [^ image shortcode in the template engine and added the image_size = winfit attribute.
+
 
 = 0.9.1 - 2022-08-19 =
 - Fixbug: Warning in import sql
 - Fixbug: slow codemirror when copying and pasting long texts.
-- Fixbug: Warning in class-dbt-list-admin.php on line 670
+- Fixbug: Warning in class-dbp-list-admin.php on line 670
 - improvement: On the 'organize columns' added the title to read the field if it is too long
 - Fixbug: sorting form with new columns
 - Fixbug list view formatting does not allow to change the ID
@@ -95,10 +109,10 @@ sidebar navigation and added collapse option
 
 = 0.7.0 - 2022-07-24 =
 - Improved help and translation
-- Created a new class dbt_render_list in place of html-table-frontend. This made it possible to manage pagination and search in lists with more flexibility.
+- Created a new class  Dbp_render_list in place of html-table-frontend. This made it possible to manage pagination and search in lists with more flexibility.
 - On frontend> list type editor it is now possible to add shortcode in the template engine
 [% html.pagination], [% html.search].
-- Added dbt_frontend_get_list filter: It allows you to redesign the display of a list in php.
+- Added dbp_frontend_get_list filter: It allows you to redesign the display of a list in php.
 - fixbug: no longer save data due to _default_alias_table in default value
 - figbug: Not all primary key columns appeared in the frontend tables
 - Improved the management of multiple tables in the frontend through the addition of the prefix parameter. Now you can use filters and pagination on multiple tables within the same page.

@@ -7,7 +7,7 @@
   	echo PinaCode::math_and_logic("foo == bar"); // 0
   	echo PinaCode::math_and_logic("foo == foo"); // 1
  */
-namespace DatabaseTables;
+namespace DatabasePress;
 
 $pina_bracket_array = []; // l'elenco dei gruppi tra parentesi tonde
 

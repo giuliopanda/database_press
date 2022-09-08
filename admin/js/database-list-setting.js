@@ -1,8 +1,8 @@
 jQuery(document).ready(function () {
-    dbt_update_css_table();
-    dbt_update_position_pagination();
-    dbt_update_column_sort();
-    dbt_update_search();
+    dbp_update_css_table();
+    dbp_update_position_pagination();
+    dbp_update_column_sort();
+    dbp_update_search();
     set_codeEditor('editor_else');
     set_codeEditor('editor_no_result');
     set_codeEditor('editor_detail_template');
@@ -27,76 +27,76 @@ jQuery(document).ready(function () {
     editor_content_footer = jQuery("#editor_content_footer").data('cm_editor');
     editor_content_footer.codemirror.setSize('100%', '150px');
 
-    dbt_list_setting(jQuery('#dbt_choose_type_frontend_view'));
-    dbt_checkif();
+    dbp_list_setting(jQuery('#dbp_choose_type_frontend_view'));
+    dbp_checkif();
     detail_toggle();
     select_editor_table_update();
 });
 /**
  * Aggiorno gli stili per la tabella
  */
-function dbt_update_css_table() {
+function dbp_update_css_table() {
     let colors = ['blue', 'green', 'red','pink','yellow','gray']
-    let color = jQuery('#dbt_css_color').val();
+    let color = jQuery('#dbp_css_color').val();
     for(x in colors) {
-        jQuery('.dbt-pagination').removeClass('dbt-pagination-'+colors[x]);
-        jQuery('#dbt_test_table').removeClass('dbt-table-'+colors[x]);
-        jQuery('.dbt-search-button').removeClass('dbt-search-button-'+colors[x]);
+        jQuery('.dbp-pagination').removeClass('dbp-pagination-'+colors[x]);
+        jQuery('#dbp_test_table').removeClass('dbp-table-'+colors[x]);
+        jQuery('.dbp-search-button').removeClass('dbp-search-button-'+colors[x]);
     }
-    jQuery('#dbt_test_table').addClass('dbt-table-'+color);
-    jQuery('.dbt-pagination').addClass('dbt-pagination-'+color);
-    jQuery('.dbt-search-button').addClass('dbt-search-button-'+color);
+    jQuery('#dbp_test_table').addClass('dbp-table-'+color);
+    jQuery('.dbp-pagination').addClass('dbp-pagination-'+color);
+    jQuery('.dbp-search-button').addClass('dbp-search-button-'+color);
 
     let size = ['xsmall', 'small','normal','big'];
-    let curr_size = jQuery('#dbt_table_size').val();
+    let curr_size = jQuery('#dbp_table_size').val();
     for(x in size) {
-        jQuery('#dbt_test_table').removeClass('dbt-block-table-'+size[x]);
+        jQuery('#dbp_test_table').removeClass('dbp-block-table-'+size[x]);
     }
     if (curr_size == "") {
         curr_size = "normal";
     }
-    jQuery('#dbt_test_table').addClass('dbt-block-table-'+curr_size);
+    jQuery('#dbp_test_table').addClass('dbp-block-table-'+curr_size);
 }
 
 /**
  * Aggiorno la preview della tabella con la paginazione
  */
- function dbt_update_position_pagination() {
-    let val = jQuery('#dbt_position_pagination').val();
-    let val_style = jQuery('#dbt_pagination_style').val();
-    jQuery('#dbt_pag_up').css('display','none');
-    jQuery('#dbt_pag2_up').css('display','none');
-    jQuery('#dbt_pag_down').css('display','none');
-    jQuery('#dbt_pag2_down').css('display','none');
-    console.log ("dbt_update_position_pagination val: "+val);
+ function dbp_update_position_pagination() {
+    let val = jQuery('#dbp_position_pagination').val();
+    let val_style = jQuery('#dbp_pagination_style').val();
+    jQuery('#dbp_pag_up').css('display','none');
+    jQuery('#dbp_pag2_up').css('display','none');
+    jQuery('#dbp_pag_down').css('display','none');
+    jQuery('#dbp_pag2_down').css('display','none');
+    console.log ("dbp_update_position_pagination val: "+val);
     if (val == "") {
-        jQuery('#dbt_pagination_style_row').css('display','none');
+        jQuery('#dbp_pagination_style_row').css('display','none');
     } else {
-        jQuery('#dbt_pagination_style_row').css('display','block');
+        jQuery('#dbp_pagination_style_row').css('display','block');
       
         if (val == "down") {
             if (val_style == "select") {
-                jQuery('#dbt_pag_down').css('display','block');
+                jQuery('#dbp_pag_down').css('display','block');
             } else {
 
-                jQuery('#dbt_pag2_down').css('display','block');
+                jQuery('#dbp_pag2_down').css('display','block');
             }
         }
         if (val == "up") {
             if (val_style == "select") {
-                jQuery('#dbt_pag_up').css('display','block');
+                jQuery('#dbp_pag_up').css('display','block');
             } else {
 
-                jQuery('#dbt_pag2_up').css('display','block');
+                jQuery('#dbp_pag2_up').css('display','block');
             }
         }
         if (val == "both") {
             if (val_style == "select") {
-                jQuery('#dbt_pag_down').css('display','block');
-                jQuery('#dbt_pag_up').css('display','block');
+                jQuery('#dbp_pag_down').css('display','block');
+                jQuery('#dbp_pag_up').css('display','block');
             } else {
-                jQuery('#dbt_pag2_down').css('display','block');
-                jQuery('#dbt_pag2_up').css('display','block');
+                jQuery('#dbp_pag2_down').css('display','block');
+                jQuery('#dbp_pag2_up').css('display','block');
             }
         }
     }
@@ -105,8 +105,8 @@ function dbt_update_css_table() {
  /**
   * Aggiorno la preview se le colonne si possono ordinare o no
   */
-function dbt_update_column_sort() {
-    let val = jQuery('#dbt_table_sort').val();
+function dbp_update_column_sort() {
+    let val = jQuery('#dbp_table_sort').val();
     if (val == "") {
         jQuery('.js-no-order').css('display','inline-block');
         jQuery('.js-order-link').css('display','none');
@@ -120,20 +120,20 @@ function dbt_update_column_sort() {
  /**
   * Aggiorno la preview se c'è la ricerca
   */
-  function dbt_update_search() {
-    let val = jQuery('#dbt_table_search').val();
+  function dbp_update_search() {
+    let val = jQuery('#dbp_table_search').val();
     if (val == "") {
-        jQuery('#dbt_preview_table_search').css('display','none');
+        jQuery('#dbp_preview_table_search').css('display','none');
        
     } else {
-        jQuery('#dbt_preview_table_search').css('display','block');
+        jQuery('#dbp_preview_table_search').css('display','block');
     }
 }
 
 /**
  * Cambio a seconda se è una tabella o un editor le opzioni successive
  */
-function dbt_list_setting(el) {
+function dbp_list_setting(el) {
     let val = jQuery(el).val();
     if (val == "TABLE_BASE") {
         jQuery('#frontend_view_table').css('display','block');
@@ -151,19 +151,19 @@ function dbt_list_setting(el) {
 /**
  * Mostra nasconde i checkbox
  */
-function dbt_checkif() {
+function dbp_checkif() {
     if (jQuery('#checkbox_show_if').is(':checked')) {
         jQuery('#block_else').css('display','block');
-        jQuery('#dbt_textarea_if').css('display','inline-block');
+        jQuery('#dbp_textarea_if').css('display','inline-block');
     } else {
         jQuery('#block_else').css('display','none');
-        jQuery('#dbt_textarea_if').css('display','none');
+        jQuery('#dbp_textarea_if').css('display','none');
     }
 }
 /**
  * Invia il form
  */
-function dbt_submit_list_setting() {
+function dbp_submit_list_setting() {
     code =  jQuery('#editor_else').data('cm_editor');
     jQuery('#editor_else').value = code.codemirror.getValue();
 
@@ -284,18 +284,23 @@ wp.CodeMirror.registerHelper("hint", "pinacode", function (editor, options) {
 
 
 function detail_toggle() {
-    if (jQuery('#select_detail_toggle').val()=="no") {
-        jQuery('#detail_text').css('display','none');
-    } else {
+    jQuery('#detail_text').css('display','none');
+    jQuery('#detail_info_php').css('display','none');
+    jQuery('#detail_info_table').css('display','none');
+    if (jQuery('#select_detail_toggle').val() == "PHP") {
+        jQuery('#detail_info_php').css('display','block');
+    } else if (jQuery('#select_detail_toggle').val() == "CUSTOM") {
         jQuery('#detail_text').css('display','block');
+    } else {
+        jQuery('#detail_info_table').css('display','block');
     }
 }
 
 
 function select_editor_table_update() {
     if (jQuery('#select_editor_table_upldate').val() == "none") {
-        jQuery('#dbt_pagination_style_row_2').css('display','none');
+        jQuery('#dbp_pagination_style_row_2').css('display','none');
     } else {
-        jQuery('#dbt_pagination_style_row_2').css('display','block');
+        jQuery('#dbp_pagination_style_row_2').css('display','block');
     }
 }

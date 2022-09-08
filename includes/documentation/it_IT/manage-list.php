@@ -4,6 +4,6 @@
 * header-title: Manage List
 */
 
-namespace DatabaseTables;
+namespace DatabasePress;
 if (!defined('WPINC')) die;
-Dbt_fn_documentation::echo_menu('Manage List');
+dbp_fn_documentation::echo_menu('Manage List');

@@ -3,7 +3,7 @@
  * GP Registry
  * Memorizza e restituisce dati passati tra le classi, in sessione o attraverso le query dell'url.
 */
-namespace DatabaseTables;
+namespace DatabasePress;
 
 class PcRegistry
 {

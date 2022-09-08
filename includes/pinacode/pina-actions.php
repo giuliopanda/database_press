@@ -4,7 +4,7 @@
  * Gestione Statica delle azioni di pinacode
  * Qui vengono caricate tutte le funzioni speciali e poi eseguite a seconda del nome dello shortcode
  */
-namespace DatabaseTables;
+namespace DatabasePress;
 
 class PinaActions
 {
@@ -98,6 +98,7 @@ pinacode_set_functions('now', 'pinacode_fn_now');
 
 /**
  * [^post id=""]
+ * [^image]
  */
 if (!function_exists('pinacode_fn_wp_post')) {
 	function pinacode_fn_wp_post($short_code_name, $attributes) {
@@ -154,17 +155,19 @@ if (!function_exists('pinacode_fn_wp_post')) {
 		if (isset($attributes['slug'])) {
 			$array_query['pagename'] = PinaCode::get_registry()->short_code($attributes['slug']);
 		}
+		$forse_single = false;
 		if (isset($attributes['id'])) {
 			$attributes['id'] = PinaCode::get_registry()->short_code($attributes['id']);
 			if (is_array($attributes['id']) || is_object($attributes['id'])) {
 				$array_query['post__in'] = (array)$attributes['id'];
-			} else if (is_numeric($attributes['id'])) {
-				$array_query['p'] = array($attributes['id']);
+			} else {
+				$forse_single = true;
+				$array_query['p'] = $attributes['id'];
 			}
-		}
+		} 
 
 		if ($shortcode_command == "image") {
-			$array_query['post_mime_type'] = 'image';
+			//$array_query['post_mime_type'] = 'image';
 			$array_query['post_type'] = "attachment";
 			$array_query['post_status'] = "inherit";
 			if (isset($attributes['post_id']) && is_string($attributes['post_id'])) {
@@ -238,9 +241,6 @@ if (!function_exists('pinacode_fn_wp_post')) {
 			$array_query['paged'] = PinaCode::get_registry()->short_code($attributes['paged']);
 		}
 
-
-
-		
 		if (isset($attributes['asc'])) {
 			$array_query['order'] = 'ASC';
 			if (!isset($attributes['order'])) {
@@ -312,13 +312,10 @@ if (!function_exists('pinacode_fn_wp_post')) {
 			}
 		}
 
-
-
-
 		if (isset($attributes['meta_query'])) {
 			$array_query['meta_query'] = parse_query_string_fn(pina_remove_quotes(PinaCode::get_registry()->short_code($attributes['meta_query'])));
 		}
-		
+		//var_dump ($array_query);
 		$query = new \WP_Query($array_query);
 		if ( $query->have_posts() ) {
 			$posts = $query->posts;  
@@ -327,7 +324,7 @@ if (!function_exists('pinacode_fn_wp_post')) {
 		}  
 		
 		$get_var = [];
-		if ($posts != null && count ($posts) > 0) {
+		if ($posts != null && count ($posts) > 0 && (!$forse_single || ($forse_single && count ($posts) == 1))) {
 			foreach ($posts as $post) {
 				if (!isset($post->ID)) continue;
 				if (!$light_load) {
@@ -369,12 +366,12 @@ if (!function_exists('pinacode_fn_wp_post')) {
 						if ($k == "_thumbnail_id" && is_array($pm) && ($temp_post['type'] != 'attachment' || substr($temp_post['mime_type'],0,5) != 'image')) {
 							$attachment_id = array_shift($pm);
 							if ($attachment_id > 0) {
-								if (isset($attributes['image'])) {
-									$attributes['image'] = PinaCode::get_registry()->short_code($attributes['image']);
+								if (isset($attributes['image_size'])) {
+									$attributes['image_size'] = PinaCode::get_registry()->short_code($attributes['image_size']);
 								} else {
-									$attributes['image'] = 'post-thumbnail';
+									$attributes['image_size'] = 'post-thumbnail';
 								}
-								$temp_post['image'] =  wp_get_attachment_image($attachment_id, @$attributes['image'] );
+								$temp_post['image'] =  wp_get_attachment_image($attachment_id, @$attributes['image_size'] );
 								$temp_post['image_link'] ='<a href="'.$permalink.'" class="pina_link pina_link_image">' . $temp_post['image'] . '</a>';
 								$temp_post['image_id'] = $attachment_id;
 							}
@@ -404,7 +401,17 @@ if (!function_exists('pinacode_fn_wp_post')) {
 				// se sono immagini
 				if ($temp_post['type'] == 'attachment' && substr($temp_post['mime_type'],0,5) == 'image') {
 					$permalink = get_permalink($temp_post['id']);
-					$temp_post['image'] = wp_get_attachment_image($temp_post['id'], @$attributes['image'],'', ['class'=>'pina-image']  );
+					if (isset($attributes['image_size']) && $attributes['image_size'] == "fit") {
+						$temp_post['image'] =  '<img src="'.wp_get_attachment_url($temp_post['id']).'" title="'.esc_attr($temp_post['title']).'" class="dbp-image-fit">';
+					} else if (isset($attributes['image_size']) && $attributes['image_size'] == "winfit") {
+						$permalink = get_permalink($temp_post['id']);
+						$temp_post['image'] =  '<img src="'.wp_get_attachment_url($temp_post['id']).'" title="'.esc_attr($temp_post['title']).'" class="dbp-image-win-fit">';
+					} else {
+						$temp_post['image'] = wp_get_attachment_image($temp_post['id'], @$attributes['image_size'],'', ['class'=>'pina-image']  );
+					}
+					$temp_post['url'] = wp_get_attachment_image_url($temp_post['id'], @$attributes['image_size']);
+					$temp_post['original_url'] = wp_get_attachment_url($temp_post['id']);
+
 					$temp_post['image_link'] ='<a href="'.$permalink.'" class="pina_link pina_link_image">' . $temp_post['image'] . '</a>';
 				}
 
@@ -412,7 +419,7 @@ if (!function_exists('pinacode_fn_wp_post')) {
 				$get_var[] = $temp_post;   
 			}
 		} else {
-			return null;
+			return '';
 		}
 		PinaCode::set_var($shortcode_command, $get_var);
 		if (substr($short_code_name, 0, strlen($shortcode_command)+1) == $shortcode_command.".") {	
@@ -521,7 +528,7 @@ if (!function_exists('pinacode_fn_wp_get_tag')) {
 			$get_var2['taxonomy'] 		= $get_var->taxonomy;
 			$get_var2['parent']			= $get_var->parent;
 			$get_var2['link'] = get_term_link($get_var);
-			$get_var2['html'] ='<a href="'.$get_var2['link'].'" class="dbt-post-category">'. $get_var2['name'].'</a>';
+			$get_var2['html'] ='<a href="'.$get_var2['link'].'" class="dbp-post-category">'. $get_var2['name'].'</a>';
 			$get_var = $get_var2;
 		} else {
 			PcErrors::set('<b>[^'.$short_code_name.'</b> I haven\'t found any tags.', '', -1, 'warning');
@@ -574,7 +581,7 @@ if (!function_exists('pinacode_fn_wp_get_cat')) {
 			$get_var2['taxonomy'] 		= $get_var->taxonomy;
 			$get_var2['parent']			= $get_var->parent;
 			$get_var2['link'] = get_term_link($get_var);
-			$get_var2['html'] ='<a href="'.$get_var2['link'].'" class="dbt-post-category">'. $get_var2['name'].'</a>';
+			$get_var2['html'] ='<a href="'.$get_var2['link'].'" class="dbp-post-category">'. $get_var2['name'].'</a>';
 			$get_var = $get_var2;
 		} else {
 			PcErrors::set('<b>[^'.$short_code_name.'</b> I haven\'t found any tags.', '', -1, 'warning');
@@ -623,7 +630,7 @@ if (!function_exists('pinacode_fn_wp_get_post_tags')) {
 				$temp['taxonomy'] 		= $g->taxonomy;
 				$temp['parent']			= $g->parent;
 				$temp['link'] = get_term_link($g);
-				$temp['html'] ='<a href="'.$g->link.'" class="dbt-post-category">'. $g->name.'</a>';
+				$temp['html'] ='<a href="'.$g->link.'" class="dbp-post-category">'. $g->name.'</a>';
 				$get_var2[] = $temp;
 			}
 			$get_var = $get_var2;
@@ -675,7 +682,7 @@ if (!function_exists('pinacode_fn_wp_get_post_cats')) {
 				$temp['taxonomy'] 		= $g->taxonomy;
 				$temp['parent']			= $g->parent;
 				$temp['link'] = get_term_link($g);
-				$temp['html'] ='<a href="'.$g->link.'" class="dbt-post-category">'. $g->name.'</a>';
+				$temp['html'] ='<a href="'.$g->link.'" class="dbp-post-category">'. $g->name.'</a>';
 				$get_var2[] = $temp;
 			}
 			$get_var = $get_var2;
@@ -1054,7 +1061,7 @@ if (!function_exists('pinacode_fn_counter')) {
 		} else {
 			$name = "_main";
 		}
-		$pina_counter = get_option('dbt_pina_counter');
+		$pina_counter = get_option('dbp_pina_counter');
 		if (!is_array($pina_counter)) {
 			$pina_counter = [];
 		}
@@ -1065,7 +1072,7 @@ if (!function_exists('pinacode_fn_counter')) {
 		}
 		if ($step != 0) {
 			$pina_counter[$name] = $pina_counter[$name]+$step;
-			update_option('dbt_pina_counter',$pina_counter, false);
+			update_option('dbp_pina_counter',$pina_counter, false);
 		}
 
 		return $pina_counter[$name];

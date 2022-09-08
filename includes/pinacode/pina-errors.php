@@ -3,7 +3,7 @@
  * PcError
  * Memorizza gli errori di pinacode
 */
-namespace DatabaseTables;
+namespace DatabasePress;
 
 class PcErrors
 {

@@ -3,6 +3,6 @@
 * header-type:menu
 * header-title: Manage Database
 */
-namespace DatabaseTables;
+namespace DatabasePress;
 if (!defined('WPINC')) die;
-Dbt_fn_documentation::echo_menu('Manage DB');
+dbp_fn_documentation::echo_menu('Manage DB');

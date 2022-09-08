@@ -1,18 +1,18 @@
 <?php 
-namespace DatabaseTables;
+namespace DatabasePress;
 if (!defined('WPINC')) die;
 ?>
 
-<div class="dbt-content-table dbt-docs-content  js-id-dbt-content" >
+<div class="dbp-content-table dbp-docs-content  js-id-dbp-content" >
     
-<h2 class="dbt-h2"> <a href="<?php echo admin_url("admin.php?page=dbt_docs") ?>">Doc</a><span class="dashicons dashicons-arrow-right-alt2"></span><?php _e('LIST FORM js script','database_tables'); ?></h2>
+<h2 class="dbp-h2"> <a href="<?php echo admin_url("admin.php?page=dbp_docs") ?>">Doc</a><span class="dashicons dashicons-arrow-right-alt2"></span><?php _e('LIST FORM js script','database_press'); ?></h2>
 
     <p>Using javascript you can improve the insertion experience for example by hiding fields or verifying the data entered.</p>
     <hr>
     <p>Inside the lists go to the form tab.</p>
     <p>Inside the individual fields there is a textarea to insert custom javascript.</p>  
     <p>The javascript inserted is executed when the form is loaded, when it is submitted and every time an element of the form is modified. You can use the <b> status </b> variable to identify when the function is called.</p>
-    <pre class="dbt-code">
+    <pre class="dbp-code">
     if (status == 'start') {
         // The form is started
     }
@@ -26,7 +26,7 @@ if (!defined('WPINC')) die;
         // Viene inviata al form. Puoi bloccare l'invio impostando un campo come invalid.
     }
     </pre>
-    <p>You can use the <b> field </b> variable to refer to the field in which you are writing the code. This variable extends the dbt_field object which has the following functions:</p> 
+    <p>You can use the <b> field </b> variable to refer to the field in which you are writing the code. This variable extends the dbp_field object which has the following functions:</p> 
     
     <ul>
         <li><b>field.val(val)</b> // val optional if set it sets the variable</li>
@@ -43,7 +43,7 @@ if (!defined('WPINC')) die;
         <li><b>field.required(boolean);</b></li>
     </ul>
 
-    <p>You can refer to the other fields on the form through the form variable which extends dbt_form</p> 
+    <p>You can refer to the other fields on the form through the form variable which extends dbp_form</p> 
             <ul>
                 <li><b>form.get(field)</b> // field name | field  label </li>
                 <li><b>form.get(table.field)</b> // current occurence</li>
@@ -58,33 +58,33 @@ if (!defined('WPINC')) die;
     <p>Attention a required field even if hidden remains required! In general, a hidden invalid field prevents the form from being submitted.</p>
     <h4>Examples:</h4>
     <p>I show a field only if the checkbox is checked. For the single checkbox, val returns null if it is not selected, otherwise it returns the value of the checkbox. In the example the checkbox has value = "1"</p>
-    <pre class="dbt-code">
+    <pre class="dbp-code">
     field.toggle(form.get('mycheckboxlabel').val() == 1);
     </pre>
     <p>I show a field only if a particular option of a checkbox is checked.</p>
-    <pre class="dbt-code">
+    <pre class="dbp-code">
     field.toggle(form.get('n.categories').val().indexOf('Blue') > -1);
     </pre>
     <p>I set the checkboxes with the option values (must be an array). If I want a defaul I use the array in the default field.</p>
-    <pre class="dbt-code">
+    <pre class="dbp-code">
     field.val(["opt_val1","opt_val5"]);
     </pre>
 
     <p>Valid a field only if it is greater than 10</p>
-    <pre class="dbt-code">
+    <pre class="dbp-code">
         field.valid( field.val() < 10, 'The field must be greater than 10');
     </pre>
     <p>Valid a date only if the start is greater than the date_start field
-    <pre class="dbt-code">
+    <pre class="dbp-code">
     let a = form.get('r.date_start').val();
     field.valid_range(a);
     </pre>
     <p>The field is valid only if it is less than 100
-    <pre class="dbt-code">
+    <pre class="dbp-code">
     field.valid_range(false,100);
     </pre>
     <p>In a repeating table I validate the next_order field saying that it must be greater than the previous instance</p>
-    <pre class="dbt-code">
+    <pre class="dbp-code">
     if (status == 'form_change') {
     let prev_val = parseInt(form.get('my_table.next_order.prev').val());
     if (!isNaN(prev_val)) {
@@ -93,7 +93,7 @@ if (!defined('WPINC')) die;
     }
     </pre>
     <p>Given due select changes the second's options each time the first is changed</p>
-    <pre class="dbt-code">
+    <pre class="dbp-code">
     if (status == 'start' || status == 'form_change') {
         if (form.get('PROVIN').val() == 'scelta 1') {
             field.toggle(true).choices({'1':"Male",'2':"Female"});

@@ -27,7 +27,7 @@
 						),
 					),
  */
-namespace DatabaseTables;
+namespace DatabasePress;
 if (!defined('WPINC')) die;
 /**
  * Divide la stringa tra AND e OR e torna l'array filtrato. 

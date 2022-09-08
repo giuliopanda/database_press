@@ -1,4 +1,4 @@
 <?php  
-namespace DatabaseTables;
+namespace DatabasePress;
 if (!defined('WPINC')) die;
-Dbt_fn_documentation::echo_search();
+dbp_fn_documentation::echo_search();

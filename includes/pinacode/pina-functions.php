@@ -1,5 +1,5 @@
 <?php
-namespace DatabaseTables;
+namespace DatabasePress;
 /**
  * Le funzioni di servizio di pinacode
  */

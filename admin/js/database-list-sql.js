@@ -1,12 +1,12 @@
 jQuery(document).ready(function () {
-    dbt_list_sql_add_row ();
+    dbp_list_sql_add_row ();
 });
 /**
  * Il bottone per creare nuove righe "FILTER" delle tabelle mysql
  */
- function dbt_list_sql_add_row () {
-    $div = jQuery('#dbt_clone_master').clone(true);
-    jQuery('#dbt_container_filter').append($div);
+ function dbp_list_sql_add_row () {
+    $div = jQuery('#dbp_clone_master').clone(true);
+    jQuery('#dbp_container_filter').append($div);
     $div.css('display','block');
     $div.removeAttr('id');
  }
@@ -14,18 +14,18 @@ jQuery(document).ready(function () {
  /**
   * Cancello la riga
   */
- function dbt_remove_sql_row(el) {
-     jQuery(el).parents('.dbt-form-row').remove();
+ function dbp_remove_sql_row(el) {
+     jQuery(el).parents('.dbp-form-row').remove();
  }
 
  /**
   * FILTER: Setto il required sul filtro dal checkbox all'hidden value
   */
- function dbt_required_field(el) {
+ function dbp_required_field(el) {
     jQuery(el).parent().find('.js-filter-required').val( ((jQuery(el).is(':checked'))? 1 : 0) );
  }
 
-function dtf_submit_list_sql(el) {
+function dbp_submit_list_sql(el) {
     checkboxes =0;
     jQuery('.js-add-role-cap').each(function() {
         if (jQuery(this).is(':checked')) {
@@ -37,7 +37,7 @@ function dtf_submit_list_sql(el) {
         return ;
     }
     if ( document.getElementById('sql_query_edit') != null) {
-        code = document.getElementById('sql_query_edit').dtf_editor_sql;
+        code = document.getElementById('sql_query_edit').dbp_editor_sql;
         if (typeof code != 'undefined' && code != null) {
             jQuery('#sql_query_edit').value = code.codemirror.getValue();
         }

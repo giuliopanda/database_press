@@ -4,7 +4,7 @@
  * Gestione degli attributi di pinacode
  * Qui vengono caricati tutti gli attributi standard usabili negli shortcode
  */
-namespace DatabaseTables;
+namespace DatabasePress;
 
 class PinaAttributes
 {
@@ -1423,18 +1423,34 @@ pinacode_set_attribute('order_reverse', 'pinacode_attr_fn_order_reverse');
 
 
 /**
- * [% default]
+ * [%default]
  */
 if (!function_exists('pinacode_attr_fn_default_all')) {
 	function pinacode_attr_fn_default_all($gvalue, $param, $shortcode_obj) {
 		if (is_array($gvalue) || is_object($gvalue)) {
 			if (count($gvalue) == 0) {
-				return $param;
+				return PinaCode::execute_shortcode($param);
 			}
 		} else if ($gvalue == 0 || trim($gvalue) == "" || $gvalue == NULL) {
-			return $param;
+			return PinaCode::execute_shortcode($param);
 		}
 		return $gvalue;
 	}
 }
 pinacode_set_attribute('default', 'pinacode_attr_fn_default');
+
+
+
+/**
+ * [% decode_ids] ritorna gli id di un record a partire dalla stringa compressa con ids_url_encode
+ */
+if (!function_exists('pinacode_attr_fn_decode_ids')) {
+	function pinacode_attr_fn_decode_ids($gvalue, $param, $shortcode_obj) {
+		if (is_array($gvalue) || is_object($gvalue)) {
+			return $gvalue;
+		} else {
+			return dbp_fn::ids_url_decode($gvalue);
+		}
+	}
+}
+pinacode_set_attribute('decode_ids', 'pinacode_attr_fn_decode_ids');

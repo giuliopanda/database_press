@@ -6,7 +6,7 @@
  * Author: Giulio Pandolfelli
  * 
  */
-namespace DatabaseTables;
+namespace DatabasePress;
 require_once(dirname(__FILE__) . "/pina-class.php");
 require_once(dirname(__FILE__) . "/pina-functions.php");
 require_once(dirname(__FILE__) . "/pina-functions-parse-query.php");

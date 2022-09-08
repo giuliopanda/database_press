@@ -1,20 +1,20 @@
 <?php 
-namespace DatabaseTables;
+namespace DatabasePress;
 if (!defined('WPINC')) die;
 ?>
 
-<div class="dbt-content-table dbt-docs-content  js-id-dbt-content" >
-    <h2 class="dbt-h2"> <a href="<?php echo admin_url("admin.php?page=dbt_docs") ?>">Doc</a><span class="dashicons dashicons-arrow-right-alt2"></span><?php _e('PHP','database_tables'); ?></h2>
+<div class="dbp-content-table dbp-docs-content  js-id-dbp-content" >
+    <h2 class="dbp-h2"> <a href="<?php echo admin_url("admin.php?page=dbp_docs") ?>">Doc</a><span class="dashicons dashicons-arrow-right-alt2"></span><?php _e('PHP','database_press'); ?></h2>
 
-    <h1 style="border-bottom:1px solid #CCC">Dbt class</h1>
-    <div class="dbt-help-p">
+    <h1 style="border-bottom:1px solid #CCC">Dbp class</h1>
+    <div class="dbp-help-p">
        
         <hr>
-        <h2 class="dbt-h2">Dbt::get_list($dbt_id, $only_table = false, $params=[], $prefix = "")</h2>
+        <h2 class="dbp-h2">Dbp::get_list($dbp_id, $only_table = false, $params=[], $prefix = "")</h2>
         <p>Carica una lista da un id e ne ritorna l'html. </p>
-        <h4 class="dbt-h4">Parameters</h4>
+        <h4 class="dbp-h4">Parameters</h4>
         <ul>
-                <li><b>$dbt_id</b><br>
+                <li><b>$dbp_id</b><br>
                 (integer) L'id della lista</li>
                 <li><b>$only_table</b><br>
                 (bool) Se stampare i filtri e la form che la raggruppa la tabella oppure no.</li>
@@ -23,64 +23,64 @@ if (!defined('WPINC')) die;
                 <li><b>$prefix</b><br>  
                 (String) un prefisso per i nomi dei campi da inviare nella form per evitare collisioni su più tabelle all'interno della stessa pagina
         </ul>
-        <h4 class="dbt-h4">Return</h4>
+        <h4 class="dbp-h4">Return</h4>
         <p>Html</p>
 
-        <h2 class="dbt-h2">Dbt::get_total($dbt_id, $filter = false)</h2>
+        <h2 class="dbp-h2">Dbp::get_total($dbp_id, $filter = false)</h2>
         <p>Carica una lista da un id e calcola il totale degli elementi.</p>
-        <h4 class="dbt-h4">Parameters</h4>
+        <h4 class="dbp-h4">Parameters</h4>
         <ul>
-                <li><b>$dbt_id</b><br>
+                <li><b>$dbp_id</b><br>
                 (integer) L'id della lista</li>
                 <li><b>$filter</b><br>
                 (bool) Se applicare i filtri oppure no.</li>
         </ul>
-        <h4 class="dbt-h4">Return</h4>
+        <h4 class="dbp-h4">Return</h4>
         <p>Int,  -1 se non riesce a fare il conto</p>
 
 
-        <h2 class="dbt-h2">Dbt::get_lists_names()</h2>
-        <p>Carica tutte le liste dbt</p>
-        <h4 class="dbt-h4">Return</h4>
+        <h2 class="dbp-h2">Dbp::get_lists_names()</h2>
+        <p>Carica tutte le liste dbp</p>
+        <h4 class="dbp-h4">Return</h4>
         <p>Array</p>
 
-        <h2 class="dbt-h2">get_list_columns($dbt_id, $searchable = true, $extend = false)</h2>
+        <h2 class="dbp-h2">get_list_columns($dbp_id, $searchable = true, $extend = false)</h2>
         <p>Estrae l'elenco delle colonne di una lista.</p>
-        <h4 class="dbt-h4">Parameters</h4>
+        <h4 class="dbp-h4">Parameters</h4>
         <ul>
-                <li><b>$dbt_id</b><br>
+                <li><b>$dbp_id</b><br>
                 (integer) L'id della lista</li>
                 <li><b>$searchable</b><br>
                 (boolean) Estrae solo le colonne delle tabelle  escludendo le colonne calcolate.</li>
                 <li><b>$extend</b><br>
                 (boolean) Se true torna solo i nomi delle colonne, altrimenti tutte le informazioni disponibili sulla colonna.</li>
         </ul>
-        <h4 class="dbt-h4">Return</h4>
-        <p>DbtDs_list_setting[]|array</p>
+        <h4 class="dbp-h4">Return</h4>
+        <p>dbpDs_list_setting[]|array</p>
 
 
-        <h2 class="dbt-h2">Dbt::get_primaries_id($dbt_id)</h2>
+        <h2 class="dbp-h2">Dbp::get_primaries_id($dbp_id)</h2>
         <p>Ritorna l'elenco delle chiavi primarie di una lista. I campi estratti sono gli alias!</p>
-        <h4 class="dbt-h4">Parameters</h4>
+        <h4 class="dbp-h4">Parameters</h4>
         <ul>
-                <li><b>$dbt_id</b><br>
+                <li><b>$dbp_id</b><br>
                 (integer) L'id della lista</li>
             
         </ul>
-        <h4 class="dbt-h4">Return</h4>
+        <h4 class="dbp-h4">Return</h4>
         <p>@return array [table=>primary_name, ...]</p>
 
 
-        <h2 class="dbt-h2">Dbt::get_data($dbt_id, $return = "items", $add_where = null, $limit = null, $order_field = null, $order="ASC")</h2>
+        <h2 class="dbp-h2">Dbp::get_data($dbp_id, $return = "items", $add_where = null, $limit = null, $order_field = null, $order="ASC")</h2>
         <p>Ritornano i dati o il model di una lista</p>
-        <h4 class="dbt-h4">Parameters</h4>
+        <h4 class="dbp-h4">Parameters</h4>
         <ul>
-                <li><b>$dbt_id</b><br>
+                <li><b>$dbp_id</b><br>
                 (integer) L'id della lista</li>
                 <li><b>$return</b><br>
                 (string) items|schema|model|schema+items</li>
                 <li><b>$add_where</b><br>
-                (array)  [[op:'', column:'', value:'' ], ... ] es: [['op'=>'=', 'column'=>'dbt_id', value=>1]]</li>
+                (array)  [[op:'', column:'', value:'' ], ... ] es: [['op'=>'=', 'column'=>'dbp_id', value=>1]]</li>
                 <li><b>$limit</b><br>
                 (integer) il numero massimo di record estratti</li>
                 <li><b>$order_field</b><br>
@@ -88,75 +88,64 @@ if (!defined('WPINC')) die;
                 <li><b>$orderorder_field</b><br>
                 (string)  ASC|DESC</li>
         </ul>
-        <h4 class="dbt-h4">Return</h4>
+        <h4 class="dbp-h4">Return</h4>
         <p>Mixed</p>
         
 
-        <h2 class="dbt-h2">Dbt::get_data_by_id($dbt_id, $dbt_ids)</h2>
-        <p>Ritornano i dati di una lista a partire dagli id</p>
-        <h4 class="dbt-h4">Parameters</h4>
+        <h2 class="dbp-h2">Dbp::get_detail($dbp_id, $dbp_ids)</h2>
+        <p>Ritornano i dati del dettaglio di una lista a partire dagli id. I dati delle liste sono modificati dalla configurazione di list_view_formatting, mentre i dati del detail sono quelli estratti dalla query.</p>
+        <h4 class="dbp-h4">Parameters</h4>
         <ul>
-                <li><b>$dbt_id</b><br>
+                <li><b>$dbp_id</b><br>
                 (integer) L'id della lista</li>
-                <li><b>$dbt_ids</b><br>
-                (array|int) $dbt_ids [pri_key=>val, ...] per un singolo ID perché una query può avere più primary Id a causa di left join per cui li accetto tutti. Se un integer invece lo associo al primo pri_id che mi ritorna.</li>
+                <li><b>$dbp_ids</b><br>
+                (array|int|string) $dbp_ids [pri_key=>val, ...] per un singolo ID perché una query può avere più primary Id a causa di left join per cui li accetto tutti. Se è un integer invece lo associo al primo pri_id che mi ritorna.<br>
+                Accetta altresì la stringa 'uniq_chars_id'.</li>
         </ul>
-        <h4 class="dbt-h4">Return</h4>
+        <h4 class="dbp-h4">Return</h4>
         <p>\stdClass|false</p>
     
-        <h2 class="dbt-h2">Dbt::save_data($dbt_id, $data)</h2>
+        <h2 class="dbp-h2">Dbp::save_data($dbp_id, $data)</h2>
         <p>Salva i dati di una o più righe in una lista.</p>
-        <h4 class="dbt-h4">Parameters</h4>
+        <h4 class="dbp-h4">Parameters</h4>
         <ul>
-                <li><b>$dbt_id</b><br>
+                <li><b>$dbp_id</b><br>
                 (integer) L'id della lista</li>
                 <li><b>$data</b><br>
                 (array) La stessa struttura importata estratta da get_data</li>
         </ul>
-        <h4 class="dbt-h4">Return</h4>
+        <h4 class="dbp-h4">Return</h4>
         <p>array</p>
 
-        <h2 class="dbt-h2">Dbt::get_form_data_by_id($dbt_id, $dbt_ids)</h2>
-        <p>Ritornano tutti i dati modificabili di una lista a partire dagli id</p>
-        <h4 class="dbt-h4">Parameters</h4>
-        <ul>
-            <li><b>$dbt_id</b><br>
-            (integer) L'id della lista</li>
-            <li><b>$dbt_ids</b><br>
-            (array|int) $dbt_ids [pri_key=>val, ...] per un singolo ID perché una query può avere più primary Id a causa di left join per cui li accetto tutti. Se un integer invece lo associo al primo pri_id che mi ritorna.</li>
-        </ul>
-        <h4 class="dbt-h4">Return</h4>
-        <p>\stdClass|false</p>
-    
-        <h2 class="dbt-h2">Dbt::save_data($dbt_id, $data)</h2>
+        <h2 class="dbp-h2">Dbp::save_data($dbp_id, $data)</h2>
         <p>Ritornano i dati o il model di una lista</p>
-        <h4 class="dbt-h4">Parameters</h4>
+        <h4 class="dbp-h4">Parameters</h4>
         <ul>
-                <li><b>$dbt_id</b><br>
+                <li><b>$dbp_id</b><br>
                 (integer) L'id della lista</li>
                 <li><b>$data</b><br>
                 (array) La stessa struttura importata estratta da get_data</li>
         </ul>
-        <h4 class="dbt-h4">Return</h4>
+        <h4 class="dbp-h4">Return</h4>
         <p>array</p>
 
 
 
-        <h2 class="dbt-h2">Dbt::render($dbt_id, $mode)</h2>
-        <p>Restituisce la classe Dbt_render_list</p>
-        <h4 class="dbt-h4">Parameters</h4>
+        <h2 class="dbp-h2">Dbp::render($dbp_id, $mode)</h2>
+        <p>Restituisce la classe dbp_render_list</p>
+        <h4 class="dbp-h4">Parameters</h4>
         <ul>
-                <li><b>$dbt_id</b><br>
+                <li><b>$dbp_id</b><br>
                 (integer) L'id della lista</li>
                 <li><b>$mode</b><br>
                 (string) Sceglie come gestire i dati se in get|post|ajax o link (gestione parziale)</li>
         </ul>
 
-        <h4 class="dbt-h4">Return</h4>
-        <p>Dbt_render_list</p>
+        <h4 class="dbp-h4">Return</h4>
+        <p>dbp_render_list</p>
 
-        <h4 class="dbt-h4">Example</h4>
-        <pre class="dbt-code">$list =  DatabaseTables\Dbt::render(6, 'get'); // ($list_id:int, $mode:string); $mode is optional
+        <h4 class="dbp-h4">Example</h4>
+        <pre class="dbp-code">$list =  DatabasePress\Dbp::render(6, 'get'); // ($list_id:int, $mode:string); $mode is optional
 $list->set_color('pink'); // Cambia il colore della lista rispetto a quello scelto 
 $list->table("", false); // (custom_class:string, table_sort:bool)
 $list->search(false); // optional (show_button:bool)
@@ -170,7 +159,7 @@ $list->end(); // Required!</pre>
     </div>
 
     <h1 style="border-bottom:1px solid #CCC">Template engine</h1>
-    <div class="dbt-help-p">
+    <div class="dbp-help-p">
 
         <h3>set get variable</h3>
         <pre class="code">

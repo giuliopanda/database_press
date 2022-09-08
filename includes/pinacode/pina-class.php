@@ -4,7 +4,7 @@
   * È una classe statica perché in questo modo da qualsiasi punto del codice si può riavviare un nuovo shortcode o valutare una condizione
   * o usare la calcolatrice.
   */
-namespace DatabaseTables;
+namespace DatabasePress;
 
 class PinaCode
 {
